@@ -1,6 +1,6 @@
 # ignore ALL .log files
 *.log
 
-# ignore ALL files in ANY directory named temp
+# ignore ALL files in ANY directory named 
 node_modules/
 .env/
