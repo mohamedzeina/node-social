@@ -128,6 +128,31 @@ exports.updatePost = (req, res, next) => {
     });
 };
 
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId)
+    .then((post) => {
+      // Check logged in user
+      clearImage(post.imageUrl);
+      if (!post) {
+        const error = new Error('Could not find post.');
+        error.statusCode = 404;
+        throw error;
+      }
+      return Post.findByIdAndDelete(postId);
+    })
+    .then((result) => {
+      console.log(result);
+      res.status(200).json({ message: 'Post deleted successfully!' });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
 const clearImage = (filePath) => {
   // Helper function that clears images from the file system
   filePath = path.join(__dirname, '..', filePath);
