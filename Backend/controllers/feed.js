@@ -63,7 +63,7 @@ exports.createPost = async (req, res, next) => {
     await user.save();
     io.getIO().emit('posts', {
       action: 'create',
-      post: { ...post._doc, creator: { _id: user.id, creator: user.name } },
+      post: { ...post._doc, creator: { _id: req.id, name: user.name } },
     }); // Notifying all users with emit that a new post has been created
     res.status(201).json({
       message: 'Post created successfully!',
