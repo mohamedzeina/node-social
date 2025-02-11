@@ -5,10 +5,11 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
 const mongoose = require('mongoose');
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
+const { graphqlHTTP } = require('express-graphql');
 
-const feedRoutes = require('./routes/feed');
-const authRoutes = require('./routes/auth');
+const { v4: uuidv4 } = require('uuid');
+const grapqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
 
 const app = express();
 
@@ -45,9 +46,6 @@ app.use((req, res, next) => {
   next();
 }); // Every response sent by the server will have these headers
 
-app.use('/feed', feedRoutes);
-app.use('/auth', authRoutes);
-
 app.use((error, req, res, next) => {
   // Error handling middleware
   console.log(error);
@@ -57,14 +55,18 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message, data: data });
 });
 
+app.use(
+  '/graphql',
+  graphqlHTTP({
+    schema: grapqlSchema,
+    rootValue: graphqlResolver,
+  })
+);
+
 mongoose
   .connect(process.env.MONGODB_URI)
   .then((result) => {
-    const server = app.listen(8080);
-    const io = require('./socket').init(server);
-    io.on('connection', (socket) => {
-      console.log('Client Connected!');
-    });
+    app.listen(8080);
   })
   .catch((err) => {
     console.log(err);
