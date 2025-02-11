@@ -56,10 +56,12 @@ app.use((error, req, res, next) => {
 });
 
 app.use(
+  // Not using post here to allow get requests to use graphiql
   '/graphql',
   graphqlHTTP({
     schema: grapqlSchema,
     rootValue: graphqlResolver,
+    graphiql: true,
   })
 );
 
