@@ -62,12 +62,22 @@ app.use(
     schema: grapqlSchema,
     rootValue: graphqlResolver,
     graphiql: true,
+    formatError(err) {
+      if (!err.originalError) {
+        return err;
+      }
+      const data = err.originalError.data;
+      const message = err.message || 'An Error Occured!';
+      const code = err.originalError.code || 500;
+      return { message: message, status: code, data: data };
+    },
   })
 );
 
 mongoose
   .connect(process.env.MONGODB_URI)
   .then((result) => {
+    console.log('Connection Established');
     app.listen(8080);
   })
   .catch((err) => {
