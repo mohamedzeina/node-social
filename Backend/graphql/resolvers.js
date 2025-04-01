@@ -116,7 +116,7 @@ module.exports = {
       ...createdPost._doc,
       _id: createdPost._id.toString(),
       createdAt: createdPost.createdAt.toISOString(),
-      updatedAt: createdPost.updatedAt.toISOString,
+      updatedAt: createdPost.updatedAt.toISOString(),
     };
   },
 
@@ -129,13 +129,14 @@ module.exports = {
 
     const totalPosts = await post.find().countDocuments();
     const posts = await Post.find().sort({ createdAt: -1 }).populate('creator');
+    console.log(posts);
     return {
       posts: posts.map((p) => {
         return {
           ...p._doc,
           _id: p._id.toString(),
-          createdAt: p.createdAt.toISOString,
-          updatedAt: p.updatedAt.toISOString,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
         };
       }),
       totalPosts: totalPosts,
