@@ -10,6 +10,7 @@ const { graphqlHTTP } = require('express-graphql');
 const { v4: uuidv4 } = require('uuid');
 const grapqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
+const auth = require('./middleware/auth');
 
 const app = express();
 
@@ -58,6 +59,8 @@ app.use((error, req, res, next) => {
   const data = error.data;
   res.status(status).json({ message: message, data: data });
 });
+
+app.use(auth);
 
 app.use(
   // Not using post here to allow get requests to use graphiql

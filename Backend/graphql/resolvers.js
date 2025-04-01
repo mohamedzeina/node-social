@@ -61,13 +61,19 @@ module.exports = {
         userId: user._id.toString(),
         email: user.email,
       },
-      'somesupersecretsecret',
+      'secretString',
       { expiresIn: '1h' } // Generate a json web token that lasts 1 hour using user information
     );
 
     return { token: token, userId: user._id.toString() };
   },
   createPost: async function ({ postInput }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated!');
+      error.code = 401;
+      throw error;
+    }
+
     const errors = [];
     if (validator.isEmpty(postInput.title)) {
       errors.push({ message: 'Title should not be empty' });
@@ -87,13 +93,22 @@ module.exports = {
       error.code = 422;
       throw error;
     }
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error = new Error('Invalid User.');
+      error.data = errors;
+      error.code = 401;
+      throw error;
+    }
     const post = new Post({
       title: postInput.title,
       content: postInput.content,
       imageUrl: postInput.imageUrl,
+      creator: user,
     });
 
     const createdPost = await post.save();
+    user.posts.push(createdPost);
     // Add post to users' posts
     return {
       ...createdPost._doc,
