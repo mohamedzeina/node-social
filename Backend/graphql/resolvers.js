@@ -8,17 +8,17 @@ module.exports = {
   createUser: async function ({ userInput }, req) {
     const errors = [];
     if (!validator.isEmail(userInput.email)) {
-      errors.push({ message: 'E-Mail is Invalid!' });
+      errors.push({ message: 'E-Mail is invalid.' });
     }
     if (
       validator.isEmpty(userInput.password) ||
       !validator.isLength(userInput.password, { min: 5 })
     ) {
-      errors.push({ message: 'Password too Short!' });
+      errors.push({ message: 'Password too short.' });
     }
 
     if (errors.length > 0) {
-      const error = new Error('Invalid Input!');
+      const error = new Error('Invalid input.');
       error.data = errors;
       error.code = 422;
       throw error;
@@ -27,7 +27,7 @@ module.exports = {
     const existingUser = await User.findOne({ email: userInput.email });
 
     if (existingUser) {
-      const error = new Error('User Exists Already!');
+      const error = new Error('User exists already.');
       throw error;
     }
 
@@ -44,13 +44,13 @@ module.exports = {
   login: async function ({ email, password }) {
     const user = await User.findOne({ email: email });
     if (!user) {
-      const error = new Error('User Not Found!');
+      const error = new Error('User not found.');
       error.code = 401;
       throw error;
     }
     const isEqual = await bcrypt.compare(password, user.password);
     if (!isEqual) {
-      const error = new Error('Password Is Incorrect!');
+      const error = new Error('Password is incorrect.');
       error.code = 401;
       throw error;
     }
