@@ -80,8 +80,12 @@ class App extends Component {
         return res.json();
       })
       .then((resData) => {
-        if (resData.errors && resData.errors[0].status === 401) {
-          throw new Error(resData.errors[0].message);
+        if (
+          resData.errors &&
+          resData.errors[0].status === 401 &&
+          resData.errors[0].data
+        ) {
+          throw new Error(resData.errors[0].data[0].message);
         }
         if (resData.errors) {
           throw new Error('User login failed.');
@@ -138,10 +142,12 @@ class App extends Component {
         return res.json();
       })
       .then((resData) => {
-        if (resData.errors && resData.errors[0].status === 422) {
-          throw new Error(
-            "Validation failed. Make sure the email address isn't used yet!"
-          );
+        if (
+          resData.errors &&
+          resData.errors[0].status === 422 &&
+          resData.errors[0].data
+        ) {
+          throw new Error(resData.errors[0].data[0].message);
         }
         if (resData.errors) {
           throw new Error('User creation failed.');

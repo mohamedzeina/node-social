@@ -165,21 +165,23 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        if (resData.errors && resData.errors[0].status === 422) {
-          throw new Error(
-            "Validation failed. Make sure the email address isn't used yet!"
-          );
+        if (
+          resData.errors &&
+          resData.errors[0].status === 422 &&
+          resData.errors[0].data
+        ) {
+          throw new Error(resData.errors[0].data[0].message);
         }
         if (resData.errors) {
-          throw new Error('User creation failed.');
+          throw new Error('Post creation failed.');
         }
         console.log(resData);
         const post = {
-          _id: resData.post._id,
-          title: resData.post.title,
-          content: resData.post.content,
-          creator: resData.post.creator,
-          createdAt: resData.post.createdAt,
+          _id: resData.data.createPost._id,
+          title: resData.data.createPost.title,
+          content: resData.data.createPost.content,
+          creator: resData.data.createPost.creator,
+          createdAt: resData.data.createPost.createdAt,
         };
         this.setState((prevState) => {
           return {
