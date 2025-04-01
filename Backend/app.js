@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -62,6 +63,21 @@ app.use((error, req, res, next) => {
 
 app.use(auth);
 
+app.put('/post-image', (req, res, next) => {
+  if (!req.isAuth) {
+    throw new Error('Not authenticated!');
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: 'No file provided!' });
+  }
+  if (req.body.oldPath) {
+    // If an old image existed
+    clearImage(req.body.oldPath);
+  }
+  filePath = req.file.path.replace('\\', '/');
+  return res.status(201).json({ message: 'File stored.', filePath: filePath });
+});
+
 app.use(
   // Not using post here to allow get requests to use graphiql
   '/graphql',
@@ -90,3 +106,9 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+const clearImage = (filePath) => {
+  // Helper function that clears images from the file system
+  filePath = path.join(__dirname, '..', filePath);
+  fs.unlink(filePath, (err) => console.log(err));
+};
