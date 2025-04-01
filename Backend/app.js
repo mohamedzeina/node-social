@@ -70,9 +70,10 @@ app.put('/post-image', (req, res, next) => {
   if (!req.file) {
     return res.status(200).json({ message: 'No file provided!' });
   }
+
   if (req.body.oldPath) {
     // If an old image existed
-    clearImage(req.body.oldPath);
+    clearImage(req.body.oldPath.replace('/', '\\'));
   }
   filePath = req.file.path.replace('\\', '/');
   return res.status(201).json({ message: 'File stored.', filePath: filePath });
@@ -109,6 +110,7 @@ mongoose
 
 const clearImage = (filePath) => {
   // Helper function that clears images from the file system
-  filePath = path.join(__dirname, '..', filePath);
+  filePath = path.join(__dirname, 'Backend', '..', filePath);
+  console.log(filePath);
   fs.unlink(filePath, (err) => console.log(err));
 };
