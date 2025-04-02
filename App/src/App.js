@@ -85,7 +85,7 @@ class App extends Component {
           throw new Error(resData.errors[0].message);
         }
         if (resData.errors) {
-          throw new Error('User login failed.');
+          throw new Error('Logging in failed.');
         }
         console.log(resData);
         this.setState({
@@ -154,7 +154,7 @@ class App extends Component {
           throw new Error(resData.errors[0].message);
         }
         if (resData.errors) {
-          throw new Error('User creation failed.');
+          throw new Error('Creating user failed.');
         }
         console.log(resData);
         this.setState({ isAuth: false, authLoading: false });

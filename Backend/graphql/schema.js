@@ -48,12 +48,14 @@ module.exports = buildSchema(`
         createPost(postInput: PostInputData): Post!
         updatePost(id: ID!, postInput: PostInputData): Post!
         deletePost(id: ID!): Boolean
+        updateStatus(status: String): User!
     }
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
         getPosts(page: Int): PostData!
         getPost(id: ID!): Post!
+        user: User!
     }
     schema {
         query: RootQuery

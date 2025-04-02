@@ -23,19 +23,37 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:8080/feed/status', {
+    const graphqlQuery = {
+      query: `
+      {
+        user {
+          status
+        }
+      }
+      `,
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
         Authorization: 'Bearer ' + this.props.token,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch user status.');
-        }
         return res.json();
       })
       .then((resData) => {
-        this.setState({ status: resData.status });
+        if (
+          resData.errors &&
+          (resData.errors[0].status === 401 || resData.errors[0].status === 404)
+        ) {
+          throw new Error(resData.errors[0].message);
+        }
+        if (resData.errors) {
+          throw new Error('Fetching status failed.');
+        }
+        this.setState({ status: resData.data.user.status });
       })
       .catch(this.catchError);
 
@@ -110,23 +128,36 @@ class Feed extends Component {
 
   statusUpdateHandler = (event) => {
     event.preventDefault();
-    fetch('http://localhost:8080/feed/status', {
-      method: 'PUT',
+    const graphqlQuery = {
+      query: `
+        mutation {
+          updateStatus(status: "${this.state.status}"){
+            status
+          }
+        }
+      `,
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
         Authorization: 'Bearer ' + this.props.token,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        status: this.state.status,
-      }),
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Can't update status!");
-        }
         return res.json();
       })
       .then((resData) => {
+        if (
+          resData.errors &&
+          (resData.errors[0].status === 401 || resData.errors[0].status === 404)
+        ) {
+          throw new Error(resData.errors[0].message);
+        }
+        if (resData.errors) {
+          throw new Error('Updating status failed.');
+        }
         console.log(resData);
       })
       .catch(this.catchError);
@@ -249,10 +280,10 @@ class Feed extends Component {
           throw new Error(resData.errors[0].message);
         }
         if (resData.errors && resDataField === 'createPost') {
-          throw new Error('Post cre ation failed.');
+          throw new Error('Creating post failed.');
         }
         if (resData.errors && resDataField === 'updatePost') {
-          throw new Error('Post updating failed.');
+          throw new Error('Updating post failed.');
         }
 
         const post = {
@@ -271,7 +302,9 @@ class Feed extends Component {
             );
             updatedPosts[postIndex] = post;
           } else {
-            updatedPosts.pop();
+            if (prevState.posts.length >= 2) {
+              updatedPosts.pop();
+            }
             updatedPosts.unshift(post);
           }
           return {
