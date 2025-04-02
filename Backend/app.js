@@ -1,5 +1,4 @@
 const path = require('path');
-const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -12,6 +11,7 @@ const { v4: uuidv4 } = require('uuid');
 const grapqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth');
+const { clearImage } = require('../util/file');
 
 const app = express();
 
@@ -107,10 +107,3 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-
-const clearImage = (filePath) => {
-  // Helper function that clears images from the file system
-  filePath = path.join(__dirname, 'Backend', '..', filePath);
-  console.log(filePath);
-  fs.unlink(filePath, (err) => console.log(err));
-};

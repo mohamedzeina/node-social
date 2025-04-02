@@ -41,6 +41,13 @@ class SinglePost extends Component {
         return res.json();
       })
       .then((resData) => {
+        if (
+          resData.errors &&
+          (resData.errors.status === 401 || resData.errors.status === 404)
+        ) {
+          throw new Error(resData.errors.message);
+        }
+
         if (resData.errors) {
           throw new Error('Fetching post failed.');
         }

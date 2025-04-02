@@ -87,6 +87,10 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
+        if (resData.errors && resData.errors.status === 401) {
+          throw new Error(resData.errors.message);
+        }
+
         if (resData.errors) {
           throw new Error('Fetching posts failed.');
         }
@@ -224,6 +228,11 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
+        let resDataField = 'createPost';
+        if (this.state.editPost) {
+          resDataField = 'updatePost';
+        }
+
         if (
           resData.errors &&
           resData.errors[0].status === 422 &&
@@ -231,12 +240,19 @@ class Feed extends Component {
         ) {
           throw new Error(resData.errors[0].data[0].message);
         }
-        if (resData.errors) {
-          throw new Error('Post creation failed.');
+        if (
+          resData.errors &&
+          (resData.errors[0].status === 422 ||
+            resData.errors[0].status === 403 ||
+            resData.errors[0].status === 404)
+        ) {
+          throw new Error(resData.errors[0].message);
         }
-        let resDataField = 'createPost';
-        if (this.state.editPost) {
-          resDataField = 'updatePost';
+        if (resData.errors && resDataField === 'createPost') {
+          throw new Error('Post cre ation failed.');
+        }
+        if (resData.errors && resDataField === 'updatePost') {
+          throw new Error('Post updating failed.');
         }
 
         const post = {
@@ -274,19 +290,36 @@ class Feed extends Component {
 
   deletePostHandler = (postId) => {
     this.setState({ postsLoading: true });
-    fetch('http://localhost:8080/feed/post/' + postId, {
-      method: 'DELETE',
+    const graphqlQuery = {
+      query: `
+        mutation {
+          deletePost(id: "${postId}")
+        }
+      `,
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
         Authorization: 'Bearer ' + this.props.token,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify(graphqlQuery),
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Deleting a post failed!');
-        }
         return res.json();
       })
       .then((resData) => {
+        if (
+          resData.errors &&
+          (resData.errors[0].status === 401 ||
+            resData.errors[0].status === 403 ||
+            resData.errors[0].status === 404)
+        ) {
+          throw new Error(resData.errors[0].message);
+        }
+        if (resData.errors) {
+          throw new Error('Post deletion failed.');
+        }
         console.log(resData);
         this.loadPosts();
         // this.setState((prevState) => {

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const Post = require('../models/post');
-const post = require('../models/post');
+const { clearImage } = require('../../util/file');
 
 module.exports = {
   createUser: async function ({ userInput }, req) {
@@ -14,7 +14,7 @@ module.exports = {
     }
     if (
       validator.isEmpty(userInput.password) ||
-      !validator.isLength(userInput.password, { min: 5 })
+      !validator.isLength(userInput.password, { min: 6 })
     ) {
       errors.push({ message: 'Password too short.' });
     }
@@ -30,6 +30,7 @@ module.exports = {
 
     if (existingUser) {
       const error = new Error('User exists already.');
+      error.code = 401;
       throw error;
     }
 
@@ -130,7 +131,7 @@ module.exports = {
       page = 1;
     }
     const perPage = 2;
-    const totalPosts = await post.find().countDocuments();
+    const totalPosts = await Post.find().countDocuments();
     const posts = await Post.find()
       .sort({ createdAt: -1 })
       .skip((page - 1) * perPage)
@@ -182,9 +183,6 @@ module.exports = {
       error.code = 404;
       throw error;
     }
-
-    console.log(post._id);
-    console.log(req.userId);
     if (post.creator._id.toString() !== req.userId.toString()) {
       const error = new Error('Not authroized!');
       error.code = 403;
@@ -221,5 +219,30 @@ module.exports = {
       createdAt: updatedPost.createdAt.toISOString(),
       updatedAt: updatedPost.updatedAt.toISOString(),
     };
+  },
+  deletePost: async function ({ id }, req) {
+    if (!req.isAuth) {
+      const error = new Error('Not authenticated!');
+      error.code = 401;
+      throw error;
+    }
+    const post = await Post.findById(id);
+    if (!post) {
+      const error = new Error('No post found!');
+      error.code = 404;
+      throw error;
+    }
+
+    if (post.creator.toString() !== req.userId.toString()) {
+      const error = new Error('Not authroized!');
+      error.code = 403;
+      throw error;
+    }
+    clearImage(post.imageUrl.replace('/', '\\'));
+    await Post.findByIdAndDelete(id);
+    const user = await User.findById(req.userId);
+    user.posts.pull(id);
+    await user.save();
+    return true;
   },
 };
