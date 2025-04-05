@@ -1,7 +1,7 @@
 # ignore ALL .log files
 *.log
 
-.env
+nodemon.json
 
 # ignore ALL files in ANY directory named 
 node_modules/
