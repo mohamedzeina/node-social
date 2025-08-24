@@ -55,10 +55,10 @@ This project follows a modular, API-first architecture:
    
    ```bash
     cd backend
-    npm install
+    npm install --legacy-peer-deps
 
     cd ../app
-    npm install --legacy-peer-deps
+    npm install 
    ```
 3. Set up your environment variables:
    In the backend/ folder, create a nodemon.json file and add the following:
