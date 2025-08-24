@@ -1,6 +1,6 @@
-# Node Social
+# NodeSocial
 
-Welcome to the **Node Social** repository! This project is a GraphQL-powered social media platform built with Node.js. It supports core social features such as user authentication, post creation, and post management — all handled through a clean API architecture with JWT-based security.
+Welcome to the **NodeSocial** repository! This project is a GraphQL-powered social media platform built with Node.js. It supports core social features such as user authentication, post creation, and post management — all handled through a clean API architecture with JWT-based security.
 
 ## Table of Contents
 
@@ -48,7 +48,7 @@ This project follows a modular, API-first architecture:
 1. Clone the repository:
    
    ```bash
-   git clone https://github.com/mohamedzeina/node-social.git
+   git clone https://github.com/mohamedzeina/NodeSocial.git
    cd NodeSocial
    ```
 2. Install dependencies for both backend and frontend:

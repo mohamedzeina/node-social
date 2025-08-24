@@ -4,70 +4,102 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
+/**
+ * @desc    Signup Controller
+ * @route   POST /auth/signup
+ * @access  Public
+ *
+ * Steps:
+ * 1. Validate input (using express-validator middleware).
+ * 2. Hash the user's password with bcrypt.
+ * 3. Create and save a new User in MongoDB.
+ * 4. Return success response with the new user's ID.
+ */
 exports.signup = async (req, res, next) => {
-	const errors = validationResult(req);
-	try {
-		if (!errors.isEmpty()) {
-			const error = new Error('Validation Failed!');
-			error.statusCode = 422;
-			error.data = errors.array();
-			throw error;
-		}
-		const email = req.body.email;
-		const name = req.body.name;
-		const password = req.body.password;
+  const errors = validationResult(req);
+  try {
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation Failed!');
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
+    const email = req.body.email;
+    const name = req.body.name;
+    const password = req.body.password;
 
-		const hashedPw = await bcrypt.hash(password, 12);
+    // Hash password with 12 salt rounds
+    const hashedPw = await bcrypt.hash(password, 12);
 
-		const user = new User({
-			email: email,
-			password: hashedPw,
-			name: name,
-		});
-		const result = await user.save();
+    // Create new user document
+    const user = new User({
+      email: email,
+      password: hashedPw,
+      name: name,
+    });
+    const result = await user.save();
 
-		res.status(201).json({ message: 'User Created!', userId: result._id });
-	} catch (err) {
-		if (!err.statusCode) {
-			err.statusCode = 500;
-		}
-		next(err);
-	}
+    // Respond with created user ID
+    res.status(201).json({ message: 'User Created!', userId: result._id });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
+/**
+ * @desc    Login Controller
+ * @route   POST /auth/login
+ * @access  Public
+ *
+ * Steps:
+ * 1. Look up user by email.
+ * 2. Compare provided password with hashed password in DB.
+ * 3. If valid, generate JWT token with userId and email.
+ * 4. Return token + userId to client.
+ */
 exports.login = async (req, res, next) => {
-	const email = req.body.email;
-	const password = req.body.password;
-	let loadedUser;
-	try {
-		const user = await User.findOne({ email: email });
+  const email = req.body.email;
+  const password = req.body.password;
+  let loadedUser;
+  try {
+    // Check if user exists
+    const user = await User.findOne({ email: email });
 
-		if (!user) {
-			const error = new Error('A user with this email could not be found.');
-			error.statusCode = 401;
-			throw error;
-		}
-		loadedUser = user;
-		const isEqual = await bcrypt.compare(password, user.password);
+    if (!user) {
+      const error = new Error('A user with this email could not be found.');
+      error.statusCode = 401;
+      throw error;
+    }
+    loadedUser = user;
 
-		if (!isEqual) {
-			const error = new Error('Wrong Password!');
-			error.statusCode = 401;
-			throw error;
-		}
-		const token = jwt.sign(
-			{
-				email: loadedUser.email,
-				userId: loadedUser._id.toString(),
-			},
-			process.env.JWT_SECRET,
-			{ expiresIn: '1h' }
-		); // Generating the JWTtoken if the credentials are correct
-		res.status(200).json({ token: token, userId: loadedUser._id.toString() });
-	} catch (err) {
-		if (!err.statusCode) {
-			err.statusCode = 500;
-		}
-		next(err);
-	}
+    // Verify password
+    const isEqual = await bcrypt.compare(password, user.password);
+
+    if (!isEqual) {
+      const error = new Error('Wrong Password!');
+      error.statusCode = 401;
+      throw error;
+    }
+
+    // Generate JWT (valid for 1 hour)
+    const token = jwt.sign(
+      {
+        email: loadedUser.email,
+        userId: loadedUser._id.toString(),
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Return token to client
+    res.status(200).json({ token: token, userId: loadedUser._id.toString() });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
