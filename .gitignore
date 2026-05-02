@@ -1,7 +1,28 @@
-# ignore ALL .log files
-*.log
+# Dependencies
+node_modules/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime / config
 nodemon.json
 
-# ignore ALL files in ANY directory named 
-node_modules/
+# Uploaded user files (keep directory via .gitkeep)
+Backend/images/*
+!Backend/images/.gitkeep
+
+# Build output
+/App/build
+/App/coverage
+
+# OS
+.DS_Store
+Thumbs.db
