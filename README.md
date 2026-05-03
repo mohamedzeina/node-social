@@ -2,6 +2,9 @@
 
 A full-stack social media platform built with a **GraphQL API** backend and a **React** frontend. Users can sign up, log in, create posts with image uploads, and manage their own content — all secured with JWT authentication.
 
+**Live Demo:** [node-social-chi.vercel.app](https://node-social-chi.vercel.app)  
+**API:** [node-social-zmra.onrender.com/graphql](https://node-social-zmra.onrender.com/graphql)
+
 ## Table of Contents
 
 - [Features](#features)
@@ -21,7 +24,7 @@ A full-stack social media platform built with a **GraphQL API** backend and a **
 - **User Status** — Each user has an editable status message (defaults to "I am new!").
 - **Pagination** — Posts are fetched 2 per page, sorted by newest first.
 - **Real-time Updates** — Socket.io is wired in for live communication between clients.
-- **GraphiQL IDE** — Interactive API explorer available at `http://localhost:8080/graphql` during development.
+- **GraphiQL IDE** — Interactive API explorer available at `/graphql` during development.
 
 ---
 
@@ -35,10 +38,12 @@ A full-stack social media platform built with a **GraphQL API** backend and a **
 | Database | MongoDB (Atlas) via Mongoose |
 | Authentication | JSON Web Tokens (`jsonwebtoken`) |
 | Password Hashing | bcryptjs |
-| File Uploads | Multer |
+| File Uploads | Multer + Cloudinary |
 | Real-time | Socket.io |
 | Frontend | React 16 (Create React App) |
 | Routing (Frontend) | React Router v4 |
+| Backend Hosting | Render |
+| Frontend Hosting | Vercel |
 
 ---
 
@@ -165,7 +170,10 @@ The backend reads its configuration from a `nodemon.json` file in the `Backend/`
 {
   "env": {
     "MONGODB_URI": "your-mongodb-connection-string",
-    "JWT_SECRET": "a-long-random-secret-string"
+    "JWT_SECRET": "a-long-random-secret-string",
+    "CLOUDINARY_CLOUD_NAME": "your-cloud-name",
+    "CLOUDINARY_API_KEY": "your-api-key",
+    "CLOUDINARY_API_SECRET": "your-api-secret"
   }
 }
 ```
@@ -174,3 +182,6 @@ The backend reads its configuration from a `nodemon.json` file in the `Backend/`
 |---|---|
 | `MONGODB_URI` | Full MongoDB connection string (e.g. from MongoDB Atlas) |
 | `JWT_SECRET` | Secret used to sign and verify JWT tokens — keep this private |
+| `CLOUDINARY_CLOUD_NAME` | Your Cloudinary cloud name (from the Cloudinary dashboard) |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret — keep this private |
