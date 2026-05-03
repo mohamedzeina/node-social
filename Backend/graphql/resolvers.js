@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const Post = require('../models/post');
-const { clearImage } = require('../../util/file');
+const cloudinary = require('../cloudinary');
 
 module.exports = {
   /**
@@ -73,7 +73,7 @@ module.exports = {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id.toString(), email: user.email },
-      'secretString', // Should be in env variable in production
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -224,7 +224,8 @@ module.exports = {
     if (post.creator.toString() !== req.userId.toString())
       throw new Error('Not authorized!');
 
-    clearImage(post.imageUrl.replace('/', '\\'));
+    const publicId = post.imageUrl.split('/').pop().split('.')[0];
+    cloudinary.uploader.destroy(publicId).catch(console.error);
     await Post.findByIdAndDelete(id);
 
     const user = await User.findById(req.userId);

@@ -1,37 +1,28 @@
-// Core Node.js module for working with file and directory paths
-const path = require('path');
-
-// External dependencies
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { graphqlHTTP } = require('express-graphql');
-
-// Utilities and custom modules
 const { v4: uuidv4 } = require('uuid');
+
+const cloudinary = require('./cloudinary');
 const grapqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth');
-const { clearImage } = require('../util/file');
 
 const app = express();
 
 // --------------------- File Upload Configuration ---------------------
 
-// Configure disk storage for uploaded images
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Store uploaded files in the 'images' folder
-    cb(null, 'images');
-  },
-  filename: function (req, file, cb) {
-    // Use a UUID as the filename to avoid collisions
-    cb(null, uuidv4());
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    public_id: () => uuidv4(),
   },
 });
 
-// Filter to allow only specific file types
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === 'image/png' ||
@@ -51,9 +42,6 @@ app.use(bodyParser.json()); // Parse incoming JSON requests
 // Configure multer to handle single image uploads under the field name 'image'
 app.use(multer({ storage: storage, fileFilter: fileFilter }).single('image'));
 
-// Serve the 'images' folder statically so images can be accessed via /images/<filename>
-app.use('/images', express.static(path.join(__dirname, 'images')));
-
 // Enable Cross-Origin Resource Sharing (CORS)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -65,16 +53,6 @@ app.use((req, res, next) => {
   }
   next();
 }); // Every response sent by the server will have these headers
-
-// Global error handling middleware
-app.use((error, req, res, next) => {
-  console.log(error);
-  console.log('im here');
-  const status = error.statusCode || 500;
-  const message = error.message;
-  const data = error.data;
-  res.status(status).json({ message: message, data: data });
-});
 
 // Authentication middleware (adds req.isAuth and req.user if valid JWT is provided)
 app.use(auth);
@@ -89,22 +67,20 @@ app.put('/post-image', (req, res, next) => {
   }
 
   if (req.body.oldPath) {
-    // If a previous image exists, remove it
-    clearImage(req.body.oldPath.replace('/', '\\'));
+    const publicId = req.body.oldPath.split('/').pop().split('.')[0];
+    cloudinary.uploader.destroy(publicId).catch(console.error);
   }
-  // Normalize file path for consistency
-  filePath = req.file.path.replace('\\', '/');
-  return res.status(201).json({ message: 'File stored.', filePath: filePath });
+
+  return res.status(201).json({ message: 'File stored.', filePath: req.file.path });
 });
 
 // GraphQL endpoint configuration
 app.use(
-  // Not using post here to allow get requests to use graphiql
   '/graphql',
   graphqlHTTP({
-    schema: grapqlSchema, // Schema definition
-    rootValue: graphqlResolver, // Resolvers (logic for each field)
-    graphiql: true, // Enable GraphiQL UI for testing queries
+    schema: grapqlSchema,
+    rootValue: graphqlResolver,
+    graphiql: true,
     formatError(err) {
       if (!err.originalError) {
         return err;
@@ -116,6 +92,15 @@ app.use(
     },
   })
 );
+
+// Global error handling middleware — must be after all routes
+app.use((error, req, res, next) => {
+  console.log(error);
+  const status = error.statusCode || 500;
+  const message = error.message;
+  const data = error.data;
+  res.status(status).json({ message: message, data: data });
+});
 
 mongoose
   .connect(process.env.MONGODB_URI)
