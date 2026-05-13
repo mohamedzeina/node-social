@@ -1,0 +1,23 @@
+/* ============================================================
+   App shell — wraps the entire application
+   ============================================================ */
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  position: relative;
+}
+
+/* Decorative paper edge — vignettes the viewport like a real page */
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at top,    rgba(22,19,16,.05) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(22,19,16,.06) 0%, transparent 60%);
+}
