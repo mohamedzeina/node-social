@@ -264,8 +264,9 @@ class App extends Component {
               isAuth={this.state.isAuth}
             />
           }
-        />
-        {routes}
+        >
+          {routes}
+        </Layout>
       </Fragment>
     );
   }

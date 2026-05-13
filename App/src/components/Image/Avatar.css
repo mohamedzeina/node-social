@@ -1,7 +1,44 @@
+/* ============================================================
+   Avatar — engraved portrait frame
+   Square frame with corner ticks, not a round avatar
+   ============================================================ */
+
 .avatar {
-    width: 10rem;
-    height: 10rem;
-    margin: 0.5rem auto;
-    border-radius: 50%;
-    overflow: hidden;
+  width: 4rem;
+  height: 4rem;
+  position: relative;
+  margin: 0.5rem;
+  background: var(--paper-deep);
+  border: 1px solid var(--ink);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Hairline corner ticks — looks like a framed portrait */
+.avatar::before,
+.avatar::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+}
+
+.avatar::before {
+  top: -3px;
+  left: -3px;
+  border-top: 1px solid var(--vermilion);
+  border-left: 1px solid var(--vermilion);
+}
+
+.avatar::after {
+  bottom: -3px;
+  right: -3px;
+  border-bottom: 1px solid var(--vermilion);
+  border-right: 1px solid var(--vermilion);
+}
+
+.avatar .image {
+  filter: saturate(0.5) contrast(1.1) sepia(0.18);
+  mix-blend-mode: multiply;
 }
