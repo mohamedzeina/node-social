@@ -25,6 +25,22 @@ class Feed extends Component {
     this.loadPosts();
   }
 
+  componentDidUpdate(prevProps) {
+    // Merge post-level updates broadcast from the modal SinglePost
+    // (likes / comment counts) so the feed reflects them when the
+    // modal closes without a full refetch. Versioned so repeat updates
+    // for the same post still trigger.
+    const prev = prevProps.postUpdate;
+    const next = this.props.postUpdate;
+    if (next && (!prev || prev.version !== next.version)) {
+      this.setState((state) => ({
+        posts: state.posts.map((p) =>
+          p._id === next.postId ? { ...p, ...next.fields } : p
+        ),
+      }));
+    }
+  }
+
   loadPosts = (direction) => {
     if (direction) {
       this.setState({ postsLoading: true, posts: [] });

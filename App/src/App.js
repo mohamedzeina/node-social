@@ -24,6 +24,10 @@ class App extends Component {
     currentUser: null,        // { _id, name, avatarUrl, status }
     authLoading: false,
     error: null,
+    // Versioned post update broadcast by the modal SinglePost so the
+    // underlying Feed / Profile can merge changes (likes, comment
+    // counts) into their local post arrays without refetching.
+    postUpdate: null,         // { postId, fields, version }
   };
 
   componentDidMount() {
@@ -75,6 +79,22 @@ class App extends Component {
     // history.goBack pops the modal route off the stack and returns
     // us to whatever URL was the background.
     this.props.history.goBack();
+  };
+
+  /**
+   * Broadcast a post-level change from the modal SinglePost so the
+   * underlying Feed / Profile can merge it into their local posts.
+   * Bumping `version` guarantees a new object identity even when the
+   * same fields are updated multiple times for the same post.
+   */
+  handlePostUpdate = (postId, fields) => {
+    this.setState((prev) => ({
+      postUpdate: {
+        postId,
+        fields,
+        version: (prev.postUpdate ? prev.postUpdate.version : 0) + 1,
+      },
+    }));
   };
 
   mobileNavHandler = (isOpen) => {
@@ -273,6 +293,7 @@ class App extends Component {
                   token={this.state.token}
                   currentUser={this.state.currentUser}
                   onUserUpdated={this.handleUserUpdated}
+                  postUpdate={this.state.postUpdate}
                 />
               )}
             />
@@ -295,6 +316,7 @@ class App extends Component {
                   userId={this.state.userId}
                   token={this.state.token}
                   currentUser={this.state.currentUser}
+                  postUpdate={this.state.postUpdate}
                 />
               )}
             />
@@ -317,6 +339,7 @@ class App extends Component {
                     userId={this.state.userId}
                     token={this.state.token}
                     currentUser={this.state.currentUser}
+                    onPostUpdate={this.handlePostUpdate}
                   />
                 )}
               />

@@ -90,6 +90,8 @@ export const Trash = make(
 
 export const Plus = make(<path d="M12 5v14M5 12h14" />);
 
+export const Close = make(<path d="M6 6l12 12M18 6L6 18" />);
+
 export const Chevron = make(<path d="m6 9 6 6 6-6" />);
 
 export const ArrowLeft = make(

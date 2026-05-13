@@ -33,6 +33,19 @@ class Profile extends Component {
     if (prevProps.match.params.userId !== this.props.match.params.userId) {
       this.setState({ loading: true, user: null, posts: [] });
       this.loadProfile();
+      return;
+    }
+
+    // Merge post-level updates broadcast from the modal SinglePost
+    // so the profile's post list reflects them on modal close.
+    const prev = prevProps.postUpdate;
+    const next = this.props.postUpdate;
+    if (next && (!prev || prev.version !== next.version)) {
+      this.setState((state) => ({
+        posts: state.posts.map((p) =>
+          p._id === next.postId ? { ...p, ...next.fields } : p
+        ),
+      }));
     }
   }
 

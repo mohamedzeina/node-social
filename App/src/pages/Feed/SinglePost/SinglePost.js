@@ -7,6 +7,7 @@ import Sidebar from '../../../components/Sidebar/Sidebar';
 import Comment from '../../../components/Comment/Comment';
 import CommentComposer from '../../../components/Comment/CommentComposer';
 import ErrorHandler from '../../../components/ErrorHandler/ErrorHandler';
+import { Close } from '../../../components/Icons/Icons';
 import './SinglePost.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
@@ -125,6 +126,12 @@ class SinglePost extends Component {
       if (data.errors) throw new Error(data.errors[0].message);
       const fresh = data.data[mutation];
       this.setState({ liked: fresh.likedByMe, likeCount: fresh.likeCount });
+      if (this.props.onPostUpdate) {
+        this.props.onPostUpdate(postId, {
+          likeCount: fresh.likeCount,
+          likedByMe: fresh.likedByMe,
+        });
+      }
     } catch (err) {
       this.setState({ liked: !nextLiked, likeCount: prevCount });
       console.error('Like toggle failed', err);
@@ -188,9 +195,19 @@ class SinglePost extends Component {
       if (data.errors) throw new Error(data.errors[0].message);
 
       const real = data.data.addComment;
-      this.setState((prev) => ({
-        comments: prev.comments.map((c) => (c._id === tempId ? real : c)),
-      }));
+      let nextLength = 0;
+      this.setState(
+        (prev) => {
+          const comments = prev.comments.map((c) => (c._id === tempId ? real : c));
+          nextLength = comments.length;
+          return { comments };
+        },
+        () => {
+          if (this.props.onPostUpdate) {
+            this.props.onPostUpdate(postId, { commentCount: nextLength });
+          }
+        }
+      );
     } catch (err) {
       this.setState((prev) => ({
         comments: prev.comments.filter((c) => c._id !== tempId),
@@ -201,11 +218,30 @@ class SinglePost extends Component {
   };
 
   deleteComment = async (id) => {
-    // Hold on to the comment in case we need to restore it
+    // Hold on to the comment in case we need to restore it.
+    // Cascade locally: drop the target + any descendants so the count
+    // matches what the server is about to do.
     const previous = this.state.comments;
-    this.setState((prev) => ({
-      comments: prev.comments.filter((c) => c._id !== id),
-    }));
+    const childrenByParent = new Map();
+    for (const c of previous) {
+      const k = c.parent || null;
+      if (!childrenByParent.has(k)) childrenByParent.set(k, []);
+      childrenByParent.get(k).push(c._id);
+    }
+    const toRemove = new Set([id]);
+    const frontier = [id];
+    while (frontier.length) {
+      const next = frontier.shift();
+      const kids = childrenByParent.get(next) || [];
+      for (const k of kids) {
+        if (!toRemove.has(k)) {
+          toRemove.add(k);
+          frontier.push(k);
+        }
+      }
+    }
+    const remaining = previous.filter((c) => !toRemove.has(c._id));
+    this.setState({ comments: remaining });
 
     const query = {
       query: `mutation DeleteComment($id: ID!) { deleteComment(id: $id) }`,
@@ -223,6 +259,11 @@ class SinglePost extends Component {
       });
       const data = await res.json();
       if (data.errors) throw new Error(data.errors[0].message);
+      if (this.props.onPostUpdate) {
+        this.props.onPostUpdate(this.props.match.params.postId, {
+          commentCount: remaining.length,
+        });
+      }
     } catch (err) {
       this.setState({ comments: previous, error: err });
     }
@@ -449,7 +490,7 @@ class SinglePost extends Component {
             onClick={this.props.onClose}
             aria-label="Close"
           >
-            ×
+            <Close size={18} />
           </button>
           <article className="single-post single-post--modal">
             <ErrorHandler error={this.state.error} onHandle={this.dismissError} />

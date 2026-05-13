@@ -31,21 +31,24 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  border: 0;
+  border: 1px solid var(--hairline);
   background: var(--surface);
   color: var(--ink);
-  font-size: 1.7rem;
-  line-height: 1;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.16s var(--ease-out), transform 0.12s var(--ease-out);
+  transition:
+    background 0.16s var(--ease-out),
+    color 0.16s var(--ease-out),
+    border-color 0.16s var(--ease-out),
+    transform 0.12s var(--ease-out);
 }
 .single-post-modal__close:hover {
-  background: var(--clay-soft);
-  color: var(--clay-hover);
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
 }
 .single-post-modal__close:active { transform: scale(0.94); }
 
