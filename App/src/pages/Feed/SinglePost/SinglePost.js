@@ -150,9 +150,14 @@ class SinglePost extends Component {
    */
   addComment = async (parentId, content) => {
     const postId = this.props.match.params.postId;
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    // clientId is the stable React key — it survives the optimistic →
+    // real swap so the bubble never unmounts/remounts. _id starts as a
+    // temp value, then gets replaced with the real server id; clientId
+    // stays the same throughout.
+    const clientId = `c-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const optimistic = {
-      _id: tempId,
+      _id: clientId,
+      clientId,
       content,
       createdAt: new Date().toISOString(),
       parent: parentId || null,
@@ -198,7 +203,13 @@ class SinglePost extends Component {
       let nextLength = 0;
       this.setState(
         (prev) => {
-          const comments = prev.comments.map((c) => (c._id === tempId ? real : c));
+          // Merge real fields onto the existing optimistic record so the
+          // React element stays the same instance — no remount, no flicker.
+          const comments = prev.comments.map((c) =>
+            c.clientId === clientId
+              ? { ...real, clientId, __pending: false }
+              : c
+          );
           nextLength = comments.length;
           return { comments };
         },
@@ -210,7 +221,7 @@ class SinglePost extends Component {
       );
     } catch (err) {
       this.setState((prev) => ({
-        comments: prev.comments.filter((c) => c._id !== tempId),
+        comments: prev.comments.filter((c) => c.clientId !== clientId),
         error: err,
       }));
       throw err;
@@ -493,7 +504,7 @@ class SinglePost extends Component {
           ) : (
             <ul className="single-post__comments-list">
               {roots.map((c) => (
-                <li key={c._id}>
+                <li key={c.clientId || c._id}>
                   <Comment
                     comment={c}
                     depth={0}

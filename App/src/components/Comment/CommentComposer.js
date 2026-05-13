@@ -48,12 +48,18 @@ const CommentComposer = ({
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (disabled) return;
+    // Clear immediately so the typed text disappears from the composer
+    // the moment the user submits. Otherwise the optimistic comment in
+    // the tree + the lingering text below look like the same content
+    // posted twice. Restored on failure so the user can retry.
+    const text = trimmed;
+    setValue('');
     setSubmitting(true);
     try {
-      await onSubmit(trimmed);
-      setValue('');
+      await onSubmit(text);
     } catch (err) {
       console.error('comment submit failed', err);
+      setValue(text);
     } finally {
       setSubmitting(false);
     }
