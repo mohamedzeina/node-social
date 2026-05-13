@@ -6,7 +6,9 @@ import Input from '../../Form/Input/Input';
 import FilePicker from '../../Form/Input/FilePicker';
 import Image from '../../Image/Image';
 import { required, length } from '../../../util/validators';
-import { generateBase64FromImage } from '../../../util/image';
+import { generateBase64FromImage, validateImageFile } from '../../../util/image';
+
+const POST_IMAGE_MAX_BYTES = 10 * 1024 * 1024; // 10 MB
 
 const POST_FORM = {
   title: {
@@ -33,7 +35,8 @@ class FeedEdit extends Component {
   state = {
     postForm: POST_FORM,
     formIsValid: false,
-    imagePreview: null
+    imagePreview: null,
+    imageError: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -65,13 +68,26 @@ class FeedEdit extends Component {
 
   postInputChangeHandler = (input, value, files) => {
     if (files) {
-      generateBase64FromImage(files[0])
-        .then(b64 => {
-          this.setState({ imagePreview: b64 });
-        })
-        .catch(e => {
-          this.setState({ imagePreview: null });
+      const file = files[0];
+      // Reject invalid files before we ever generate a preview or
+      // store them on state. Cleared file → next submit can't ship it.
+      try {
+        validateImageFile(file, { maxBytes: POST_IMAGE_MAX_BYTES });
+      } catch (err) {
+        this.setState({ imagePreview: null, imageError: err.message });
+        this.setState((prev) => {
+          const next = {
+            ...prev.postForm,
+            image: { ...prev.postForm.image, value: '', valid: false, touched: true },
+          };
+          return { postForm: next, formIsValid: false };
         });
+        return;
+      }
+      this.setState({ imageError: null });
+      generateBase64FromImage(file)
+        .then(b64 => this.setState({ imagePreview: b64 }))
+        .catch(() => this.setState({ imagePreview: null }));
     }
     this.setState(prevState => {
       let isValid = true;
@@ -167,9 +183,12 @@ class FeedEdit extends Component {
               valid={this.state.postForm['image'].valid}
               touched={this.state.postForm['image'].touched}
             />
-            <div className="new-post__preview-image">
-              {!this.state.imagePreview && <p>Pick an image to preview here</p>}
-              {this.state.imagePreview && (
+            <div className={['new-post__preview-image', this.state.imageError ? 'has-error' : ''].join(' ')}>
+              {this.state.imageError && <p>{this.state.imageError}</p>}
+              {!this.state.imageError && !this.state.imagePreview && (
+                <p>Pick an image to preview here</p>
+              )}
+              {!this.state.imageError && this.state.imagePreview && (
                 <Image imageUrl={this.state.imagePreview} contain left />
               )}
             </div>

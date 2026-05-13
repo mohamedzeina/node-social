@@ -128,5 +128,12 @@
   position: relative;
   overflow: hidden;
 }
-.new-post__preview-image p { margin: 0; font-size: 0.92rem; }
+.new-post__preview-image p { margin: 0; font-size: 0.92rem; padding: 0 1rem; text-align: center; }
 .new-post__preview-image .image { position: absolute; inset: 0; background-size: cover; }
+
+.new-post__preview-image.has-error {
+  background: var(--heart-soft);
+  border-color: var(--heart);
+  color: var(--heart);
+  font-weight: 600;
+}

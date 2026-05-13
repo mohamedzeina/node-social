@@ -15,15 +15,25 @@ const app = express();
 
 // --------------------- File Upload Configuration ---------------------
 
+const ALLOWED_MIME_TYPES = [
+  'image/png',
+  'image/jpg',
+  'image/jpeg',
+  'image/webp',
+];
+const ALLOWED_FORMATS = ['jpg', 'jpeg', 'png', 'webp'];
+
 const fileFilter = (req, file, cb) => {
-  if (
-    file.mimetype === 'image/png' ||
-    file.mimetype === 'image/jpg' ||
-    file.mimetype === 'image/jpeg'
-  ) {
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(null, false);
+    // Surface a real Error so the global error handler returns a
+    // proper JSON response instead of silently dropping the file.
+    const err = new Error(
+      'Unsupported file type. Please upload a PNG, JPG, or WebP image.'
+    );
+    err.statusCode = 415;
+    cb(err, false);
   }
 };
 
@@ -35,7 +45,7 @@ const uploadFor = (folder, sizeLimitBytes) =>
       cloudinary,
       params: {
         folder: `dispatches/${folder}`,
-        allowed_formats: ['jpg', 'jpeg', 'png'],
+        allowed_formats: ALLOWED_FORMATS,
         public_id: () => uuidv4(),
       },
     }),
@@ -118,6 +128,14 @@ app.use(
 // Global error handling middleware — must be after all routes
 app.use((error, req, res, next) => {
   console.log(error);
+
+  // Translate multer errors into friendly, predictable responses
+  if (error && error.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      message: 'That image is too large. Please choose a smaller file.',
+    });
+  }
+
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;

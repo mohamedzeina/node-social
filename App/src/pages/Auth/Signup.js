@@ -5,7 +5,9 @@ import Input from '../../components/Form/Input/Input';
 import FilePicker from '../../components/Form/Input/FilePicker';
 import Button from '../../components/Button/Button';
 import { required, length, email } from '../../util/validators';
-import { generateBase64FromImage } from '../../util/image';
+import { generateBase64FromImage, validateImageFile } from '../../util/image';
+
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 import Auth from './Auth';
 
 class Signup extends Component {
@@ -38,13 +40,34 @@ class Signup extends Component {
       formIsValid: false
     },
     avatarPreview: null,
+    avatarError: null,
   };
 
   inputChangeHandler = (input, value, files) => {
-    if (input === 'avatar' && files && files[0]) {
-      generateBase64FromImage(files[0])
-        .then((b64) => this.setState({ avatarPreview: b64 }))
-        .catch(() => this.setState({ avatarPreview: null }));
+    if (input === 'avatar') {
+      const file = files && files[0];
+      if (file) {
+        // Validate before doing anything else — reject early.
+        try {
+          validateImageFile(file, { maxBytes: AVATAR_MAX_BYTES });
+        } catch (err) {
+          this.setState({ avatarError: err.message, avatarPreview: null });
+          // Clear the rejected file from state so submit doesn't pick it up.
+          this.setState((prev) => ({
+            signupForm: {
+              ...prev.signupForm,
+              avatar: { ...prev.signupForm.avatar, value: null, touched: true },
+            },
+          }));
+          return;
+        }
+        this.setState({ avatarError: null });
+        generateBase64FromImage(file)
+          .then((b64) => this.setState({ avatarPreview: b64 }))
+          .catch(() => this.setState({ avatarPreview: null }));
+      } else {
+        this.setState({ avatarPreview: null, avatarError: null });
+      }
     }
 
     this.setState(prevState => {
@@ -86,7 +109,7 @@ class Signup extends Component {
   };
 
   render() {
-    const { avatarPreview } = this.state;
+    const { avatarPreview, avatarError } = this.state;
     const nameValue = this.state.signupForm.name.value || '';
     const fallbackInitial = nameValue.trim().charAt(0).toUpperCase() || '?';
 
@@ -113,8 +136,12 @@ class Signup extends Component {
               <label htmlFor="avatar" className="signup__avatar-label">
                 Profile picture <span className="signup__optional">(optional)</span>
               </label>
-              <p className="signup__avatar-hint">
-                {avatarPreview ? 'Looks good. Hit save below to finish.' : 'Add a photo so friends can recognise you. PNG or JPG, up to 5 MB.'}
+              <p className={['signup__avatar-hint', avatarError ? 'signup__avatar-hint--error' : ''].join(' ')}>
+                {avatarError
+                  ? avatarError
+                  : avatarPreview
+                    ? 'Looks good. Hit save below to finish.'
+                    : 'Add a photo so friends can recognise you. PNG, JPG, or WebP, up to 5 MB.'}
               </p>
               <div className="signup__avatar-buttons">
                 <label className="signup__avatar-button" htmlFor="avatar">

@@ -133,6 +133,11 @@
   line-height: 1.45;
 }
 
+.signup__avatar-hint--error {
+  color: var(--heart);
+  font-weight: 600;
+}
+
 .signup__avatar-buttons {
   display: flex;
   gap: 0.4rem;

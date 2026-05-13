@@ -214,12 +214,15 @@ class Feed extends Component {
       },
       body: formData,
     })
-      .then((res) => {
-        console.log(res);
-        return res.json();
+      .then(async (res) => {
+        const body = await res.json();
+        if (!res.ok) {
+          throw new Error(body.message || 'Image upload failed.');
+        }
+        return body;
       })
       .then((fileResData) => {
-        console.log(fileResData);
+        // No new file uploaded (e.g. edit with no image change) → keep existing
         const imageUrl = fileResData.filePath || 'undefined';
         let graphqlQuery = {
           query: `
@@ -351,6 +354,10 @@ class Feed extends Component {
             totalPosts: updatedTotalPosts,
           };
         });
+      })
+      .catch((err) => {
+        console.error(err);
+        this.setState({ editLoading: false, error: err });
       });
   };
 
