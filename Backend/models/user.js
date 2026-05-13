@@ -30,6 +30,10 @@ const userSchema = new Schema({
     type: String,
     default: 'I am new!',
   },
+  avatarUrl: {
+    type: String,
+    default: null,
+  },
   posts: [
     {
       type: Schema.Types.ObjectId,

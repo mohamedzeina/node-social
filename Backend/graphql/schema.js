@@ -26,7 +26,8 @@ module.exports = buildSchema(`
         name: String!
         email: String!
         password: String    # Nullable → only used internally, not exposed to clients
-        status: String!     # Profile status 
+        status: String!     # Profile status
+        avatarUrl: String   # Cloudinary URL of user's avatar (null if not set)
         posts: [Post!]!     # Relation: all posts created by this user
     }
     
@@ -52,6 +53,7 @@ module.exports = buildSchema(`
         email: String!
         name: String!
         password: String!
+        avatarUrl: String   # Optional avatar URL — set if user uploaded an avatar at signup
     }
     
     # Input for creating/updating a post
@@ -70,6 +72,7 @@ module.exports = buildSchema(`
         updatePost(id: ID!, postInput: PostInputData): Post!    # Update an existing post
         deletePost(id: ID!): Boolean                            # Delete a post
         updateStatus(status: String!): User!                    # Update user status
+        updateAvatar(avatarUrl: String!): User!                 # Update user's avatar URL
         likePost(id: ID!): Post!                                # Like a post (idempotent)
         unlikePost(id: ID!): Post!                              # Remove like from a post
     }

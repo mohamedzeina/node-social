@@ -63,6 +63,7 @@ module.exports = {
       email: userInput.email,
       name: userInput.name,
       password: hashedPw,
+      avatarUrl: userInput.avatarUrl || null,
     });
 
     const createdUser = await user.save();
@@ -222,8 +223,13 @@ module.exports = {
     if (post.creator.toString() !== req.userId.toString())
       throw new Error('Not authorized!');
 
-    const publicId = post.imageUrl.split('/').pop().split('.')[0];
-    cloudinary.uploader.destroy(publicId).catch(console.error);
+    // Extract the Cloudinary public_id including any folder prefix.
+    // New posts live under dispatches/posts/<uuid>; older ones may be
+    // at the root. Match `/image/upload/[v123/]<publicId>.<ext>`.
+    const match = post.imageUrl.match(/\/image\/upload\/(?:v\d+\/)?(.+)\.(?:jpg|jpeg|png)$/i);
+    if (match) {
+      cloudinary.uploader.destroy(match[1]).catch(console.error);
+    }
     await Post.findByIdAndDelete(id);
 
     const user = await User.findById(req.userId);
@@ -257,6 +263,29 @@ module.exports = {
     user.status = status;
     await user.save();
 
+    return { ...user._doc, _id: user._id.toString() };
+  },
+
+  /**
+   * Update current user's avatar URL
+   * Cleans up the previous avatar from Cloudinary (if it was a Cloudinary asset)
+   */
+  updateAvatar: async function ({ avatarUrl }, req) {
+    if (!req.isAuth) throw new Error('Not authenticated!');
+
+    const user = await User.findById(req.userId);
+    if (!user) throw new Error('No user found!');
+
+    // Best-effort cleanup of the previous Cloudinary avatar
+    if (user.avatarUrl) {
+      const match = user.avatarUrl.match(/\/image\/upload\/(?:v\d+\/)?(.+)\.(?:jpg|jpeg|png)$/i);
+      if (match) {
+        cloudinary.uploader.destroy(match[1]).catch(console.error);
+      }
+    }
+
+    user.avatarUrl = avatarUrl;
+    await user.save();
     return { ...user._doc, _id: user._id.toString() };
   },
 

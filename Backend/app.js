@@ -15,14 +15,6 @@ const app = express();
 
 // --------------------- File Upload Configuration ---------------------
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    public_id: () => uuidv4(),
-  },
-});
-
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === 'image/png' ||
@@ -35,12 +27,28 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Create a Cloudinary-backed multer instance for a specific folder.
+// All uploads go under `dispatches/<folder>` to keep the account tidy.
+const uploadFor = (folder, sizeLimitBytes) =>
+  multer({
+    storage: new CloudinaryStorage({
+      cloudinary,
+      params: {
+        folder: `dispatches/${folder}`,
+        allowed_formats: ['jpg', 'jpeg', 'png'],
+        public_id: () => uuidv4(),
+      },
+    }),
+    fileFilter,
+    limits: { fileSize: sizeLimitBytes },
+  }).single('image');
+
+const postImageUpload = uploadFor('posts', 10 * 1024 * 1024);   // 10 MB
+const avatarUpload    = uploadFor('avatars', 5 * 1024 * 1024);  //  5 MB
+
 // --------------------- Middleware ---------------------
 
 app.use(bodyParser.json()); // Parse incoming JSON requests
-
-// Configure multer to handle single image uploads under the field name 'image'
-app.use(multer({ storage: storage, fileFilter: fileFilter }).single('image'));
 
 // Enable Cross-Origin Resource Sharing (CORS)
 app.use((req, res, next) => {
@@ -57,8 +65,8 @@ app.use((req, res, next) => {
 // Authentication middleware (adds req.isAuth and req.user if valid JWT is provided)
 app.use(auth);
 
-// Handle image upload and replacement
-app.put('/post-image', (req, res, next) => {
+// Handle post image upload and replacement (auth required)
+app.put('/post-image', postImageUpload, (req, res, next) => {
   if (!req.isAuth) {
     throw new Error('Not authenticated!');
   }
@@ -67,11 +75,25 @@ app.put('/post-image', (req, res, next) => {
   }
 
   if (req.body.oldPath) {
-    const publicId = req.body.oldPath.split('/').pop().split('.')[0];
-    cloudinary.uploader.destroy(publicId).catch(console.error);
+    const match = req.body.oldPath.match(/\/image\/upload\/(?:v\d+\/)?(.+)\.(?:jpg|jpeg|png)$/i);
+    if (match) {
+      cloudinary.uploader.destroy(match[1]).catch(console.error);
+    }
   }
 
   return res.status(201).json({ message: 'File stored.', filePath: req.file.path });
+});
+
+// Handle avatar upload. Public on purpose — runs during signup before
+// the user has a JWT. Auth-protected updates go through the
+// `updateAvatar` GraphQL mutation, which uses this endpoint's URL.
+app.post('/avatar-upload', avatarUpload, (req, res, next) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file provided!' });
+  }
+  return res
+    .status(201)
+    .json({ message: 'Avatar stored.', filePath: req.file.path });
 });
 
 // GraphQL endpoint configuration
