@@ -191,13 +191,22 @@ class SinglePost extends Component {
     };
     this.setState((prev) => ({ comments: [...prev.comments, optimistic] }));
 
-    // In modal mode, top-level comments land at the bottom of the list —
-    // which sits just above the sticky composer dock. Scroll the body so
-    // the new comment is in view next to the dock the user just typed in.
-    if (this.props.asModal && !parentId && this.modalBodyRef.current) {
+    // In modal mode, scroll the new comment into view so the user
+    // never has to hunt for what they just posted.
+    //   - Top-level: scroll body to the bottom (the new comment lands
+    //     at the end of the root list, just above the composer dock)
+    //   - Reply: scrollIntoView the specific new reply element by its
+    //     clientId — it lives nested under its parent in the tree
+    if (this.props.asModal && this.modalBodyRef.current) {
       requestAnimationFrame(() => {
-        const el = this.modalBodyRef.current;
-        if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        const body = this.modalBodyRef.current;
+        if (!body) return;
+        if (parentId) {
+          const el = body.querySelector(`[data-client-id="${clientId}"]`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+        }
       });
     }
 

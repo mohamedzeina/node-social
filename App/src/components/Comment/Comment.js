@@ -107,6 +107,7 @@ const Comment = ({
           hasReplies ? 'comment--has-replies' : '',
         ].join(' ')}
         aria-busy={pending || undefined}
+        data-client-id={comment.clientId || _id}
       >
         {authorId ? (
           <Link
