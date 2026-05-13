@@ -16,6 +16,8 @@ class Feed extends Component {
     totalPosts: 0,
     editPost: null,
     status: '',
+    myName: '',
+    myAvatar: null,
     postPage: 1,
     postsLoading: true,
     editLoading: false,
@@ -26,7 +28,9 @@ class Feed extends Component {
       query: `
       {
         user {
+          name
           status
+          avatarUrl
         }
       }
       `,
@@ -52,7 +56,11 @@ class Feed extends Component {
         if (resData.errors) {
           throw new Error('Fetching status failed.');
         }
-        this.setState({ status: resData.data.user.status });
+        this.setState({
+          status: resData.data.user.status,
+          myName: resData.data.user.name,
+          myAvatar: resData.data.user.avatarUrl,
+        });
       })
       .catch(this.catchError);
 
@@ -419,7 +427,13 @@ class Feed extends Component {
         />
 
         <section className="feed__status">
-          <span className="feed__status-avatar">{(this.state.status || 'Y').trim().charAt(0).toUpperCase()}</span>
+          <span className="feed__status-avatar" aria-hidden="true">
+            {this.state.myAvatar ? (
+              <img src={this.state.myAvatar} alt="" />
+            ) : (
+              (this.state.myName || 'Y').trim().charAt(0).toUpperCase()
+            )}
+          </span>
           <form onSubmit={this.statusUpdateHandler}>
             <Input
               id="status"

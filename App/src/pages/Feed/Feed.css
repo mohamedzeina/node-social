@@ -26,7 +26,7 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: var(--clay);
+  background: linear-gradient(135deg, var(--clay), var(--gold));
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -35,6 +35,13 @@
   font-weight: 700;
   font-size: 0.95rem;
   flex-shrink: 0;
+  overflow: hidden;
+}
+.feed__status-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .feed__status form {
