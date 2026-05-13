@@ -13,33 +13,36 @@ const Schema = mongoose.Schema;
  * - posts: Array of Post references (relationship: one-to-many)
  */
 
-const userSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  status: {
-    type: String,
-    default: 'I am new!',
-  },
-  avatarUrl: {
-    type: String,
-    default: null,
-  },
-  posts: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Post',
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
     },
-  ],
-});
+    password: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      default: 'I am new!',
+    },
+    avatarUrl: {
+      type: String,
+      default: null,
+    },
+    posts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Post',
+      },
+    ],
+  },
+  { timestamps: true } // adds createdAt + updatedAt
+);
 
 module.exports = mongoose.model('User', userSchema);

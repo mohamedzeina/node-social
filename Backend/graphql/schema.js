@@ -28,6 +28,7 @@ module.exports = buildSchema(`
         password: String    # Nullable → only used internally, not exposed to clients
         status: String!     # Profile status
         avatarUrl: String   # Cloudinary URL of user's avatar (null if not set)
+        createdAt: String   # ISO timestamp of when the account was created (nullable for legacy users)
         posts: [Post!]!     # Relation: all posts created by this user
     }
     
@@ -84,6 +85,7 @@ module.exports = buildSchema(`
         login(email: String!, password: String!): AuthData!     # Authenticate user
         getPosts(page: Int): PostData!                          # Paginated posts
         getPost(id: ID!): Post!                                 # Get single post
+        getUser(id: ID!): User!                                  # Get any user (profile page)
         user: User!                                              # Get currently logged-in user
     }
 

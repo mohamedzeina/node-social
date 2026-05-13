@@ -24,6 +24,16 @@ const projectPost = (post, viewerId) => {
   };
 };
 
+/**
+ * Project a User document into GraphQL shape. Handles missing
+ * createdAt for legacy users (before timestamps were added).
+ */
+const projectUser = (user) => ({
+  ...user._doc,
+  _id: user._id.toString(),
+  createdAt: user.createdAt ? user.createdAt.toISOString() : null,
+});
+
 module.exports = {
   /**
    * Register a new user
@@ -67,7 +77,7 @@ module.exports = {
     });
 
     const createdUser = await user.save();
-    return { ...createdUser._doc, _id: createdUser._id.toString() };
+    return projectUser(createdUser);
   },
 
   /**
@@ -248,7 +258,31 @@ module.exports = {
     const user = await User.findById(req.userId);
     if (!user) throw new Error('No user found!');
 
-    return { ...user._doc, _id: user._id.toString() };
+    return projectUser(user);
+  },
+
+  /**
+   * Get any user's profile by id (requires auth).
+   * Posts are populated and projected so the profile page can render
+   * the user's contributions in the same shape as the feed.
+   */
+  getUser: async function ({ id }, req) {
+    if (!req.isAuth) throw new Error('Not authenticated!');
+
+    const user = await User.findById(id).populate({
+      path: 'posts',
+      populate: { path: 'creator' },
+      options: { sort: { createdAt: -1 } },
+    });
+
+    if (!user) {
+      const err = new Error('User not found.');
+      err.code = 404;
+      throw err;
+    }
+
+    const posts = (user.posts || []).map((p) => projectPost(p, req.userId));
+    return { ...projectUser(user), posts };
   },
 
   /**
@@ -263,7 +297,7 @@ module.exports = {
     user.status = status;
     await user.save();
 
-    return { ...user._doc, _id: user._id.toString() };
+    return projectUser(user);
   },
 
   /**
@@ -286,7 +320,7 @@ module.exports = {
 
     user.avatarUrl = avatarUrl;
     await user.save();
-    return { ...user._doc, _id: user._id.toString() };
+    return projectUser(user);
   },
 
   /**
