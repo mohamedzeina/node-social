@@ -88,21 +88,22 @@ const Comment = ({
           </div>
         )}
 
-        <div className="comment__bubble">
-          <div className="comment__head">
-            {authorId ? (
-              <Link to={`/u/${authorId}`} className="comment__author">{name}</Link>
-            ) : (
-              <span className="comment__author">{name}</span>
-            )}
-            <span className="comment__date" title={createdAt}>
-              {formatRelative(createdAt)}
-            </span>
+        <div className="comment__column">
+          <div className="comment__bubble">
+            <div className="comment__head">
+              {authorId ? (
+                <Link to={`/u/${authorId}`} className="comment__author">{name}</Link>
+              ) : (
+                <span className="comment__author">{name}</span>
+              )}
+              <span className="comment__date" title={createdAt}>
+                {formatRelative(createdAt)}
+              </span>
+            </div>
+            <p className="comment__content">{content}</p>
           </div>
-          <p className="comment__content">{content}</p>
 
-          {/* Inline actions — only shown for real (non-pending) comments
-              and only when there's a viewer who can act on them. */}
+          {/* Actions sit BENEATH the bubble — always visible, native-feeling */}
           {!pending && viewerId && (
             <div className="comment__actions">
               <button
@@ -115,14 +116,17 @@ const Comment = ({
                 <span>{isReplying ? 'Cancel' : 'Reply'}</span>
               </button>
               {isOwn && onDelete && (
-                <button
-                  type="button"
-                  className="comment__action comment__action--danger"
-                  onClick={() => onDelete(_id)}
-                >
-                  <Trash size={13} />
-                  <span>Delete</span>
-                </button>
+                <>
+                  <span className="comment__action-dot" aria-hidden="true">·</span>
+                  <button
+                    type="button"
+                    className="comment__action comment__action--danger"
+                    onClick={() => onDelete(_id)}
+                  >
+                    <Trash size={13} />
+                    <span>Delete</span>
+                  </button>
+                </>
               )}
             </div>
           )}

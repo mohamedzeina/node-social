@@ -1,56 +1,118 @@
 /* ============================================================
-   Comment — chat-bubble row + cascading replies
+   Comment — chat bubble + stitched thread spine
+   ------------------------------------------------------------
+   Each nested reply draws its own vertical spine segment and an
+   L-shaped tributary that hooks from the spine over to the child
+   avatar. Same-colored segments stack seamlessly into a single
+   continuous "thread" that runs from each parent avatar down
+   through all of its descendants.
    ============================================================ */
 
 .comment-node {
-  /* depth is set by Comment.js as --depth (0…MAX_VISUAL_DEPTH) */
-  --depth: 0;
+  --avatar:    2.1rem;
+  --avatar-c:  1.15rem;          /* avatar vertical-center incl. row top offset */
+  --spine-w:   2px;
+  --spine-x:   calc(var(--avatar) / 2);  /* 1.05rem — aligns under parent avatar centerline */
+  --hook-w:    1.25rem;
+  --indent:    calc(var(--spine-x) + var(--hook-w));  /* 2.3rem per level */
+  --spine:     #D7CBB1;          /* warm tan thread color */
+  --spine-on:  var(--clay);
 }
 
-/* Replies indent + get a thread line on the left of their wrapper */
-.comment-node--reply {
-  position: relative;
-  margin-left: 1.4rem;
-  padding-left: 0.9rem;
-  border-left: 2px solid var(--hairline);
-}
-.comment-node--reply:hover { border-left-color: var(--hairline-strong); }
-
-/* Deepest visual rung — past this we stop adding more nesting space
-   so threads stay readable on narrow columns. */
-.comment-node--capped {
-  margin-left: 1rem;
-  padding-left: 0.7rem;
-}
-
-.comment-node__composer {
-  padding: 0 0 0.25rem;
-}
+/* ============================================================
+   Children wrapper — holds all direct replies of a comment
+   ============================================================ */
 
 .comment-node__children {
   display: flex;
   flex-direction: column;
-  margin-top: 0.25rem;
+  margin-top: 0.1rem;
 }
 
 /* ============================================================
-   The comment row itself
+   Reply node — draws its own spine segment + tributary hook
+   ============================================================ */
+
+.comment-node--reply {
+  position: relative;
+  padding-left: var(--indent);
+  padding-top: 0.15rem;
+}
+
+/* Vertical spine running the full height of this sibling so
+   consecutive siblings produce one continuous line. */
+.comment-node--reply::before {
+  content: '';
+  position: absolute;
+  left: var(--spine-x);
+  top: 0;
+  bottom: 0;
+  width: var(--spine-w);
+  background: var(--spine);
+  border-radius: var(--spine-w);
+  pointer-events: none;
+  transition: background 0.22s var(--ease-out);
+}
+/* Last reply in a sibling group truncates the spine at its own
+   avatar centerline so the thread "closes" cleanly. */
+.comment-node--reply:last-child::before {
+  bottom: auto;
+  height: var(--avatar-c);
+}
+
+/* L-hook from the spine over to this reply's avatar. The hook's
+   border-left coincides with the vertical spine — same color means
+   they merge into a single stroke. */
+.comment-node--reply::after {
+  content: '';
+  position: absolute;
+  left: var(--spine-x);
+  top: 0;
+  width: var(--hook-w);
+  height: var(--avatar-c);
+  border-left: var(--spine-w) solid var(--spine);
+  border-bottom: var(--spine-w) solid var(--spine);
+  border-bottom-left-radius: 14px;
+  pointer-events: none;
+  transition: border-color 0.22s var(--ease-out);
+}
+
+/* Subtle warm-up of the whole sub-thread when hovered */
+.comment-node--reply:hover > .comment-node--reply::before,
+.comment-node--reply:hover::before { background: var(--spine-on); }
+.comment-node--reply:hover::after  { border-color: var(--spine-on); }
+
+/* Deep threads — past the visual depth cap, tighten everything so
+   the column stays readable on narrow surfaces. */
+.comment-node--capped {
+  --hook-w:   0.6rem;
+  --spine-x:  0.8rem;
+}
+
+/* ============================================================
+   The comment row (avatar + body column)
    ============================================================ */
 
 .comment {
   display: grid;
-  grid-template-columns: 2.1rem 1fr;
+  grid-template-columns: var(--avatar) 1fr;
   gap: 0.7rem;
-  padding: 0.6rem 0;
+  padding: 0.4rem 0.5rem 0.4rem 0;
   position: relative;
+  border-radius: var(--r-md);
   animation: fade-up 0.28s var(--ease-out);
+  transition: background 0.18s var(--ease-out);
 }
+.comment:hover { background: rgba(232, 222, 203, 0.32); }
+.comment[aria-busy='true']:hover { background: transparent; }
 
-.comment.is-pending { opacity: 0.6; }
+.comment.is-pending { opacity: 0.62; }
+
+/* ---- Avatar — sits ON the spine like a stitched node ---- */
 
 .comment__avatar {
-  width: 2.1rem;
-  height: 2.1rem;
+  width: var(--avatar);
+  height: var(--avatar);
   border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(135deg, var(--clay), var(--gold));
@@ -63,35 +125,50 @@
   font-size: 0.9rem;
   flex-shrink: 0;
   margin-top: 0.1rem;
+  position: relative;
+  z-index: 1;
+  /* Halo of card-color so the spine "dives under" the avatar */
+  box-shadow: 0 0 0 3px var(--surface);
 }
-.comment__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.comment__avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
 a.comment__avatar--link {
   cursor: pointer;
-  transition: transform 0.14s var(--ease-out), box-shadow 0.14s var(--ease-out);
+  transition: transform 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
 }
 a.comment__avatar--link:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 0 2px var(--clay-soft);
+  transform: scale(1.06);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--clay-soft);
 }
+
+/* ---- Body column wraps bubble + actions row -------------- */
+
+.comment__column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---- Bubble — chat-bubble corner toward avatar ---------- */
 
 .comment__bubble {
   background: var(--surface-2);
   border-radius: var(--r-md);
-  padding: 0.55rem 0.85rem;
+  border-top-left-radius: 4px;
+  padding: 0.6rem 0.9rem 0.55rem;
   min-width: 0;
+  position: relative;
+  transition: background 0.16s var(--ease-out);
 }
+.comment:hover .comment__bubble { background: var(--surface); border: 1px solid var(--hairline); padding: calc(0.6rem - 1px) calc(0.9rem - 1px) calc(0.55rem - 1px); }
+.comment[aria-busy='true']:hover .comment__bubble { background: var(--surface-2); border: 0; padding: 0.6rem 0.9rem 0.55rem; }
 
 .comment__head {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.55rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.18rem;
 }
 
 .comment__author {
@@ -100,6 +177,7 @@ a.comment__avatar--link:hover {
   font-size: 0.88rem;
   color: var(--ink);
   text-decoration: none;
+  letter-spacing: -0.005em;
   transition: color 0.14s var(--ease-out);
 }
 a.comment__author:hover {
@@ -127,39 +205,69 @@ a.comment__author:hover {
   white-space: pre-wrap;
 }
 
-/* ---- Actions row inside the bubble ------------------ */
+/* ============================================================
+   Actions row — under the bubble, always visible
+   ============================================================ */
+
 .comment__actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  margin-top: 0.35rem;
-  margin-left: -0.35rem;
-  opacity: 0.7;
-  transition: opacity 0.14s var(--ease-out);
+  gap: 0.1rem;
+  margin-top: 0.25rem;
+  margin-left: 0.2rem;
 }
-.comment:hover .comment__actions,
-.comment:focus-within .comment__actions { opacity: 1; }
 
 .comment__action {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
+  padding: 0.3rem 0.6rem;
   border-radius: var(--r-pill);
   color: var(--ink-3);
   font-family: var(--font-body);
   font-size: 0.78rem;
   font-weight: 600;
-  transition: background 0.14s var(--ease-out), color 0.14s var(--ease-out);
+  letter-spacing: 0.01em;
+  transition:
+    background 0.14s var(--ease-out),
+    color 0.14s var(--ease-out),
+    transform 0.1s var(--ease-out);
 }
 .comment__action:hover {
-  background: var(--surface-3);
+  background: var(--surface-2);
   color: var(--ink);
+}
+.comment__action:active { transform: scale(0.96); }
+.comment__action[aria-expanded='true'] {
+  background: var(--clay-soft);
+  color: var(--clay-hover);
 }
 .comment__action--danger:hover {
   background: var(--heart-soft);
   color: var(--heart);
+}
+
+.comment__action-dot {
+  color: var(--ink-4);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0 0.1rem;
+  user-select: none;
+}
+
+/* ============================================================
+   Inline composer slot (appears when user clicks Reply)
+   ------------------------------------------------------------
+   Indented to the same column where the new reply will land,
+   so the spatial relationship reads immediately.
+   ============================================================ */
+
+.comment-node__composer {
+  padding: 0.45rem 0 0.55rem;
+  padding-left: var(--indent);
+  margin-left: -0.2rem;
+  animation: fade-up 0.22s var(--ease-out);
 }
