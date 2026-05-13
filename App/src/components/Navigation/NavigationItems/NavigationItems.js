@@ -4,9 +4,9 @@ import { NavLink } from 'react-router-dom';
 import './NavigationItems.css';
 
 const navItems = [
-  { id: 'feed',   text: 'The Feed',  link: '/',       auth: true  },
-  { id: 'login',  text: 'Sign in',   link: '/',       auth: false },
-  { id: 'signup', text: 'Subscribe', link: '/signup', auth: false }
+  { id: 'feed',   text: 'Home',    link: '/',       auth: true  },
+  { id: 'login',  text: 'Log in',  link: '/',       auth: false },
+  { id: 'signup', text: 'Sign up', link: '/signup', auth: false }
 ];
 
 const navigationItems = props => [
@@ -18,7 +18,7 @@ const navigationItems = props => [
         className={['nav-item', props.mobile ? 'nav-item--mobile' : ''].join(' ')}
       >
         <NavLink to={item.link} exact onClick={props.onChoose}>
-          <span className="nav-item__text">{item.text}</span>
+          {item.text}
         </NavLink>
       </li>
     )),
@@ -27,9 +27,7 @@ const navigationItems = props => [
       className={['nav-item', props.mobile ? 'nav-item--mobile' : ''].join(' ')}
       key="logout"
     >
-      <button onClick={props.onLogout}>
-        <span className="nav-item__text">Sign off</span>
-      </button>
+      <button onClick={props.onLogout}>Log out</button>
     </li>
   )
 ];

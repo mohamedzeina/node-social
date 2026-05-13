@@ -7,14 +7,6 @@ import NavigationItems from '../NavigationItems/NavigationItems';
 
 import './MainNavigation.css';
 
-const todayDateline = () =>
-  new Date().toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-
 const mainNavigation = props => (
   <nav className="main-nav">
     <MobileToggle onOpen={props.onOpenMobileNav} />
@@ -23,10 +15,7 @@ const mainNavigation = props => (
       <Logo />
     </NavLink>
 
-    <div className="main-nav__dateline" aria-hidden="true">
-      <span className="main-nav__vol">Vol. I &middot; No. 01</span>
-      <span className="main-nav__date">{todayDateline()}</span>
-    </div>
+    <div className="main-nav__spacer" />
 
     <ul className="main-nav__items">
       <NavigationItems isAuth={props.isAuth} onLogout={props.onLogout} />

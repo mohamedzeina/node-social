@@ -1,6 +1,7 @@
 import React from 'react';
 
 import NavigationItems from '../NavigationItems/NavigationItems';
+import Logo from '../../Logo/Logo';
 import './MobileNavigation.css';
 
 const mobileNavigation = props => (
@@ -9,13 +10,10 @@ const mobileNavigation = props => (
     aria-hidden={!props.open}
   >
     <div className="mobile-nav__head">
-      <span className="mobile-nav__eyebrow">Contents</span>
-      <span className="mobile-nav__folio">Folio I</span>
+      <Logo />
     </div>
 
-    <ul
-      className={['mobile-nav__items', props.mobile ? 'mobile' : ''].join(' ')}
-    >
+    <ul className="mobile-nav__items">
       <NavigationItems
         mobile
         onChoose={props.onChooseItem}
@@ -23,12 +21,6 @@ const mobileNavigation = props => (
         onLogout={props.onLogout}
       />
     </ul>
-
-    <div className="mobile-nav__foot">
-      <span className="mobile-nav__colophon">
-        Set in Fraunces &amp; Newsreader
-      </span>
-    </div>
   </nav>
 );
 

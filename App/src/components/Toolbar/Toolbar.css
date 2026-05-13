@@ -1,57 +1,29 @@
 /* ============================================================
-   Toolbar — masthead bar
-   Dark ink stripe at the top of every page (the masthead)
+   Toolbar — app top bar
+   Frosted cream surface with hairline at the bottom
    ============================================================ */
 
 .toolbar {
   width: 100%;
-  background: var(--ink);
-  color: var(--paper);
-  position: relative;
-}
-
-.toolbar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle at 18% 28%, rgba(242,236,223,0.05) 0 1px, transparent 1px),
-    radial-gradient(circle at 72% 76%, rgba(242,236,223,0.04) 0 1px, transparent 1px);
-  background-size: 8px 8px, 12px 12px;
-  pointer-events: none;
-  opacity: 0.7;
+  background: rgba(250, 246, 238, 0.85);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .toolbar__inner {
-  position: relative;
-  height: 4.25rem;
-  padding: 0 1.25rem;
+  height: 4rem;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
   width: 100%;
-}
-
-/* Vermilion hairline at the bottom — separates masthead from content */
-.toolbar__hairline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 3px;
-  background:
-    linear-gradient(to right,
-      var(--vermilion) 0%,
-      var(--vermilion) 33%,
-      var(--ink) 33%,
-      var(--ink) 66%,
-      var(--vermilion) 66%,
-      var(--vermilion) 100%);
-  border-top: 1px solid var(--paper-edge);
+  max-width: 80rem;
+  margin: 0 auto;
 }
 
 @media (min-width: 768px) {
   .toolbar__inner {
-    padding: 0 2.5rem;
-    height: 4.75rem;
+    padding: 0 1.5rem;
+    height: 4.25rem;
   }
 }
