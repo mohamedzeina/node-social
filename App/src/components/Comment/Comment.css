@@ -219,6 +219,23 @@ a.comment__author:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* "Posting…" — Facebook-style live indicator that shows while the
+   optimistic comment is in flight to the server. Warm clay tint so
+   it reads as friendly progress, gentle opacity pulse signals work
+   is still happening without being aggressive. */
+.comment__date--pending {
+  color: var(--clay);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  animation: comment-posting-pulse 1.3s ease-in-out infinite;
+}
+
+@keyframes comment-posting-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
 .comment__content {
   font-family: var(--font-body);
   font-size: 0.95rem;

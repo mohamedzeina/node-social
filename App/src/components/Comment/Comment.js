@@ -139,8 +139,11 @@ const Comment = ({
               ) : (
                 <span className="comment__author">{name}</span>
               )}
-              <span className="comment__date" title={createdAt}>
-                {formatRelative(createdAt)}
+              <span
+                className={['comment__date', pending ? 'comment__date--pending' : ''].join(' ')}
+                title={pending ? 'Saving your comment…' : createdAt}
+              >
+                {pending ? 'Posting…' : formatRelative(createdAt)}
               </span>
             </div>
             <p className="comment__content">{content}</p>
