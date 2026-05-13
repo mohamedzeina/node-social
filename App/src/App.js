@@ -117,64 +117,64 @@ class App extends Component {
       });
   };
 
-  signupHandler = (event, authData) => {
+  signupHandler = async (event, authData) => {
     event.preventDefault();
     this.setState({ authLoading: true });
-    const graphqlQuery = {
-      query: `
-        mutation CreateNewUser($email: String!, $name: String!, $password: String!) {
-          createUser(userInput: {email: $email, name: $name, password: $password}) {
-            _id
-            email
+
+    try {
+      // If the user picked an avatar, upload it first and capture the URL.
+      let avatarUrl = null;
+      const avatarFile = authData.signupForm.avatar && authData.signupForm.avatar.value;
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('image', avatarFile);
+        const uploadRes = await fetch(
+          'https://node-social-zmra.onrender.com/avatar-upload',
+          { method: 'POST', body: formData }
+        );
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.message || 'Avatar upload failed.');
+        avatarUrl = uploadData.filePath || null;
+      }
+
+      const graphqlQuery = {
+        query: `
+          mutation CreateNewUser($email: String!, $name: String!, $password: String!, $avatarUrl: String) {
+            createUser(userInput: {email: $email, name: $name, password: $password, avatarUrl: $avatarUrl}) {
+              _id
+              email
+            }
           }
-        }
-      `,
-      variables: {
-        email: authData.signupForm.email.value,
-        name: authData.signupForm.name.value,
-        password: authData.signupForm.password.value,
-      },
-    };
-    fetch('https://node-social-zmra.onrender.com/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(graphqlQuery),
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((resData) => {
-        console.log(resData.errors);
-        if (
-          resData.errors &&
-          resData.errors[0].status === 422 &&
-          resData.errors[0].data
-        ) {
-          throw new Error(resData.errors[0].data[0].message);
-        }
-        if (
-          resData.errors &&
-          (resData.errors[0].status === 422 || resData.errors[0].status === 401)
-        ) {
-          throw new Error(resData.errors[0].message);
-        }
-        if (resData.errors) {
-          throw new Error('Creating user failed.');
-        }
-        console.log(resData);
-        this.setState({ isAuth: false, authLoading: false });
-        this.props.history.replace('/');
-      })
-      .catch((err) => {
-        console.log(err);
-        this.setState({
-          isAuth: false,
-          authLoading: false,
-          error: err,
-        });
+        `,
+        variables: {
+          email: authData.signupForm.email.value,
+          name: authData.signupForm.name.value,
+          password: authData.signupForm.password.value,
+          avatarUrl,
+        },
+      };
+
+      const res = await fetch('https://node-social-zmra.onrender.com/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(graphqlQuery),
       });
+      const resData = await res.json();
+
+      if (resData.errors && resData.errors[0].status === 422 && resData.errors[0].data) {
+        throw new Error(resData.errors[0].data[0].message);
+      }
+      if (resData.errors && (resData.errors[0].status === 422 || resData.errors[0].status === 401)) {
+        throw new Error(resData.errors[0].message);
+      }
+      if (resData.errors) throw new Error('Creating user failed.');
+
+      this.setState({ isAuth: false, authLoading: false });
+      this.props.history.replace('/');
+    } catch (err) {
+      console.log(err);
+      this.setState({ isAuth: false, authLoading: false, error: err });
+    }
   };
 
   setAutoLogout = (milliseconds) => {

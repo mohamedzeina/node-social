@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
 import Input from '../../components/Form/Input/Input';
+import FilePicker from '../../components/Form/Input/FilePicker';
 import Button from '../../components/Button/Button';
 import { required, length, email } from '../../util/validators';
+import { generateBase64FromImage } from '../../util/image';
 import Auth from './Auth';
 
 class Signup extends Component {
@@ -27,22 +29,37 @@ class Signup extends Component {
         touched: false,
         validators: [required]
       },
+      avatar: {
+        value: null,           // File object (optional)
+        valid: true,           // optional → always valid
+        touched: false,
+        validators: []
+      },
       formIsValid: false
-    }
+    },
+    avatarPreview: null,
   };
 
-  inputChangeHandler = (input, value) => {
+  inputChangeHandler = (input, value, files) => {
+    if (input === 'avatar' && files && files[0]) {
+      generateBase64FromImage(files[0])
+        .then((b64) => this.setState({ avatarPreview: b64 }))
+        .catch(() => this.setState({ avatarPreview: null }));
+    }
+
     this.setState(prevState => {
       let isValid = true;
       for (const validator of prevState.signupForm[input].validators) {
         isValid = isValid && validator(value);
       }
+      const nextValue = input === 'avatar' ? (files ? files[0] : null) : value;
       const updatedForm = {
         ...prevState.signupForm,
-        [input]: { ...prevState.signupForm[input], valid: isValid, value }
+        [input]: { ...prevState.signupForm[input], valid: isValid, value: nextValue }
       };
       let formIsValid = true;
       for (const inputName in updatedForm) {
+        if (inputName === 'formIsValid') continue;
         formIsValid = formIsValid && updatedForm[inputName].valid;
       }
       return { signupForm: updatedForm, formIsValid };
@@ -58,7 +75,21 @@ class Signup extends Component {
     }));
   };
 
+  removeAvatarHandler = () => {
+    this.setState((prev) => ({
+      avatarPreview: null,
+      signupForm: {
+        ...prev.signupForm,
+        avatar: { ...prev.signupForm.avatar, value: null, touched: false },
+      },
+    }));
+  };
+
   render() {
+    const { avatarPreview } = this.state;
+    const nameValue = this.state.signupForm.name.value || '';
+    const fallbackInitial = nameValue.trim().charAt(0).toUpperCase() || '?';
+
     return (
       <Auth
         title="Create your account"
@@ -70,6 +101,46 @@ class Signup extends Component {
         }
       >
         <form onSubmit={e => this.props.onSignup(e, this.state)}>
+          <div className="signup__avatar-row">
+            <div className="signup__avatar-preview" aria-hidden="true">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="" />
+              ) : (
+                <span>{fallbackInitial}</span>
+              )}
+            </div>
+            <div className="signup__avatar-actions">
+              <label htmlFor="avatar" className="signup__avatar-label">
+                Profile picture <span className="signup__optional">(optional)</span>
+              </label>
+              <p className="signup__avatar-hint">
+                {avatarPreview ? 'Looks good. Hit save below to finish.' : 'Add a photo so friends can recognise you. PNG or JPG, up to 5 MB.'}
+              </p>
+              <div className="signup__avatar-buttons">
+                <label className="signup__avatar-button" htmlFor="avatar">
+                  {avatarPreview ? 'Change photo' : 'Choose a photo'}
+                </label>
+                {avatarPreview && (
+                  <button
+                    type="button"
+                    className="signup__avatar-remove"
+                    onClick={this.removeAvatarHandler}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <FilePicker
+                id="avatar"
+                control="input"
+                onChange={this.inputChangeHandler}
+                onBlur={this.inputBlurHandler.bind(this, 'avatar')}
+                valid={this.state.signupForm.avatar.valid}
+                touched={this.state.signupForm.avatar.touched}
+              />
+            </div>
+          </div>
+
           <Input
             id="name"
             label="Display name"

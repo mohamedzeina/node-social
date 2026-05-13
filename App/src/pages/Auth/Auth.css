@@ -70,3 +70,123 @@
   .auth { margin-top: 4rem; max-width: 28rem; }
   .auth__card { padding: 2.25rem 2rem; }
 }
+
+/* ============================================================
+   Signup-specific: optional avatar picker row
+   ============================================================ */
+
+.signup__avatar-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.75rem 0 1rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.signup__avatar-preview {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--clay), var(--gold));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--hairline-strong);
+}
+.signup__avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.signup__avatar-actions {
+  flex: 1;
+  min-width: 0;
+}
+
+.signup__avatar-label {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--ink);
+  margin: 0 0 0.2rem;
+}
+
+.signup__optional {
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.signup__avatar-hint {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  margin: 0 0 0.55rem;
+  line-height: 1.45;
+}
+
+.signup__avatar-buttons {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.signup__avatar-button {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline-strong);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background 0.16s var(--ease-out), border-color 0.16s var(--ease-out);
+}
+.signup__avatar-button:hover {
+  background: var(--clay-soft);
+  border-color: var(--clay);
+  color: var(--clay-hover);
+}
+
+.signup__avatar-remove {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--r-pill);
+  transition: color 0.16s var(--ease-out), background 0.16s var(--ease-out);
+}
+.signup__avatar-remove:hover {
+  color: var(--heart);
+  background: var(--heart-soft);
+}
+
+/* Hide the underlying file input — we drive it from the styled label */
+.signup__avatar-actions .input {
+  margin: 0;
+}
+.signup__avatar-actions .input input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
