@@ -33,46 +33,33 @@ class Login extends Component {
       }
       const updatedForm = {
         ...prevState.loginForm,
-        [input]: {
-          ...prevState.loginForm[input],
-          valid: isValid,
-          value: value
-        }
+        [input]: { ...prevState.loginForm[input], valid: isValid, value }
       };
       let formIsValid = true;
       for (const inputName in updatedForm) {
         formIsValid = formIsValid && updatedForm[inputName].valid;
       }
-      return {
-        loginForm: updatedForm,
-        formIsValid: formIsValid
-      };
+      return { loginForm: updatedForm, formIsValid };
     });
   };
 
   inputBlurHandler = input => {
-    this.setState(prevState => {
-      return {
-        loginForm: {
-          ...prevState.loginForm,
-          [input]: {
-            ...prevState.loginForm[input],
-            touched: true
-          }
-        }
-      };
-    });
+    this.setState(prevState => ({
+      loginForm: {
+        ...prevState.loginForm,
+        [input]: { ...prevState.loginForm[input], touched: true }
+      }
+    }));
   };
 
   render() {
     return (
       <Auth
-        eyebrow="Returning reader"
-        title="Welcome back."
-        lede="Sign in to continue filing dispatches and to read what others have written today."
+        title="Welcome back"
+        lede="Log in to keep up with what your friends are sharing."
         footer={
           <span>
-            New here? <Link to="/signup">Subscribe</Link>
+            New here? <Link to="/signup">Create an account</Link>
           </span>
         }
       >
@@ -86,10 +73,10 @@ class Login extends Component {
         >
           <Input
             id="email"
-            label="Address of correspondence"
+            label="Email"
             type="email"
             control="input"
-            placeholder="you@dispatches.example"
+            placeholder="you@example.com"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'email')}
             value={this.state.loginForm['email'].value}
@@ -98,10 +85,10 @@ class Login extends Component {
           />
           <Input
             id="password"
-            label="Passphrase"
+            label="Password"
             type="password"
             control="input"
-            placeholder="Your secret line"
+            placeholder="••••••••"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'password')}
             value={this.state.loginForm['password'].value}
@@ -109,7 +96,7 @@ class Login extends Component {
             touched={this.state.loginForm['password'].touched}
           />
           <Button design="accent" mode="raised" type="submit" loading={this.props.loading}>
-            Enter the press room
+            Log in
           </Button>
         </form>
       </Auth>

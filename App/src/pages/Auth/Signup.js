@@ -39,56 +39,43 @@ class Signup extends Component {
       }
       const updatedForm = {
         ...prevState.signupForm,
-        [input]: {
-          ...prevState.signupForm[input],
-          valid: isValid,
-          value: value
-        }
+        [input]: { ...prevState.signupForm[input], valid: isValid, value }
       };
       let formIsValid = true;
       for (const inputName in updatedForm) {
         formIsValid = formIsValid && updatedForm[inputName].valid;
       }
-      return {
-        signupForm: updatedForm,
-        formIsValid: formIsValid
-      };
+      return { signupForm: updatedForm, formIsValid };
     });
   };
 
   inputBlurHandler = input => {
-    this.setState(prevState => {
-      return {
-        signupForm: {
-          ...prevState.signupForm,
-          [input]: {
-            ...prevState.signupForm[input],
-            touched: true
-          }
-        }
-      };
-    });
+    this.setState(prevState => ({
+      signupForm: {
+        ...prevState.signupForm,
+        [input]: { ...prevState.signupForm[input], touched: true }
+      }
+    }));
   };
 
   render() {
     return (
       <Auth
-        eyebrow="Become a contributor"
-        title="Subscribe."
-        lede="Make a byline, file your first dispatch, and join a quieter corner of the internet."
+        title="Create your account"
+        lede="Join Dispatches to share what you're working on and follow your friends."
         footer={
           <span>
-            Already on the masthead? <Link to="/">Sign in</Link>
+            Already have an account? <Link to="/">Log in</Link>
           </span>
         }
       >
         <form onSubmit={e => this.props.onSignup(e, this.state)}>
           <Input
             id="name"
-            label="Byline"
+            label="Display name"
             type="text"
             control="input"
-            placeholder="The name to print under your work"
+            placeholder="What should we call you?"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'name')}
             value={this.state.signupForm['name'].value}
@@ -97,10 +84,10 @@ class Signup extends Component {
           />
           <Input
             id="email"
-            label="Address of correspondence"
+            label="Email"
             type="email"
             control="input"
-            placeholder="you@dispatches.example"
+            placeholder="you@example.com"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'email')}
             value={this.state.signupForm['email'].value}
@@ -109,10 +96,10 @@ class Signup extends Component {
           />
           <Input
             id="password"
-            label="Passphrase"
+            label="Password"
             type="password"
             control="input"
-            placeholder="At least five characters"
+            placeholder="At least 5 characters"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'password')}
             value={this.state.signupForm['password'].value}
@@ -120,7 +107,7 @@ class Signup extends Component {
             touched={this.state.signupForm['password'].touched}
           />
           <Button design="accent" mode="raised" type="submit" loading={this.props.loading}>
-            Join the masthead
+            Create account
           </Button>
         </form>
       </Auth>
