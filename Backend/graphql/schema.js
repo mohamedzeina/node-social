@@ -18,6 +18,18 @@ module.exports = buildSchema(`
         updatedAt: String!
         likeCount: Int!         # Total number of likes on this post
         likedByMe: Boolean!     # Whether the requesting user has liked this post
+        commentCount: Int!      # Denormalised total number of comments
+        comments: [Comment!]    # Only populated by getPost (null on feed queries)
+    }
+
+    # A Comment on a Post
+    type Comment {
+        _id: ID!
+        content: String!
+        author: User!
+        post: ID!
+        createdAt: String!
+        updatedAt: String!
     }
     
     # A User of the system
@@ -76,6 +88,8 @@ module.exports = buildSchema(`
         updateAvatar(avatarUrl: String!): User!                 # Update user's avatar URL
         likePost(id: ID!): Post!                                # Like a post (idempotent)
         unlikePost(id: ID!): Post!                              # Remove like from a post
+        addComment(postId: ID!, content: String!): Comment!     # Add a comment to a post
+        deleteComment(id: ID!): Boolean                         # Delete own comment
     }
 
     # ------------------------------

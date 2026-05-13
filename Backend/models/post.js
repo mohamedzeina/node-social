@@ -40,6 +40,13 @@ const postSchema = new Schema(
         ref: 'User',
       },
     ],
+    // Denormalised counter — updated by addComment/deleteComment
+    // resolvers so the feed can render counts without an N+1.
+    commentCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true } // CreatedAt and UpdatedAt timestamps added by mongoose
 );

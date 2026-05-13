@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const Post = require('../models/post');
+const Comment = require('../models/comment');
 const cloudinary = require('../cloudinary');
 
 /**
@@ -21,8 +22,25 @@ const projectPost = (post, viewerId) => {
     likedByMe: viewerId
       ? likes.some((id) => id.toString() === viewerId.toString())
       : false,
+    commentCount: post.commentCount || 0,
+    // comments is only populated by getPost — feed queries leave it
+    // unresolved so they don't fan out to the comments collection
+    comments: post._populatedComments
+      ? post._populatedComments.map(projectComment)
+      : null,
   };
 };
+
+/**
+ * Project a Comment document into GraphQL shape.
+ */
+const projectComment = (comment) => ({
+  ...comment._doc,
+  _id: comment._id.toString(),
+  post: comment.post.toString ? comment.post.toString() : comment.post,
+  createdAt: comment.createdAt.toISOString(),
+  updatedAt: comment.updatedAt.toISOString(),
+});
 
 /**
  * Project a User document into GraphQL shape. Handles missing
@@ -181,6 +199,13 @@ module.exports = {
     const post = await Post.findById(id).populate('creator');
     if (!post) throw new Error('No post found!');
 
+    // Fetch comments separately (chronological — oldest first reads
+    // like a conversation) and attach to the post for projection.
+    const comments = await Comment.find({ post: post._id })
+      .sort({ createdAt: 1 })
+      .populate('author');
+    post._populatedComments = comments;
+
     return projectPost(post, req.userId);
   },
 
@@ -241,6 +266,9 @@ module.exports = {
       cloudinary.uploader.destroy(match[1]).catch(console.error);
     }
     await Post.findByIdAndDelete(id);
+
+    // Cascade-delete the post's comments so we don't leak orphans.
+    await Comment.deleteMany({ post: id });
 
     const user = await User.findById(req.userId);
     user.posts.pull(id);
@@ -355,5 +383,71 @@ module.exports = {
 
     if (!post) throw new Error('No post found!');
     return projectPost(post, req.userId);
+  },
+
+  /**
+   * Add a comment to a post.
+   * Validates content, creates a Comment doc, atomically bumps the
+   * denormalised commentCount on the parent Post.
+   */
+  addComment: async function ({ postId, content }, req) {
+    if (!req.isAuth) throw new Error('Not authenticated!');
+
+    const trimmed = (content || '').trim();
+    if (!trimmed) {
+      const err = new Error('Comment cannot be empty.');
+      err.code = 422;
+      throw err;
+    }
+    if (trimmed.length > 2000) {
+      const err = new Error('Comment is too long (max 2000 chars).');
+      err.code = 422;
+      throw err;
+    }
+
+    // Make sure the post exists before we create an orphaned comment
+    const post = await Post.findById(postId);
+    if (!post) {
+      const err = new Error('No post found.');
+      err.code = 404;
+      throw err;
+    }
+
+    const comment = await Comment.create({
+      content: trimmed,
+      author: req.userId,
+      post: postId,
+    });
+
+    // Atomically increment the denormalised counter on the parent
+    await Post.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
+
+    await comment.populate('author');
+    return projectComment(comment);
+  },
+
+  /**
+   * Delete a comment. Only the author can delete their own comment.
+   */
+  deleteComment: async function ({ id }, req) {
+    if (!req.isAuth) throw new Error('Not authenticated!');
+
+    const comment = await Comment.findById(id);
+    if (!comment) {
+      const err = new Error('Comment not found.');
+      err.code = 404;
+      throw err;
+    }
+    if (comment.author.toString() !== req.userId.toString()) {
+      const err = new Error('Not authorized!');
+      err.code = 403;
+      throw err;
+    }
+
+    await Comment.deleteOne({ _id: id });
+    // Decrement counter; clamp to 0 via the model's `min` constraint
+    await Post.updateOne({ _id: comment.post }, { $inc: { commentCount: -1 } });
+
+    return true;
   },
 };
