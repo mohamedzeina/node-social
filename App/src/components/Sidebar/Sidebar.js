@@ -55,7 +55,7 @@ const Sidebar = ({ currentUser, postCount, postsLoading }) => {
   const profileLink = currentUser._id ? `/u/${currentUser._id}` : null;
 
   const navItems = [
-    { id: 'home',   label: 'Home',          icon: '⌂', link: '/', active: true },
+    { id: 'home',   label: 'Home',          icon: '⌂', link: '/' },
     { id: 'saved',  label: 'Saved',         icon: '✦', soon: true },
     { id: 'notifs', label: 'Notifications', icon: '◔', soon: true },
   ];
@@ -100,7 +100,8 @@ const Sidebar = ({ currentUser, postCount, postsLoading }) => {
                 <NavLink
                   to={item.link}
                   exact
-                  className={['sidebar__link', item.active ? 'is-active' : ''].join(' ')}
+                  className="sidebar__link"
+                  activeClassName="is-active"
                 >
                   <span className="sidebar__link-icon" aria-hidden="true">{item.icon}</span>
                   <span className="sidebar__link-label">{item.label}</span>
