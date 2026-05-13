@@ -145,3 +145,10 @@ a:focus-visible {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+@keyframes like-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}

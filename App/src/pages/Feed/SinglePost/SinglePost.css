@@ -112,6 +112,55 @@
   white-space: pre-wrap;
 }
 
+/* ---- Footer (like row) ----------------------------- */
+.single-post__footer {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.single-post__like {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: transparent;
+  border: 1px solid var(--hairline-strong);
+  cursor: pointer;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--r-pill);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  transition: background 0.16s var(--ease-out),
+              color 0.16s var(--ease-out),
+              border-color 0.16s var(--ease-out),
+              transform 0.12s var(--ease-out);
+}
+.single-post__like:hover {
+  background: var(--heart-soft);
+  color: var(--heart);
+  border-color: var(--heart);
+}
+.single-post__like:active { transform: scale(0.97); }
+.single-post__like.is-liked {
+  background: var(--heart-soft);
+  color: var(--heart);
+  border-color: var(--heart);
+}
+.single-post__like.is-liked .single-post__like-icon {
+  animation: like-pop 0.32s var(--ease-out);
+}
+.single-post__like.is-pending { opacity: 0.7; }
+
+.single-post__like-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
 @media (min-width: 768px) {
   .single-post__card {
     padding: 1.75rem 2rem 2rem;

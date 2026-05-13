@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import Image from '../../../components/Image/Image';
 import './SinglePost.css';
 
+const API_URL = 'https://node-social-zmra.onrender.com/graphql';
+
 class SinglePost extends Component {
   state = {
     title: '',
@@ -12,6 +14,9 @@ class SinglePost extends Component {
     image: '',
     content: '',
     loading: true,
+    liked: false,
+    likeCount: 0,
+    likePending: false,
   };
 
   componentDidMount() {
@@ -25,12 +30,14 @@ class SinglePost extends Component {
           creator { name }
           imageUrl
           createdAt
+          likeCount
+          likedByMe
         }
       }
       `,
       variables: { postId },
     };
-    fetch('https://node-social-zmra.onrender.com/graphql', {
+    fetch(API_URL, {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + this.props.token,
@@ -52,6 +59,8 @@ class SinglePost extends Component {
             month: 'long', day: 'numeric', year: 'numeric',
           }),
           content: resData.data.getPost.content,
+          liked: resData.data.getPost.likedByMe,
+          likeCount: resData.data.getPost.likeCount,
           loading: false,
         });
       })
@@ -61,8 +70,45 @@ class SinglePost extends Component {
       });
   }
 
+  toggleLike = async () => {
+    if (this.state.likePending || !this.props.token) return;
+    const postId = this.props.match.params.postId;
+    const nextLiked = !this.state.liked;
+    const prevCount = this.state.likeCount;
+    const nextCount = prevCount + (nextLiked ? 1 : -1);
+
+    this.setState({ liked: nextLiked, likeCount: nextCount, likePending: true });
+
+    const mutation = nextLiked ? 'likePost' : 'unlikePost';
+    const query = {
+      query: `mutation L($id: ID!) { ${mutation}(id: $id) { _id likeCount likedByMe } }`,
+      variables: { id: postId },
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + this.props.token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(query),
+      });
+      const data = await res.json();
+      if (data.errors) throw new Error(data.errors[0].message);
+      const fresh = data.data[mutation];
+      this.setState({ liked: fresh.likedByMe, likeCount: fresh.likeCount });
+    } catch (err) {
+      this.setState({ liked: !nextLiked, likeCount: prevCount });
+      console.error('Like toggle failed', err);
+    } finally {
+      this.setState({ likePending: false });
+    }
+  };
+
   render() {
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
+    const { liked, likeCount, likePending } = this.state;
 
     return (
       <article className="single-post">
@@ -90,6 +136,28 @@ class SinglePost extends Component {
           <div className="single-post__content">
             {this.state.content}
           </div>
+
+          <footer className="single-post__footer">
+            <button
+              type="button"
+              className={[
+                'single-post__like',
+                liked ? 'is-liked' : '',
+                likePending ? 'is-pending' : '',
+              ].join(' ')}
+              onClick={this.toggleLike}
+              aria-pressed={liked}
+            >
+              <span className="single-post__like-icon" aria-hidden="true">
+                {liked ? '♥' : '♡'}
+              </span>
+              <span>
+                {likeCount > 0
+                  ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
+                  : 'Be the first to like this'}
+              </span>
+            </button>
+          </footer>
         </div>
       </article>
     );
