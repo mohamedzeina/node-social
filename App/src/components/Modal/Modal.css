@@ -1,40 +1,120 @@
+/* ============================================================
+   Modal — "Editor's desk" overlay
+   Sheet of newsprint with corner ticks and a double rule
+   ============================================================ */
+
 .modal {
   position: fixed;
-  width: 90%;
-  left: 5%;
-  top: 20vh;
-  background: white;
-  border-radius: 5px;
-  z-index: 200;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  width: calc(100% - 2rem);
+  max-width: 42rem;
+  left: 50%;
+  top: 12vh;
+  transform: translateX(-50%);
+  z-index: 300;
+
+  background: var(--paper);
+  color: var(--ink);
+  padding: 1.5rem 1.5rem 1rem;
+
+  border: 1px solid var(--ink);
+  box-shadow:
+    8px 8px 0 var(--ink),
+    8px 8px 0 0.5px var(--vermilion),
+    0 30px 80px -20px rgba(22,19,16,0.45);
+
+  animation: modal-rise 0.32s cubic-bezier(0.2, 0.7, 0.2, 1);
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
+@keyframes modal-rise {
+  0%   { opacity: 0; transform: translate(-50%, 16px); }
+  100% { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Corner ticks — register marks like a print plate */
+.modal__corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+.modal__corner::before,
+.modal__corner::after {
+  content: "";
+  position: absolute;
+  background: var(--vermilion);
+}
+.modal__corner::before { width: 100%; height: 1px; }
+.modal__corner::after  { width: 1px;  height: 100%; }
+
+.modal__corner--tl { top: 8px;    left: 8px; }
+.modal__corner--tl::before { top: 0;    left: 0; }
+.modal__corner--tl::after  { top: 0;    left: 0; }
+
+.modal__corner--tr { top: 8px;    right: 8px; }
+.modal__corner--tr::before { top: 0;    right: 0; }
+.modal__corner--tr::after  { top: 0;    right: 0; }
+
+.modal__corner--bl { bottom: 8px; left: 8px; }
+.modal__corner--bl::before { bottom: 0; left: 0; }
+.modal__corner--bl::after  { bottom: 0; left: 0; }
+
+.modal__corner--br { bottom: 8px; right: 8px; }
+.modal__corner--br::before { bottom: 0; right: 0; }
+.modal__corner--br::after  { bottom: 0; right: 0; }
+
+/* Header */
 .modal__header {
-  border-bottom: 2px solid #3b0062;
+  padding: 0.25rem 0.5rem 0.5rem;
+  position: relative;
 }
 
-.modal__header h1 {
-  font-size: 1.5rem;
-  color: #3b0062;
-  margin: 1rem;
+.modal__eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--vermilion);
+  margin-bottom: 0.6rem;
+}
+
+.modal__title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.0;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.modal__rule {
+  margin-top: 1rem;
+  height: 0;
+  border-top: 3px double var(--ink);
 }
 
 .modal__content {
-  padding: 1rem;
+  padding: 1rem 0.5rem;
 }
 
 .modal__actions {
-  padding: 1rem;
-  text-align: right;
-}
-
-.modal__actions button {
-  margin: 0 0.5rem;
+  padding: 1rem 0.5rem 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  border-top: 1px solid var(--paper-edge);
+  margin-top: 0.5rem;
 }
 
 @media (min-width: 768px) {
   .modal {
-    width: 40rem;
-    left: calc((100% - 40rem) / 2);
+    top: 10vh;
+    padding: 2rem 2rem 1.25rem;
   }
+  .modal__title { font-size: 2.5rem; }
 }
