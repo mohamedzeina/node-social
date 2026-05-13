@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import MobileToggle from '../MobileToggle/MobileToggle';
 import Logo from '../../Logo/Logo';
 import NavigationItems from '../NavigationItems/NavigationItems';
+import UserMenu from '../UserMenu/UserMenu';
 
 import './MainNavigation.css';
 
@@ -17,9 +18,13 @@ const mainNavigation = props => (
 
     <div className="main-nav__spacer" />
 
-    <ul className="main-nav__items">
-      <NavigationItems isAuth={props.isAuth} onLogout={props.onLogout} />
-    </ul>
+    {props.isAuth ? (
+      <UserMenu currentUser={props.currentUser} onLogout={props.onLogout} />
+    ) : (
+      <ul className="main-nav__items">
+        <NavigationItems isAuth={props.isAuth} onLogout={props.onLogout} />
+      </ul>
+    )}
   </nav>
 );
 
