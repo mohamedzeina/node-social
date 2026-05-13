@@ -6,9 +6,9 @@ import FilePicker from '../../components/Form/Input/FilePicker';
 import Button from '../../components/Button/Button';
 import { required, length, email } from '../../util/validators';
 import { generateBase64FromImage, validateImageFile } from '../../util/image';
+import Auth from './Auth';
 
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
-import Auth from './Auth';
 
 class Signup extends Component {
   state = {
