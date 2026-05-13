@@ -95,13 +95,13 @@ const Post = props => {
         )}
       </header>
 
-      <Link to={'/' + props.id} className="post__body">
+      <Link to={'/p/' + props.id} className="post__body">
         <h2 className="post__title">{props.title}</h2>
         <p className="post__content">{props.content}</p>
       </Link>
 
       {props.image && (
-        <Link to={'/' + props.id} className="post__image">
+        <Link to={'/p/' + props.id} className="post__image">
           <Image imageUrl={props.image} />
         </Link>
       )}
@@ -124,7 +124,7 @@ const Post = props => {
           <span>{count > 0 ? count : 'Like'}</span>
         </button>
 
-        <Link to={'/' + props.id} className="post__action">
+        <Link to={'/p/' + props.id} className="post__action">
           <span className="post__action-icon" aria-hidden="true">💬</span>
           <span>Reply</span>
         </Link>
@@ -135,7 +135,7 @@ const Post = props => {
             if (navigator.share) {
               navigator.share({
                 title: props.title,
-                url: window.location.origin + '/' + props.id,
+                url: window.location.origin + '/p/' + props.id,
               }).catch(() => {});
             }
           }}

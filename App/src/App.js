@@ -261,7 +261,7 @@ class App extends Component {
             )}
           />
           <Route
-            path="/:postId"
+            path="/p/:postId"
             render={(props) => (
               <SinglePostPage
                 {...props}
