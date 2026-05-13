@@ -10,27 +10,141 @@
 }
 
 /* ============================================================
-   Modal variant — Facebook-style overlay when opened from the feed
+   Modal — "reader's room" surface
+   ------------------------------------------------------------
+   A purpose-built modal layout distinct from the page view:
+   sticky topbar (always-visible context), scrollable body
+   (post + thread), sticky composer dock (always one click away).
+   Built as a flex column inside a centered shell so the scroll
+   stays contained and the user never loses orientation.
    ============================================================ */
 
 .single-post-modal {
   position: fixed;
   inset: 0;
   z-index: 280;       /* above Backdrop (200) but below tooltips */
-  overflow-y: auto;
-  padding: 3rem 1rem 5rem;
+  display: flex;
+  align-items: flex-end;     /* mobile: dock to bottom edge */
+  justify-content: center;
+  padding: 1.5rem 0 0;
   -webkit-overflow-scrolling: touch;
-  animation: fade-up 0.3s var(--ease-out);
+  animation: modal-fade-in 0.22s var(--ease-out);
 }
 
-/* Close button — anchored to the top-right of the card itself (modal only) */
-.single-post__close {
-  position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
-  z-index: 2;
-  width: 2rem;
-  height: 2rem;
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (min-width: 640px) {
+  .single-post-modal {
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+}
+
+/* The shell — three-region flex column with hard rounded edges
+   and a deliberate shadow. Stops click propagation so backdrop
+   clicks (which travel up to .single-post-modal) close the modal
+   while clicks inside don't. */
+.single-post-modal__shell {
+  width: 100%;
+  max-width: 40rem;
+  max-height: calc(100vh - 1.5rem);
+  background: var(--surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;            /* clip the rounded corners on inner regions */
+  animation: modal-rise 0.32s var(--ease-out);
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .single-post-modal__shell {
+    max-height: calc(100vh - 4rem);
+    border-radius: var(--r-xl);
+  }
+}
+
+@keyframes modal-rise {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ---- Sticky topbar — author identity + close X ----------- */
+
+.single-post-modal__topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 0.95rem 0.85rem 1.05rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.single-post-modal__topbar-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--clay), var(--gold));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  text-decoration: none;
+  transition: transform 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
+}
+.single-post-modal__topbar-avatar img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+a.single-post-modal__topbar-avatar:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 3px var(--clay-soft);
+}
+
+.single-post-modal__topbar-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.single-post-modal__topbar-name {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.14s var(--ease-out);
+}
+a.single-post-modal__topbar-name:hover { color: var(--clay); }
+
+.single-post-modal__topbar-date {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.1rem;
+}
+
+.single-post-modal__topbar-close {
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 50%;
   border: 0;
   background: var(--surface-2);
@@ -39,31 +153,157 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
   transition:
     background 0.16s var(--ease-out),
     color 0.16s var(--ease-out),
     transform 0.12s var(--ease-out);
 }
-.single-post__close:hover {
+.single-post-modal__topbar-close:hover {
   background: var(--ink);
   color: #fff;
 }
-.single-post__close:active { transform: scale(0.92); }
+.single-post-modal__topbar-close:active { transform: scale(0.92); }
 
-.single-post--modal { animation: fade-up 0.35s var(--ease-out); }
-.single-post--modal .single-post__card {
-  box-shadow: var(--shadow-lg);
-  position: relative;          /* anchor for .single-post__close */
+/* ---- Scrollable body ------------------------------------- */
+
+.single-post-modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem 1.25rem 1rem;
+  /* Custom scrollbar inherits from index.css ::-webkit-scrollbar rules */
 }
 
-@media (min-width: 768px) {
-  .single-post-modal {
-    padding: 3.5rem 2rem 5rem;
+@media (min-width: 640px) {
+  .single-post-modal__body {
+    padding: 1.5rem 1.75rem 1.25rem;
   }
-  .single-post__close {
-    top: 1rem;
-    right: 1rem;
+}
+
+.single-post-modal__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);  /* tighter than page title */
+  line-height: 1.18;
+  letter-spacing: -0.022em;
+  margin: 0 0 1.1rem;
+  color: var(--ink);
+}
+
+/* Image is CONTAINED in the body (not full-bleed like page view).
+   Rounded + soft frame so it reads as part of the conversation,
+   not a banner that dominates. */
+.single-post-modal__image {
+  margin: 0 0 1.2rem;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-2);
+  height: 17rem;
+  position: relative;
+  border: 1px solid var(--hairline);
+}
+.single-post-modal__image .image {
+  background-size: cover;
+  background-position: center;
+}
+@media (min-width: 640px) {
+  .single-post-modal__image { height: 20rem; }
+}
+
+.single-post-modal__content {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.62;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  margin: 0 0 1.5rem;
+}
+
+.single-post-modal__like-row {
+  margin: 0 0 1.4rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  align-items: center;
+}
+
+/* Comments section inside modal — no composer here (it lives in
+   the sticky dock below). Just head + list. */
+.single-post-modal__comments {
+  padding-top: 0.1rem;
+}
+
+.single-post-modal__comments-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+
+.single-post-modal__comments-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.single-post-modal__comments-count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--r-pill);
+  font-variant-numeric: tabular-nums;
+}
+
+.single-post-modal__comments-empty {
+  margin: 0.5rem 0 0;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--r-md);
+}
+.single-post-modal__comments-empty p {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 0.92rem;
+}
+
+/* ---- Sticky composer dock — always one click away ------- */
+
+.single-post-modal__composer-dock {
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  /* Subtle lift shadow so the dock visually "floats" above the scroll */
+  box-shadow: 0 -2px 8px -6px rgba(42, 33, 27, 0.12);
+}
+
+@media (min-width: 640px) {
+  .single-post-modal__composer-dock {
+    padding: 0.85rem 1.25rem;
   }
+}
+
+/* Reset the composer's own padding/border since the dock owns those */
+.single-post-modal__composer-dock .comment-composer {
+  padding: 0;
+  border-top: 0;
 }
 
 .single-post__back {

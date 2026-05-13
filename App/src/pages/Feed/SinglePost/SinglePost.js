@@ -7,10 +7,25 @@ import Sidebar from '../../../components/Sidebar/Sidebar';
 import Comment from '../../../components/Comment/Comment';
 import CommentComposer from '../../../components/Comment/CommentComposer';
 import ErrorHandler from '../../../components/ErrorHandler/ErrorHandler';
-import { Close } from '../../../components/Icons/Icons';
+import { Close, Heart, HeartFilled } from '../../../components/Icons/Icons';
 import './SinglePost.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
+
+const formatRelativeDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (seconds < 45) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
 
 class SinglePost extends Component {
   state = {
@@ -19,6 +34,7 @@ class SinglePost extends Component {
     authorAvatar: null,
     authorId: null,
     date: '',
+    createdAt: null,
     image: '',
     content: '',
     loading: true,
@@ -28,6 +44,8 @@ class SinglePost extends Component {
     comments: [],
     error: null,
   };
+
+  modalBodyRef = React.createRef();
 
   componentDidMount() {
     if (this.props.asModal) {
@@ -82,6 +100,7 @@ class SinglePost extends Component {
           authorAvatar: resData.data.getPost.creator.avatarUrl,
           authorId: resData.data.getPost.creator._id,
           image: resData.data.getPost.imageUrl,
+          createdAt: resData.data.getPost.createdAt,
           date: new Date(resData.data.getPost.createdAt).toLocaleDateString('en-US', {
             month: 'long', day: 'numeric', year: 'numeric',
           }),
@@ -171,6 +190,16 @@ class SinglePost extends Component {
       __pending: true,
     };
     this.setState((prev) => ({ comments: [...prev.comments, optimistic] }));
+
+    // In modal mode, top-level comments land at the bottom of the list —
+    // which sits just above the sticky composer dock. Scroll the body so
+    // the new comment is in view next to the dock the user just typed in.
+    if (this.props.asModal && !parentId && this.modalBodyRef.current) {
+      requestAnimationFrame(() => {
+        const el = this.modalBodyRef.current;
+        if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      });
+    }
 
     const query = {
       query: `
@@ -311,19 +340,8 @@ class SinglePost extends Component {
   // ---------- Helpers for the inner content (shared by page + modal) ----------
 
   renderSkeletonCard() {
-    const isModal = !!this.props.asModal;
     return (
       <div className="single-post__card">
-        {isModal && (
-          <button
-            type="button"
-            className="single-post__close"
-            onClick={this.props.onClose}
-            aria-label="Close"
-          >
-            <Close size={16} />
-          </button>
-        )}
         <header className="single-post__header">
           <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
           <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
@@ -389,7 +407,6 @@ class SinglePost extends Component {
   renderCard() {
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
     const { liked, likeCount, likePending } = this.state;
-    const isModal = !!this.props.asModal;
 
     // Build the comment tree from the flat list.
     const byId = new Map();
@@ -408,16 +425,6 @@ class SinglePost extends Component {
 
     return (
       <div className="single-post__card">
-        {isModal && (
-          <button
-            type="button"
-            className="single-post__close"
-            onClick={this.props.onClose}
-            aria-label="Close"
-          >
-            <Close size={16} />
-          </button>
-        )}
         <header className="single-post__header">
           {this.state.authorId ? (
             <Link
@@ -474,7 +481,7 @@ class SinglePost extends Component {
             aria-pressed={liked}
           >
             <span className="single-post__like-icon" aria-hidden="true">
-              {liked ? '♥' : '♡'}
+              {liked ? <HeartFilled size={18} /> : <Heart size={18} />}
             </span>
             <span>
               {likeCount > 0
@@ -522,28 +529,256 @@ class SinglePost extends Component {
     );
   }
 
+  /**
+   * Modal — a dedicated "reader's room" surface, distinct from the
+   * page view. Three regions inside a flex-column shell:
+   *   1. Sticky topbar — avatar + name + relative date + close X.
+   *      Always visible so you never lose context as you scroll.
+   *   2. Scrollable body — title, image, content, like row, comments.
+   *      Owns the scroll; the rest of the shell stays put.
+   *   3. Sticky composer dock — CommentComposer always one click away
+   *      regardless of how long the post or thread is.
+   * Clicks on the shell itself stop propagation so only clicks on the
+   * surrounding empty space close the modal.
+   */
+  renderModal() {
+    const { loading, liked, likeCount, likePending } = this.state;
+    const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
+
+    // Build the comment tree (same algorithm as renderCard)
+    const byId = new Map();
+    for (const c of this.state.comments) {
+      byId.set(c._id, { ...c, replies: [] });
+    }
+    const roots = [];
+    for (const node of byId.values()) {
+      if (node.parent && byId.has(node.parent)) {
+        byId.get(node.parent).replies.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+    const total = this.state.comments.length;
+
+    return (
+      <div
+        className="single-post-modal"
+        role="dialog"
+        aria-modal="true"
+        onClick={this.handleBackdropClick}
+      >
+        <div
+          className="single-post-modal__shell"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
+
+          {/* ===== Sticky topbar — always-visible context ===== */}
+          <header className="single-post-modal__topbar">
+            {loading ? (
+              <>
+                <Skeleton variant="circle" width="2.2rem" height="2.2rem" />
+                <div className="single-post-modal__topbar-meta">
+                  <Skeleton variant="text" width="7rem" height="0.95rem" />
+                  <div style={{ height: '0.2rem' }} />
+                  <Skeleton variant="text" width="4rem" height="0.7rem" />
+                </div>
+              </>
+            ) : (
+              <>
+                {this.state.authorId ? (
+                  <Link
+                    to={`/u/${this.state.authorId}`}
+                    className="single-post-modal__topbar-avatar"
+                    aria-label={`View ${this.state.author}'s profile`}
+                  >
+                    {this.state.authorAvatar ? (
+                      <img src={this.state.authorAvatar} alt="" />
+                    ) : (
+                      <span>{initial}</span>
+                    )}
+                  </Link>
+                ) : (
+                  <div className="single-post-modal__topbar-avatar" aria-hidden="true">
+                    {this.state.authorAvatar ? (
+                      <img src={this.state.authorAvatar} alt="" />
+                    ) : (
+                      <span>{initial}</span>
+                    )}
+                  </div>
+                )}
+                <div className="single-post-modal__topbar-meta">
+                  {this.state.authorId ? (
+                    <Link
+                      to={`/u/${this.state.authorId}`}
+                      className="single-post-modal__topbar-name"
+                    >
+                      {this.state.author}
+                    </Link>
+                  ) : (
+                    <span className="single-post-modal__topbar-name">
+                      {this.state.author}
+                    </span>
+                  )}
+                  <span
+                    className="single-post-modal__topbar-date"
+                    title={this.state.date}
+                  >
+                    {formatRelativeDate(this.state.createdAt)}
+                  </span>
+                </div>
+              </>
+            )}
+            <button
+              type="button"
+              className="single-post-modal__topbar-close"
+              onClick={this.props.onClose}
+              aria-label="Close"
+            >
+              <Close size={16} />
+            </button>
+          </header>
+
+          {/* ===== Scrollable body ===== */}
+          <div
+            className="single-post-modal__body"
+            ref={this.modalBodyRef}
+            aria-busy={loading || undefined}
+          >
+            {loading ? (
+              <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <Skeleton variant="text" width="70%" height="1.8rem" />
+                  <Skeleton variant="text" width="48%" height="1.8rem" />
+                </div>
+                <div className="single-post-modal__image">
+                  <Skeleton width="100%" height="100%" radius={0} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
+                  <Skeleton variant="text" width="98%" />
+                  <Skeleton variant="text" width="94%" />
+                  <Skeleton variant="text" width="100%" />
+                  <Skeleton variant="text" width="72%" />
+                </div>
+                <div className="single-post-modal__like-row">
+                  <Skeleton width="9rem" height="2.5rem" radius="999px" />
+                </div>
+                <section className="single-post-modal__comments" aria-label="Comments loading">
+                  <div className="single-post-modal__comments-head">
+                    <Skeleton variant="text" width="5rem" height="1.05rem" />
+                    <Skeleton width="4rem" height="1.4rem" radius="999px" />
+                  </div>
+                  <ul className="single-post__comments-list">
+                    {[0, 1, 2].map((i) => (
+                      <li key={i}>
+                        <div className="comment" aria-busy="true">
+                          <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
+                          <div className="comment__column">
+                            <div className="comment__bubble">
+                              <div className="comment__head" style={{ width: '100%' }}>
+                                <Skeleton variant="text" width={`${30 + i * 8}%`} height="0.85rem" />
+                                <Skeleton variant="text" width="2.5rem" height="0.75rem" />
+                              </div>
+                              <Skeleton variant="text" width="100%" />
+                              <div style={{ height: '0.3rem' }} />
+                              <Skeleton variant="text" width={`${68 + i * 6}%`} />
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </>
+            ) : (
+              <>
+                <h1 className="single-post-modal__title">{this.state.title}</h1>
+
+                {this.state.image && (
+                  <div className="single-post-modal__image">
+                    <Image contain imageUrl={this.state.image} />
+                  </div>
+                )}
+
+                <div className="single-post-modal__content">{this.state.content}</div>
+
+                <div className="single-post-modal__like-row">
+                  <button
+                    type="button"
+                    className={[
+                      'single-post__like',
+                      liked ? 'is-liked' : '',
+                      likePending ? 'is-pending' : '',
+                    ].join(' ')}
+                    onClick={this.toggleLike}
+                    aria-pressed={liked}
+                  >
+                    <span className="single-post__like-icon" aria-hidden="true">
+                      {liked ? <HeartFilled size={18} /> : <Heart size={18} />}
+                    </span>
+                    <span>
+                      {likeCount > 0
+                        ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
+                        : 'Be the first to like this'}
+                    </span>
+                  </button>
+                </div>
+
+                <section className="single-post-modal__comments" aria-label="Comments">
+                  <div className="single-post-modal__comments-head">
+                    <h2 className="single-post-modal__comments-title">Comments</h2>
+                    <span className="single-post-modal__comments-count">
+                      {total} {total === 1 ? 'reply' : 'replies'}
+                    </span>
+                  </div>
+
+                  {roots.length === 0 ? (
+                    <div className="single-post-modal__comments-empty">
+                      <p>No replies yet. Start the conversation below.</p>
+                    </div>
+                  ) : (
+                    <ul className="single-post__comments-list">
+                      {roots.map((c) => (
+                        <li key={c.clientId || c._id}>
+                          <Comment
+                            comment={c}
+                            depth={0}
+                            viewerId={this.props.userId}
+                            currentUser={this.props.currentUser}
+                            onAddReply={this.addComment}
+                            onDelete={this.deleteComment}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              </>
+            )}
+          </div>
+
+          {/* ===== Sticky composer dock — always one click away ===== */}
+          <div className="single-post-modal__composer-dock">
+            <CommentComposer
+              currentUser={this.props.currentUser}
+              onSubmit={(text) => this.addComment(null, text)}
+              placeholder="Write a comment…"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const { loading } = this.state;
-    const inner = loading ? this.renderSkeletonCard() : this.renderCard();
 
-    // ---- Modal mode (opened from feed / profile) ----
     if (this.props.asModal) {
-      return (
-        <div
-          className="single-post-modal"
-          role="dialog"
-          aria-modal="true"
-          onClick={this.handleBackdropClick}
-        >
-          <article className="single-post single-post--modal">
-            <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
-            {inner}
-          </article>
-        </div>
-      );
+      return this.renderModal();
     }
 
     // ---- Page mode (direct URL / refresh) ----
+    const inner = loading ? this.renderSkeletonCard() : this.renderCard();
     return (
       <div className="app-page">
         <div className="app-page__sidebar">
