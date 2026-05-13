@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
 import Post from '../../components/Feed/Post/Post';
-import Loader from '../../components/Loader/Loader';
+import Skeleton from '../../components/Skeleton/Skeleton';
+import PostSkeleton from '../../components/Skeleton/PostSkeleton';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import './Profile.css';
 
@@ -102,10 +103,40 @@ class Profile extends Component {
 
     if (loading) {
       return (
-        <div className="profile profile--loading">
-          <div className="profile__loader">
-            <Loader />
+        <div className="profile">
+          {/* Back link slot kept stable so the page doesn't jump on load */}
+          <div className="profile__back-skeleton">
+            <Skeleton width="5rem" height="1.6rem" radius="999px" />
           </div>
+
+          <header className="profile__hero profile__hero--skeleton">
+            <span className="profile__accent" aria-hidden="true" />
+            <div className="profile__hero-top">
+              <Skeleton variant="circle" width="5rem" height="5rem" />
+              <div className="profile__identity">
+                <Skeleton variant="text" width="55%" height="1.8rem" />
+                <div style={{ height: '0.5rem' }} />
+                <Skeleton variant="text" width="85%" />
+              </div>
+              <Skeleton width="6.5rem" height="2.25rem" radius="999px" />
+            </div>
+            <div className="profile__stats">
+              <Skeleton width="3.5rem" height="2.25rem" />
+              <div className="profile__stat-sep" aria-hidden="true" />
+              <Skeleton width="4rem" height="2.25rem" />
+              <div className="profile__stat-sep" aria-hidden="true" />
+              <Skeleton width="5rem" height="2.25rem" />
+            </div>
+          </header>
+
+          <section className="profile__posts">
+            <div className="profile__posts-header">
+              <Skeleton variant="text" width="6rem" height="1.4rem" />
+              <Skeleton width="5rem" height="1.6rem" radius="999px" />
+            </div>
+            <PostSkeleton />
+            <PostSkeleton />
+          </section>
         </div>
       );
     }

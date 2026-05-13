@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Post from '../../components/Feed/Post/Post';
 import FeedEdit from '../../components/Feed/FeedEdit/FeedEdit';
 import Paginator from '../../components/Paginator/Paginator';
-import Loader from '../../components/Loader/Loader';
+import PostSkeleton from '../../components/Skeleton/PostSkeleton';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import './Feed.css';
@@ -387,9 +387,10 @@ class Feed extends Component {
 
         <section className="feed">
           {this.state.postsLoading && (
-            <div className="feed__loader-wrap">
-              <Loader />
-            </div>
+            <>
+              <PostSkeleton />
+              <PostSkeleton />
+            </>
           )}
           {this.state.posts.length <= 0 && !this.state.postsLoading ? (
             <div className="feed__empty">

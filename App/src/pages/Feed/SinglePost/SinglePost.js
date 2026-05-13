@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
 import Image from '../../../components/Image/Image';
+import Skeleton from '../../../components/Skeleton/Skeleton';
 import './SinglePost.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
@@ -112,7 +113,43 @@ class SinglePost extends Component {
 
   render() {
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
-    const { liked, likeCount, likePending } = this.state;
+    const { liked, likeCount, likePending, loading } = this.state;
+
+    if (loading) {
+      return (
+        <article className="single-post">
+          <div className="single-post__back-skeleton">
+            <Skeleton width="5rem" height="1.6rem" radius="999px" />
+          </div>
+          <div className="single-post__card">
+            <header className="single-post__header">
+              <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
+              <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
+                <Skeleton variant="text" width="45%" />
+                <div style={{ height: '0.35rem' }} />
+                <Skeleton variant="text" width="30%" />
+              </div>
+            </header>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
+              <Skeleton variant="text" width="80%" height="2rem" />
+              <Skeleton variant="text" width="55%" height="2rem" />
+            </div>
+            <div className="single-post__image">
+              <Skeleton width="100%" height="100%" radius={0} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+              <Skeleton variant="text" width="98%" />
+              <Skeleton variant="text" width="94%" />
+              <Skeleton variant="text" width="100%" />
+              <Skeleton variant="text" width="72%" />
+            </div>
+            <footer className="single-post__footer">
+              <Skeleton width="9rem" height="2.5rem" radius="999px" />
+            </footer>
+          </div>
+        </article>
+      );
+    }
 
     return (
       <article className="single-post">

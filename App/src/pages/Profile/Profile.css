@@ -10,7 +10,6 @@
   animation: fade-up 0.4s var(--ease-out);
 }
 
-.profile--loading,
 .profile--empty {
   display: flex;
   align-items: center;
@@ -18,7 +17,11 @@
   min-height: 50vh;
 }
 
-.profile__loader { padding: 4rem 0; }
+.profile__back-skeleton {
+  margin-bottom: 0.75rem;
+}
+
+.profile__hero--skeleton .profile__hero::before { display: none; }
 
 .profile__not-found {
   text-align: center;

@@ -27,6 +27,10 @@
   color: var(--ink);
 }
 
+.single-post__back-skeleton {
+  margin-bottom: 0.75rem;
+}
+
 .single-post__card {
   background: var(--surface);
   border: 1px solid var(--hairline);
