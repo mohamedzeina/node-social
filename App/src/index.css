@@ -1,140 +1,114 @@
 /* ============================================================
-   Dispatches — a writing journal
-   Editorial / print-magazine aesthetic
+   Dispatches — design system v2
+   Warm-casual social-app aesthetic (Cohost/Tumblr energy)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:wght@400..700&display=swap');
 
 :root {
-  /* ---- Surfaces ---------------------------------------- */
-  --paper:           #F2ECDF;          /* main newsprint background */
-  --paper-deep:      #E8E1D1;          /* secondary, slightly darker */
-  --paper-shadow:    #D9D0BC;          /* edge of paper */
-  --paper-edge:      #C9BFA8;          /* hairlines */
+  /* ---- Surfaces -------------------------------------- */
+  --bg:              #FAF6EE;          /* warm cream, page background */
+  --surface:         #FFFFFF;          /* cards / inputs */
+  --surface-2:       #F1EADD;          /* subtle raised surface */
+  --surface-3:       #E8DECB;          /* deeper warm */
+  --hairline:        #E5DCC8;          /* very soft dividers */
+  --hairline-strong: #D2C6AB;
 
-  /* ---- Ink --------------------------------------------- */
-  --ink:             #161310;          /* primary text / heavy ink */
-  --ink-soft:        #2C2620;          /* secondary text */
-  --ink-faint:       #6B6358;          /* tertiary, metadata */
-  --ink-ghost:       #9C9485;          /* very subtle */
+  /* ---- Ink (warm, not pure black) -------------------- */
+  --ink:             #2A211B;          /* primary text */
+  --ink-2:           #4A3F36;          /* secondary */
+  --ink-3:           #7A6E5F;          /* tertiary, metadata */
+  --ink-4:           #B5A993;          /* muted, placeholders */
 
-  /* ---- Accents ----------------------------------------- */
-  --vermilion:       #B73225;          /* vintage editorial red */
-  --vermilion-deep:  #8E2418;
-  --vermilion-soft:  #D9776B;
-  --slate:           #1F2E3B;          /* deep editorial blue */
-  --moss:            #4A5A2E;          /* secondary accent */
-  --gold:            #B58A3B;          /* aged-gold for highlights */
+  /* ---- Accents --------------------------------------- */
+  --clay:            #C7572A;          /* primary accent — warm terracotta */
+  --clay-hover:      #B04920;
+  --clay-soft:       #F5E1D3;          /* tinted background of clay */
 
-  /* ---- Type ------------------------------------------- */
-  --font-display:    'Fraunces', 'Times New Roman', serif;
-  --font-body:       'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-mono:       'JetBrains Mono', 'Courier New', monospace;
+  --sage:            #6D8A66;          /* secondary accent — calm green */
+  --sage-soft:       #DDE4D5;
 
-  /* ---- Rhythm ----------------------------------------- */
-  --rule:            1px solid var(--ink);
-  --rule-soft:       1px solid var(--paper-edge);
-  --rule-double:     3px double var(--ink);
+  --heart:           #DB3050;          /* like / favourite */
+  --heart-soft:      #F8DCE0;
 
-  --shadow-press:    0 1px 0 var(--ink), 0 2px 0 var(--paper-shadow);
-  --shadow-lift:     0 8px 24px -12px rgba(22,19,16,.35), 0 2px 6px -2px rgba(22,19,16,.18);
+  --gold:            #D9A441;          /* warm highlight */
 
-  --radius-soft:     2px;
+  /* ---- Type ------------------------------------------ */
+  --font-display:    'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body:       'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono:       'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---- Shape ----------------------------------------- */
+  --r-xs:            6px;
+  --r-sm:            10px;
+  --r-md:            14px;
+  --r-lg:            20px;
+  --r-xl:            28px;
+  --r-pill:          999px;
+
+  /* ---- Shadows --------------------------------------- */
+  --shadow-sm:       0 1px 2px rgba(42, 33, 27, 0.06),
+                     0 2px 6px -2px rgba(42, 33, 27, 0.08);
+  --shadow-md:       0 2px 4px rgba(42, 33, 27, 0.06),
+                     0 8px 20px -6px rgba(42, 33, 27, 0.12);
+  --shadow-lg:       0 4px 8px rgba(42, 33, 27, 0.06),
+                     0 20px 50px -12px rgba(42, 33, 27, 0.22);
+  --shadow-press:    inset 0 2px 4px rgba(42, 33, 27, 0.12);
+
+  /* ---- Motion ---------------------------------------- */
+  --ease-out:        cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out:     cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+* { box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; }
 
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.55;
-  font-feature-settings: 'liga' 1, 'kern' 1, 'onum' 1;
+  font-feature-settings: 'kern' 1, 'ss01' 1;
 }
 
-/* Subtle newsprint grain — pure CSS, no images */
-body {
-  background-image:
-    radial-gradient(circle at 23% 18%, rgba(22,19,16,.018) 0 1px, transparent 1px),
-    radial-gradient(circle at 71% 62%, rgba(22,19,16,.022) 0 1px, transparent 1px),
-    radial-gradient(circle at 47% 89%, rgba(22,19,16,.015) 0 1px, transparent 1px),
-    radial-gradient(circle at 9%  53%, rgba(22,19,16,.020) 0 1px, transparent 1px);
-  background-size: 7px 7px, 11px 11px, 13px 13px, 17px 17px;
-  background-attachment: fixed;
-}
+/* selection: warm clay */
+::selection { background: var(--clay); color: #fff; }
 
-/* Selection — editorial red */
-::selection { background: var(--vermilion); color: var(--paper); }
-
-/* ---- Typography defaults ----------------------------- */
+/* ---- Type defaults --------------------------------- */
 h1, h2, h3, h4, h5 {
   font-family: var(--font-display);
-  font-weight: 500;
-  font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 1;
+  font-weight: 600;
   color: var(--ink);
   margin: 0;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
-h1 { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 600; }
-h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); }
-h3 { font-size: 1.3rem; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); }
+h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); }
+h3 { font-size: 1.2rem; }
 
 p {
   font-family: var(--font-body);
-  font-size: 1.0625rem;
-  line-height: 1.65;
-  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
 }
 
 a {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--vermilion);
-  transition: all .18s ease;
-}
-
-a:hover {
-  color: var(--vermilion);
-  text-decoration-thickness: 2px;
-}
-
-/* ---- Reusable utility classes ------------------------ */
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.dropcap::first-letter {
-  font-family: var(--font-display);
+  color: var(--clay);
+  text-decoration: none;
   font-weight: 600;
-  font-size: 4.2em;
-  float: left;
-  line-height: 0.86;
-  padding: 0.1em 0.12em 0 0;
-  color: var(--vermilion);
-  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  transition: color 0.18s var(--ease-out);
 }
+a:hover { color: var(--clay-hover); }
 
-.rule          { border: 0; border-top: var(--rule); margin: 1.5rem 0; }
-.rule--soft    { border-top: var(--rule-soft); }
-.rule--double  { border: 0; border-top: var(--rule-double); margin: 2rem 0; }
-
-/* ---- Form element resets ---------------------------- */
+/* ---- Form element resets -------------------------- */
 button, input, textarea, select {
   font-family: inherit;
   font-size: inherit;
@@ -145,28 +119,29 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--vermilion);
-  outline-offset: 3px;
+  outline: 2px solid var(--clay);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
 }
 
-/* ---- Scrollbar (subtle) ----------------------------- */
+/* ---- Scrollbar ------------------------------------- */
 ::-webkit-scrollbar           { width: 10px; height: 10px; }
-::-webkit-scrollbar-track     { background: var(--paper-deep); }
-::-webkit-scrollbar-thumb     { background: var(--ink-faint); border: 2px solid var(--paper-deep); }
-::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+::-webkit-scrollbar-track     { background: var(--bg); }
+::-webkit-scrollbar-thumb     { background: var(--hairline-strong); border-radius: var(--r-pill); border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
 
-/* ---- Keyframes shared across components ------------- */
-@keyframes dispatch-fade-up {
+/* ---- Shared keyframes ------------------------------ */
+@keyframes fade-up {
   0%   { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes dispatch-reveal {
-  0%   { clip-path: inset(0 100% 0 0); }
-  100% { clip-path: inset(0 0 0 0); }
+@keyframes pop {
+  0%   { transform: scale(0.94); opacity: 0; }
+  60%  { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); }
 }
 
-@keyframes dispatch-mark {
-  0%   { background-size: 0% 100%; }
-  100% { background-size: 100% 100%; }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
