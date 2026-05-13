@@ -169,55 +169,65 @@ const POSTS = [
 ];
 
 // Comments: post is the index into POSTS, author is index into USERS.
-// Ordered roughly oldest-first within each post so the seeded
-// timestamps don't all collide at the same millisecond.
+// Top-level comments have parent: null. Replies set parent to the
+// `id` of another comment in this list (resolved at insert time).
+// IDs only need to be unique within this array.
 const COMMENTS = [
   // Post 0 — Morning ritual (Maya)
-  { post: 0, author: 1, content: 'This is exactly why I bought a kettle that doesn’t beep.' },
-  { post: 0, author: 4, content: 'Same. The phone-less ten minutes is everything.' },
-  { post: 0, author: 5, content: 'Trying this tomorrow. Wish me luck.' },
+  { id: 'p0c1', post: 0, author: 1, content: 'This is exactly why I bought a kettle that doesn’t beep.' },
+  { id: 'p0c1a', post: 0, author: 0, parent: 'p0c1', content: 'Glad someone gets it. The beep is criminal.' },
+  { id: 'p0c2', post: 0, author: 4, content: 'Same. The phone-less ten minutes is everything.' },
+  { id: 'p0c3', post: 0, author: 5, content: 'Trying this tomorrow. Wish me luck.' },
+  { id: 'p0c3a', post: 0, author: 0, parent: 'p0c3', content: 'Good luck. Phone goes in the other room.' },
+  { id: 'p0c3b', post: 0, author: 5, parent: 'p0c3a', content: 'Update: I survived. Coffee was better too.' },
 
   // Post 1 — Seventeen miles (James)
-  { post: 1, author: 0, content: 'Where on the coast?? I want to do this trip.' },
-  { post: 1, author: 2, content: 'Crab rolls from a fold-out table is the dream.' },
-  { post: 1, author: 5, content: 'Seventeen miles is a serious day.' },
+  { id: 'p1c1', post: 1, author: 0, content: 'Where on the coast?? I want to do this trip.' },
+  { id: 'p1c1a', post: 1, author: 1, parent: 'p1c1', content: 'South coast, near the old lighthouse. I’ll text you the route.' },
+  { id: 'p1c2', post: 1, author: 2, content: 'Crab rolls from a fold-out table is the dream.' },
+  { id: 'p1c3', post: 1, author: 5, content: 'Seventeen miles is a serious day.' },
 
   // Post 2 — Piranesi (Aisha)
-  { post: 2, author: 0, content: 'If you liked Piranesi, try The Buried Giant.' },
-  { post: 2, author: 3, content: 'I rationed it. Ten pages a night.' },
-  { post: 2, author: 4, content: 'Susanna Clarke is a magician.' },
+  { id: 'p2c1', post: 2, author: 0, content: 'If you liked Piranesi, try The Buried Giant.' },
+  { id: 'p2c1a', post: 2, author: 2, parent: 'p2c1', content: 'Already on my shelf. Bumping it up.' },
+  { id: 'p2c2', post: 2, author: 3, content: 'I rationed it. Ten pages a night.' },
+  { id: 'p2c3', post: 2, author: 4, content: 'Susanna Clarke is a magician.' },
+  { id: 'p2c3a', post: 2, author: 3, parent: 'p2c3', content: 'Jonathan Strange & Mr Norrell is the same trick at novel-length.' },
+  { id: 'p2c3b', post: 2, author: 4, parent: 'p2c3a', content: 'A thousand pages of pure joy.' },
 
   // Post 3 — Small things compound (Oliver)
-  { post: 3, author: 0, content: 'Eight lines, ten times faster — favourite ratio.' },
-  { post: 3, author: 1, content: 'This is also true for photographs.' },
+  { id: 'p3c1', post: 3, author: 0, content: 'Eight lines, ten times faster — favourite ratio.' },
+  { id: 'p3c2', post: 3, author: 1, content: 'This is also true for photographs.' },
 
   // Post 4 — The basil survived (Sofia)
-  { post: 4, author: 2, content: 'Talking to plants is not as silly as people say.' },
-  { post: 4, author: 5, content: 'Mine is on its third life. We’re not friends.' },
-  { post: 4, author: 0, content: 'What variety? Genovese?' },
+  { id: 'p4c1', post: 4, author: 2, content: 'Talking to plants is not as silly as people say.' },
+  { id: 'p4c2', post: 4, author: 5, content: 'Mine is on its third life. We’re not friends.' },
+  { id: 'p4c2a', post: 4, author: 4, parent: 'p4c2', content: 'Take it to the kitchen window. Trust me.' },
+  { id: 'p4c3', post: 4, author: 0, content: 'What variety? Genovese?' },
+  { id: 'p4c3a', post: 4, author: 4, parent: 'p4c3', content: 'Genovese — best leaves for cooking.' },
 
   // Post 5 — First loaf (Noah)
-  { post: 5, author: 4, content: 'Dense crumb is just well-loved bread.' },
-  { post: 5, author: 3, content: 'Going darker on the bake is a good problem.' },
-  { post: 5, author: 1, content: 'Send me the recipe.' },
+  { id: 'p5c1', post: 5, author: 4, content: 'Dense crumb is just well-loved bread.' },
+  { id: 'p5c2', post: 5, author: 3, content: 'Going darker on the bake is a good problem.' },
+  { id: 'p5c3', post: 5, author: 1, content: 'Send me the recipe.' },
 
   // Post 6 — Espresso bar (Maya)
-  { post: 6, author: 1, content: 'Send me the canal, I’m coming.' },
-  { post: 6, author: 4, content: 'Three-seat bars are the only good bars.' },
+  { id: 'p6c1', post: 6, author: 1, content: 'Send me the canal, I’m coming.' },
+  { id: 'p6c2', post: 6, author: 4, content: 'Three-seat bars are the only good bars.' },
 
   // Post 7 — Light at 5pm (James)
-  { post: 7, author: 0, content: 'Stop, I’m crying at my desk.' },
-  { post: 7, author: 2, content: 'Long way home is the right way home.' },
-  { post: 7, author: 4, content: 'The “autumn film still” season.' },
+  { id: 'p7c1', post: 7, author: 0, content: 'Stop, I’m crying at my desk.' },
+  { id: 'p7c2', post: 7, author: 2, content: 'Long way home is the right way home.' },
+  { id: 'p7c3', post: 7, author: 4, content: 'The “autumn film still” season.' },
 
   // Post 8 — On rereading (Aisha)
-  { post: 8, author: 0, content: 'I reread Mrs. Dalloway every June.' },
-  { post: 8, author: 3, content: 'Yes. Skim once, read once.' },
+  { id: 'p8c1', post: 8, author: 0, content: 'I reread Mrs. Dalloway every June.' },
+  { id: 'p8c2', post: 8, author: 3, content: 'Yes. Skim once, read once.' },
 
   // Post 9 — Brutalist library (Sofia)
-  { post: 9, author: 2, content: 'Concrete + wood is always the move.' },
-  { post: 9, author: 1, content: 'I’d love to shoot this on film.' },
-  { post: 9, author: 0, content: 'Buildings AND people, well said.' },
+  { id: 'p9c1', post: 9, author: 2, content: 'Concrete + wood is always the move.' },
+  { id: 'p9c2', post: 9, author: 1, content: 'I’d love to shoot this on film.' },
+  { id: 'p9c3', post: 9, author: 0, content: 'Buildings AND people, well said.' },
 ];
 
 // --------------------------------------------------------------------
@@ -279,23 +289,31 @@ async function run() {
   console.log(`  ✓ ${totalLikes} likes distributed`);
 
   console.log('→ Creating comments …');
+  const commentIdMap = {};       // seed.id → real ObjectId
   const commentCountByPost = {};
   for (const c of COMMENTS) {
     const post = postDocs[c.post];
     const author = userDocs[c.author];
     if (!post || !author) continue;
-    await Comment.create({
+    const parentObjId = c.parent ? commentIdMap[c.parent] : null;
+    if (c.parent && !parentObjId) {
+      console.warn(`  ! parent '${c.parent}' not yet created for '${c.id}'`);
+    }
+    const doc = await Comment.create({
       content: c.content,
       author: author._id,
       post: post._id,
+      parent: parentObjId || null,
     });
+    if (c.id) commentIdMap[c.id] = doc._id;
     commentCountByPost[post._id] = (commentCountByPost[post._id] || 0) + 1;
   }
   // Update denormalised counters in bulk
   for (const [postId, count] of Object.entries(commentCountByPost)) {
     await Post.updateOne({ _id: postId }, { $set: { commentCount: count } });
   }
-  console.log(`  ✓ ${COMMENTS.length} comments distributed\n`);
+  const repliesCount = COMMENTS.filter((c) => c.parent).length;
+  console.log(`  ✓ ${COMMENTS.length} comments distributed (${repliesCount} replies)\n`);
 
   console.log('Done. Test accounts:');
   USERS.forEach((u) =>
