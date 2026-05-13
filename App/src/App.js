@@ -20,6 +20,7 @@ class App extends Component {
     isAuth: false,
     token: null,
     userId: null,
+    currentUser: null,        // { _id, name, avatarUrl, status }
     authLoading: false,
     error: null,
   };
@@ -38,8 +39,36 @@ class App extends Component {
     const remainingMilliseconds =
       new Date(expiryDate).getTime() - new Date().getTime();
     this.setState({ isAuth: true, token: token, userId: userId });
+    this.fetchCurrentUser(token);
     this.setAutoLogout(remainingMilliseconds);
   }
+
+  fetchCurrentUser = (token) => {
+    const graphqlQuery = {
+      query: '{ user { _id name avatarUrl status } }',
+    };
+    fetch('https://node-social-zmra.onrender.com/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(graphqlQuery),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.data && data.data.user) {
+          this.setState({ currentUser: data.data.user });
+        }
+      })
+      .catch((err) => console.error('Failed to load current user', err));
+  };
+
+  handleUserUpdated = (partial) => {
+    this.setState((prev) => ({
+      currentUser: prev.currentUser ? { ...prev.currentUser, ...partial } : partial,
+    }));
+  };
 
   mobileNavHandler = (isOpen) => {
     this.setState({ showMobileNav: isOpen, showBackdrop: isOpen });
@@ -50,7 +79,7 @@ class App extends Component {
   };
 
   logoutHandler = () => {
-    this.setState({ isAuth: false, token: null });
+    this.setState({ isAuth: false, token: null, currentUser: null });
     localStorage.removeItem('token');
     localStorage.removeItem('expiryDate');
     localStorage.removeItem('userId');
@@ -105,6 +134,7 @@ class App extends Component {
           new Date().getTime() + remainingMilliseconds
         );
         localStorage.setItem('expiryDate', expiryDate.toISOString());
+        this.fetchCurrentUser(resData.data.login.token);
         this.setAutoLogout(remainingMilliseconds);
       })
       .catch((err) => {
@@ -222,7 +252,12 @@ class App extends Component {
             path="/"
             exact
             render={(props) => (
-              <FeedPage userId={this.state.userId} token={this.state.token} />
+              <FeedPage
+                userId={this.state.userId}
+                token={this.state.token}
+                currentUser={this.state.currentUser}
+                onUserUpdated={this.handleUserUpdated}
+              />
             )}
           />
           <Route
@@ -252,6 +287,7 @@ class App extends Component {
                 onOpenMobileNav={this.mobileNavHandler.bind(this, true)}
                 onLogout={this.logoutHandler}
                 isAuth={this.state.isAuth}
+                currentUser={this.state.currentUser}
               />
             </Toolbar>
           }

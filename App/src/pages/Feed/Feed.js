@@ -16,55 +16,26 @@ class Feed extends Component {
     totalPosts: 0,
     editPost: null,
     status: '',
-    myName: '',
-    myAvatar: null,
     postPage: 1,
     postsLoading: true,
     editLoading: false,
   };
 
   componentDidMount() {
-    const graphqlQuery = {
-      query: `
-      {
-        user {
-          name
-          status
-          avatarUrl
-        }
-      }
-      `,
-    };
-    fetch('https://node-social-zmra.onrender.com/graphql', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + this.props.token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(graphqlQuery),
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((resData) => {
-        if (
-          resData.errors &&
-          (resData.errors[0].status === 401 || resData.errors[0].status === 404)
-        ) {
-          throw new Error(resData.errors[0].message);
-        }
-        if (resData.errors) {
-          throw new Error('Fetching status failed.');
-        }
-        this.setState({
-          status: resData.data.user.status,
-          myName: resData.data.user.name,
-          myAvatar: resData.data.user.avatarUrl,
-        });
-      })
-      .catch(this.catchError);
-
+    // Sync local editable status from the lifted currentUser (App.js
+    // is the source of truth for who's logged in).
+    if (this.props.currentUser) {
+      this.setState({ status: this.props.currentUser.status || '' });
+    }
     this.loadPosts();
+  }
+
+  componentDidUpdate(prevProps) {
+    // currentUser arrives asynchronously after mount; seed our local
+    // editable status the moment it lands.
+    if (!prevProps.currentUser && this.props.currentUser) {
+      this.setState({ status: this.props.currentUser.status || '' });
+    }
   }
 
   loadPosts = (direction) => {
@@ -175,7 +146,11 @@ class Feed extends Component {
         if (resData.errors) {
           throw new Error('Updating status failed.');
         }
-        console.log(resData);
+        // Propagate the new status up to App so the navbar / sidebar
+        // see it immediately (no refetch needed).
+        if (this.props.onUserUpdated) {
+          this.props.onUserUpdated({ status: this.state.status });
+        }
       })
       .catch(this.catchError);
   };
@@ -438,10 +413,13 @@ class Feed extends Component {
 
         <section className="feed__status">
           <span className="feed__status-avatar" aria-hidden="true">
-            {this.state.myAvatar ? (
-              <img src={this.state.myAvatar} alt="" />
+            {this.props.currentUser && this.props.currentUser.avatarUrl ? (
+              <img src={this.props.currentUser.avatarUrl} alt="" />
             ) : (
-              (this.state.myName || 'Y').trim().charAt(0).toUpperCase()
+              ((this.props.currentUser && this.props.currentUser.name) || 'Y')
+                .trim()
+                .charAt(0)
+                .toUpperCase()
             )}
           </span>
           <form onSubmit={this.statusUpdateHandler}>
