@@ -6,6 +6,7 @@ import Paginator from '../../components/Paginator/Paginator';
 import PostSkeleton from '../../components/Skeleton/PostSkeleton';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import Sidebar from '../../components/Sidebar/Sidebar';
+import { Plus } from '../../components/Icons/Icons';
 import './Feed.css';
 
 class Feed extends Component {
@@ -380,7 +381,7 @@ class Feed extends Component {
             ?
           </span>
           <span className="feed__composer-cta" aria-hidden="true">
-            <span className="feed__composer-cta-icon">+</span>
+            <span className="feed__composer-cta-icon"><Plus size={14} /></span>
             <span className="feed__composer-cta-label">Post</span>
           </span>
         </button>

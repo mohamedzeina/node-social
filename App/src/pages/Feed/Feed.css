@@ -138,10 +138,14 @@
 .feed__composer:hover .feed__composer-cta { background: var(--clay); }
 
 .feed__composer-cta-icon {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
-  font-weight: 700;
-  margin-top: -1px;
+  transition: transform 0.22s var(--ease-out);
+}
+.feed__composer:hover .feed__composer-cta-icon {
+  transform: rotate(90deg);
 }
 
 @media (max-width: 480px) {

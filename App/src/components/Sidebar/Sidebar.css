@@ -24,8 +24,26 @@
 .sidebar__profile {
   position: relative;
   text-align: center;
-  padding: 1.5rem 1.1rem 1.1rem;
+  padding: 1.5rem 1.1rem 0;
+  overflow: hidden;
 }
+
+/* Soft clay bloom behind the avatar — adds warmth without being a banner */
+.sidebar__profile::before {
+  content: "";
+  position: absolute;
+  top: -3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12rem;
+  height: 12rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--clay-soft) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sidebar__profile > * { position: relative; z-index: 1; }
 
 .sidebar__profile-avatar {
   width: 4.5rem;
@@ -41,7 +59,7 @@
   font-weight: 700;
   font-size: 1.7rem;
   margin: 0 0 0.75rem;
-  box-shadow: 0 4px 14px -4px rgba(42, 33, 27, 0.25);
+  box-shadow: 0 0 0 4px var(--surface), 0 6px 16px -4px rgba(42, 33, 27, 0.3);
 }
 .sidebar__profile-avatar img {
   width: 100%;
@@ -70,7 +88,9 @@
 }
 
 .sidebar__profile-status {
-  font-size: 0.88rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.9rem;
   color: var(--ink-3);
   line-height: 1.4;
   max-width: 15rem;
@@ -78,39 +98,42 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.sidebar__stats {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--hairline);
-}
-
-.sidebar__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.1;
-}
-
-.sidebar__stat-value {
+.sidebar__profile-status-mark {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.35rem;
+  font-style: normal;
   color: var(--clay);
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  font-size: 1.1em;
+  vertical-align: -0.05em;
+  margin: 0 0.05em;
 }
 
-.sidebar__stat-label {
-  font-size: 0.74rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--ink-3);
-  margin-top: 2px;
+/* CTA pill at the bottom of the profile card */
+.sidebar__profile-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin: 1rem -1.1rem 0;
+  padding: 0.75rem 1.1rem;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border-top: 1px solid var(--hairline);
+  transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out);
 }
+.sidebar__profile-cta:hover {
+  background: var(--clay-soft);
+  color: var(--clay-hover);
+}
+.sidebar__profile-cta svg { transition: transform 0.18s var(--ease-out); }
+.sidebar__profile-cta:hover svg { transform: rotate(-90deg) translateX(2px) !important; }
 
 /* ============================================================
    Nav card
@@ -216,22 +239,37 @@
 .sidebar__tip {
   display: flex;
   align-items: flex-start;
-  gap: 0.7rem;
-  padding: 0.95rem 1rem;
-  background: linear-gradient(135deg, var(--sage-soft), var(--surface));
+  gap: 0.8rem;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(135deg, var(--sage-soft), var(--surface) 80%);
   border-color: var(--sage-soft);
 }
 
 .sidebar__tip-mark {
   font-family: var(--font-display);
   color: var(--sage);
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   line-height: 1;
-  margin-top: 1px;
+  margin-top: -1px;
+  flex-shrink: 0;
+}
+
+.sidebar__tip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sidebar__tip-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
 }
 
 .sidebar__tip-text {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--ink-2);
   margin: 0;
   line-height: 1.5;
@@ -239,4 +277,5 @@
 .sidebar__tip-text strong {
   color: var(--ink);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }

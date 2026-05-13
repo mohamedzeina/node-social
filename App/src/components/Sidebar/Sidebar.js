@@ -1,17 +1,15 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 
+import { Chevron } from '../Icons/Icons';
 import './Sidebar.css';
 
 const Sidebar = ({ currentUser, postCount }) => {
+  const profileLink = currentUser && currentUser._id ? `/u/${currentUser._id}` : null;
+
   const navItems = [
     { id: 'home',    label: 'Home',          icon: '⌂', link: '/',         active: true },
-    {
-      id: 'profile',
-      label: 'Your profile',
-      icon: '☻',
-      link: currentUser && currentUser._id ? `/u/${currentUser._id}` : null,
-    },
+    { id: 'profile', label: 'Your profile',  icon: '☻', link: profileLink },
     { id: 'saved',   label: 'Saved',         icon: '✦', soon: true },
     { id: 'notifs',  label: 'Notifications', icon: '◔', soon: true },
   ];
@@ -31,16 +29,18 @@ const Sidebar = ({ currentUser, postCount }) => {
 
         <div className="sidebar__profile-body">
           <span className="sidebar__profile-name">{name || 'Welcome'}</span>
-          <span className="sidebar__profile-status">{status}</span>
+          <span className="sidebar__profile-status">
+            <span className="sidebar__profile-status-mark" aria-hidden="true">“</span>
+            {status}
+            <span className="sidebar__profile-status-mark" aria-hidden="true">”</span>
+          </span>
         </div>
 
-        {typeof postCount === 'number' && (
-          <div className="sidebar__stats">
-            <div className="sidebar__stat">
-              <span className="sidebar__stat-value">{postCount}</span>
-              <span className="sidebar__stat-label">in the feed</span>
-            </div>
-          </div>
+        {profileLink && (
+          <Link to={profileLink} className="sidebar__profile-cta">
+            <span>View your profile</span>
+            <Chevron size={14} style={{ transform: 'rotate(-90deg)' }} />
+          </Link>
         )}
       </div>
 
@@ -78,11 +78,16 @@ const Sidebar = ({ currentUser, postCount }) => {
 
       {/* Tip card */}
       <div className="sidebar__card sidebar__tip">
-        <span className="sidebar__tip-mark" aria-hidden="true">✿</span>
-        <p className="sidebar__tip-text">
-          <strong>Dispatches</strong> is a slow social platform.
-          Two posts a page, no algorithm.
-        </p>
+        <span className="sidebar__tip-mark" aria-hidden="true">❦</span>
+        <div className="sidebar__tip-body">
+          <strong className="sidebar__tip-title">Slow social</strong>
+          <p className="sidebar__tip-text">
+            Two dispatches per page, sorted newest first.
+            {typeof postCount === 'number' && (
+              <> Currently <strong>{postCount}</strong> in the feed.</>
+            )}
+          </p>
+        </div>
       </div>
     </aside>
   );
