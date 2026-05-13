@@ -11,6 +11,7 @@ class SinglePost extends Component {
     title: '',
     author: '',
     authorAvatar: null,
+    authorId: null,
     date: '',
     image: '',
     content: '',
@@ -28,7 +29,7 @@ class SinglePost extends Component {
         getPost(id: $postId) {
           title
           content
-          creator { name avatarUrl }
+          creator { _id name avatarUrl }
           imageUrl
           createdAt
           likeCount
@@ -56,6 +57,7 @@ class SinglePost extends Component {
           title: resData.data.getPost.title,
           author: resData.data.getPost.creator.name,
           authorAvatar: resData.data.getPost.creator.avatarUrl,
+          authorId: resData.data.getPost.creator._id,
           image: resData.data.getPost.imageUrl,
           date: new Date(resData.data.getPost.createdAt).toLocaleDateString('en-US', {
             month: 'long', day: 'numeric', year: 'numeric',
@@ -120,17 +122,35 @@ class SinglePost extends Component {
 
         <div className="single-post__card">
           <header className="single-post__header">
-            <div className="single-post__avatar" aria-hidden="true">
-              {this.state.authorAvatar ? (
-                <img src={this.state.authorAvatar} alt="" />
-              ) : (
-                <span>{initial}</span>
-              )}
-            </div>
-            <div className="single-post__byline">
-              <span className="single-post__author">{this.state.author || '—'}</span>
-              <span className="single-post__date">{this.state.date}</span>
-            </div>
+            {this.state.authorId ? (
+              <Link to={`/u/${this.state.authorId}`} className="single-post__byline-link">
+                <div className="single-post__avatar" aria-hidden="true">
+                  {this.state.authorAvatar ? (
+                    <img src={this.state.authorAvatar} alt="" />
+                  ) : (
+                    <span>{initial}</span>
+                  )}
+                </div>
+                <div className="single-post__byline">
+                  <span className="single-post__author">{this.state.author || '—'}</span>
+                  <span className="single-post__date">{this.state.date}</span>
+                </div>
+              </Link>
+            ) : (
+              <div className="single-post__byline-link">
+                <div className="single-post__avatar" aria-hidden="true">
+                  {this.state.authorAvatar ? (
+                    <img src={this.state.authorAvatar} alt="" />
+                  ) : (
+                    <span>{initial}</span>
+                  )}
+                </div>
+                <div className="single-post__byline">
+                  <span className="single-post__author">{this.state.author || '—'}</span>
+                  <span className="single-post__date">{this.state.date}</span>
+                </div>
+              </div>
+            )}
           </header>
 
           <h1 className="single-post__title">{this.state.title || ''}</h1>

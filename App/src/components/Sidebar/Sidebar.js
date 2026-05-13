@@ -3,14 +3,19 @@ import { NavLink } from 'react-router-dom';
 
 import './Sidebar.css';
 
-const NAV_ITEMS = [
-  { id: 'home',     label: 'Home',          icon: '⌂', link: '/',         active: true },
-  { id: 'profile',  label: 'Your profile',  icon: '☻', soon: true },
-  { id: 'saved',    label: 'Saved',         icon: '✦', soon: true },
-  { id: 'notifs',   label: 'Notifications', icon: '◔', soon: true },
-];
-
 const Sidebar = ({ currentUser, postCount }) => {
+  const navItems = [
+    { id: 'home',    label: 'Home',          icon: '⌂', link: '/',         active: true },
+    {
+      id: 'profile',
+      label: 'Your profile',
+      icon: '☻',
+      link: currentUser && currentUser._id ? `/u/${currentUser._id}` : null,
+    },
+    { id: 'saved',   label: 'Saved',         icon: '✦', soon: true },
+    { id: 'notifs',  label: 'Notifications', icon: '◔', soon: true },
+  ];
+
   const name = (currentUser && currentUser.name) || '';
   const initial = name.trim().charAt(0).toUpperCase() || '?';
   const avatar = currentUser && currentUser.avatarUrl;
@@ -43,7 +48,7 @@ const Sidebar = ({ currentUser, postCount }) => {
       <nav className="sidebar__card sidebar__nav" aria-label="Quick links">
         <span className="sidebar__heading">Browse</span>
         <ul>
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <li key={item.id}>
               {item.link ? (
                 <NavLink

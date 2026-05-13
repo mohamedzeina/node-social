@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
 import './UserMenu.css';
 
@@ -79,16 +80,27 @@ const UserMenu = ({ currentUser, onLogout }) => {
 
           <hr className="user-menu__divider" />
 
-          <button
-            type="button"
-            className="user-menu__item user-menu__item--soon"
-            role="menuitem"
-            disabled
-          >
-            <span className="user-menu__item-icon" aria-hidden="true">☻</span>
-            View profile
-            <span className="user-menu__chip">Soon</span>
-          </button>
+          {currentUser && currentUser._id ? (
+            <Link
+              to={`/u/${currentUser._id}`}
+              className="user-menu__item"
+              role="menuitem"
+              onClick={close}
+            >
+              <span className="user-menu__item-icon" aria-hidden="true">☻</span>
+              View profile
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="user-menu__item user-menu__item--soon"
+              role="menuitem"
+              disabled
+            >
+              <span className="user-menu__item-icon" aria-hidden="true">☻</span>
+              View profile
+            </button>
+          )}
 
           <button
             type="button"

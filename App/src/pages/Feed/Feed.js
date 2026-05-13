@@ -411,6 +411,7 @@ class Feed extends Component {
                   isOwn={post.creator._id === this.props.userId}
                   author={post.creator.name}
                   authorAvatar={post.creator.avatarUrl}
+                  authorId={post.creator._id}
                   date={new Date(post.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
