@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 
 import Post from '../../components/Feed/Post/Post';
-import Button from '../../components/Button/Button';
 import FeedEdit from '../../components/Feed/FeedEdit/FeedEdit';
-import Input from '../../components/Form/Input/Input';
 import Paginator from '../../components/Paginator/Paginator';
 import Loader from '../../components/Loader/Loader';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
@@ -16,27 +14,13 @@ class Feed extends Component {
     posts: [],
     totalPosts: 0,
     editPost: null,
-    status: '',
     postPage: 1,
     postsLoading: true,
     editLoading: false,
   };
 
   componentDidMount() {
-    // Sync local editable status from the lifted currentUser (App.js
-    // is the source of truth for who's logged in).
-    if (this.props.currentUser) {
-      this.setState({ status: this.props.currentUser.status || '' });
-    }
     this.loadPosts();
-  }
-
-  componentDidUpdate(prevProps) {
-    // currentUser arrives asynchronously after mount; seed our local
-    // editable status the moment it lands.
-    if (!prevProps.currentUser && this.props.currentUser) {
-      this.setState({ status: this.props.currentUser.status || '' });
-    }
   }
 
   loadPosts = (direction) => {
@@ -108,50 +92,6 @@ class Feed extends Component {
           totalPosts: resData.data.getPosts.totalPosts,
           postsLoading: false,
         });
-      })
-      .catch(this.catchError);
-  };
-
-  statusUpdateHandler = (event) => {
-    event.preventDefault();
-    const graphqlQuery = {
-      query: `
-        mutation UpdateUserStatus($userStatus: String!) {
-          updateStatus(status: $userStatus){
-            status
-          }
-        }
-      `,
-      variables: {
-        userStatus: this.state.status,
-      },
-    };
-    fetch('https://node-social-zmra.onrender.com/graphql', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + this.props.token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(graphqlQuery),
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((resData) => {
-        if (
-          resData.errors &&
-          (resData.errors[0].status === 401 || resData.errors[0].status === 404)
-        ) {
-          throw new Error(resData.errors[0].message);
-        }
-        if (resData.errors) {
-          throw new Error('Updating status failed.');
-        }
-        // Propagate the new status up to App so the navbar / sidebar
-        // see it immediately (no refetch needed).
-        if (this.props.onUserUpdated) {
-          this.props.onUserUpdated({ status: this.state.status });
-        }
       })
       .catch(this.catchError);
   };
@@ -340,10 +280,6 @@ class Feed extends Component {
       });
   };
 
-  statusInputChangeHandler = (input, value) => {
-    this.setState({ status: value });
-  };
-
   deletePostHandler = (postId) => {
     this.setState({ postsLoading: true });
     const graphqlQuery = {
@@ -420,8 +356,13 @@ class Feed extends Component {
         </div>
 
         <div className="feed-page__main">
-        <section className="feed__status">
-          <span className="feed__status-avatar" aria-hidden="true">
+        <button
+          type="button"
+          className="feed__composer"
+          onClick={this.newPostHandler}
+          aria-label="Create a new post"
+        >
+          <span className="feed__composer-avatar" aria-hidden="true">
             {this.props.currentUser && this.props.currentUser.avatarUrl ? (
               <img src={this.props.currentUser.avatarUrl} alt="" />
             ) : (
@@ -431,27 +372,18 @@ class Feed extends Component {
                 .toUpperCase()
             )}
           </span>
-          <form onSubmit={this.statusUpdateHandler}>
-            <Input
-              id="status"
-              type="text"
-              placeholder="What's on your mind?"
-              control="input"
-              onChange={this.statusInputChangeHandler}
-              value={this.state.status}
-            />
-            <Button mode="flat" type="submit">
-              Save
-            </Button>
-          </form>
-        </section>
-
-        <section className="feed__control">
-          <div className="feed__heading">Home</div>
-          <Button mode="raised" design="accent" onClick={this.newPostHandler}>
-            New post
-          </Button>
-        </section>
+          <span className="feed__composer-prompt">
+            What&rsquo;s on your mind
+            {this.props.currentUser && this.props.currentUser.name
+              ? `, ${this.props.currentUser.name.trim().split(/\s+/)[0]}`
+              : ''}
+            ?
+          </span>
+          <span className="feed__composer-cta" aria-hidden="true">
+            <span className="feed__composer-cta-icon">+</span>
+            <span className="feed__composer-cta-label">Post</span>
+          </span>
+        </button>
 
         <section className="feed">
           {this.state.postsLoading && (
