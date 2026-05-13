@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import Image from '../../Image/Image';
+import { Heart, HeartFilled, Reply, Share, Pencil, Trash } from '../../Icons/Icons';
 import './Post.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
@@ -11,6 +12,9 @@ const Post = props => {
   const [liked, setLiked] = useState(likedByMe);
   const [count, setCount] = useState(likeCount);
   const [pending, setPending] = useState(false);
+  // Bursts is a list of timestamps; each one renders a floating heart
+  // that flies up and fades. Trimmed after the animation completes.
+  const [bursts, setBursts] = useState([]);
 
   // Keep local state in sync if parent re-fetches the feed
   useEffect(() => { setLiked(likedByMe); }, [likedByMe]);
@@ -21,10 +25,17 @@ const Post = props => {
     const nextLiked = !liked;
     const nextCount = count + (nextLiked ? 1 : -1);
 
-    // Optimistic update
+    // Optimistic update + delight burst when newly liked
     setLiked(nextLiked);
     setCount(nextCount);
     setPending(true);
+    if (nextLiked) {
+      const stamp = Date.now() + Math.random();
+      setBursts((b) => [...b, stamp]);
+      setTimeout(() => {
+        setBursts((b) => b.filter((s) => s !== stamp));
+      }, 900);
+    }
 
     const mutation = nextLiked ? 'likePost' : 'unlikePost';
     const query = {
@@ -43,12 +54,10 @@ const Post = props => {
       });
       const data = await res.json();
       if (data.errors) throw new Error(data.errors[0].message);
-      // Reconcile with server truth
       const fresh = data.data[mutation];
       setLiked(fresh.likedByMe);
       setCount(fresh.likeCount);
     } catch (err) {
-      // Revert on failure
       setLiked(!nextLiked);
       setCount(count);
       console.error('Like toggle failed', err);
@@ -61,6 +70,8 @@ const Post = props => {
 
   return (
     <article className="post">
+      <span className="post__rail" aria-hidden="true" />
+
       <header className="post__header">
         {props.authorId ? (
           <Link
@@ -91,7 +102,10 @@ const Post = props => {
           ) : (
             <span className="post__author">{props.author}</span>
           )}
-          <span className="post__date">{props.date}</span>
+          <span className="post__date">
+            <span className="post__date-dot" aria-hidden="true" />
+            {props.date}
+          </span>
         </div>
         {props.isOwn && (
           <div className="post__menu">
@@ -101,7 +115,7 @@ const Post = props => {
               aria-label="Edit"
               title="Edit"
             >
-              ✎
+              <Pencil size={16} />
             </button>
             <button
               className="post__menu-btn post__menu-btn--danger"
@@ -109,7 +123,7 @@ const Post = props => {
               aria-label="Delete"
               title="Delete"
             >
-              🗑
+              <Trash size={16} />
             </button>
           </div>
         )}
@@ -139,14 +153,24 @@ const Post = props => {
           aria-pressed={liked}
         >
           <span className="post__action-icon" aria-hidden="true">
-            {liked ? '♥' : '♡'}
+            {liked ? <HeartFilled size={18} /> : <Heart size={18} />}
           </span>
-          <span>{count > 0 ? count : 'Like'}</span>
+          <span className="post__action-label">
+            {count > 0 ? count : 'Like'}
+          </span>
+          {/* Floating-heart bursts when the user newly likes a post */}
+          {bursts.map((stamp) => (
+            <span key={stamp} className="post__heart-burst" aria-hidden="true">
+              <HeartFilled size={20} />
+            </span>
+          ))}
         </button>
 
         <Link to={'/p/' + props.id} className="post__action">
-          <span className="post__action-icon" aria-hidden="true">💬</span>
-          <span>Reply</span>
+          <span className="post__action-icon" aria-hidden="true">
+            <Reply size={18} />
+          </span>
+          <span className="post__action-label">Reply</span>
         </Link>
 
         <button
@@ -161,8 +185,10 @@ const Post = props => {
           }}
           aria-label="Share"
         >
-          <span className="post__action-icon" aria-hidden="true">↗</span>
-          <span>Share</span>
+          <span className="post__action-icon" aria-hidden="true">
+            <Share size={18} />
+          </span>
+          <span className="post__action-label">Share</span>
         </button>
       </footer>
     </article>
