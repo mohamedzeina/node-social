@@ -71,6 +71,12 @@ class App extends Component {
     }));
   };
 
+  closePostModal = () => {
+    // history.goBack pops the modal route off the stack and returns
+    // us to whatever URL was the background.
+    this.props.history.goBack();
+  };
+
   mobileNavHandler = (isOpen) => {
     this.setState({ showMobileNav: isOpen, showBackdrop: isOpen });
   };
@@ -247,44 +253,76 @@ class App extends Component {
       </Switch>
     );
     if (this.state.isAuth) {
+      // Modal-as-route pattern: when a Link includes a `background`
+      // location in its state, the main Switch renders against that
+      // background URL (so the feed stays mounted) and the modal
+      // route on top renders the actual destination as an overlay.
+      const location = this.props.location;
+      const background = location.state && location.state.background;
+
       routes = (
-        <Switch>
-          <Route
-            path="/"
-            exact
-            render={(props) => (
-              <FeedPage
-                userId={this.state.userId}
-                token={this.state.token}
-                currentUser={this.state.currentUser}
-                onUserUpdated={this.handleUserUpdated}
+        <Fragment>
+          <Switch location={background || location}>
+            <Route
+              path="/"
+              exact
+              render={(props) => (
+                <FeedPage
+                  {...props}
+                  userId={this.state.userId}
+                  token={this.state.token}
+                  currentUser={this.state.currentUser}
+                  onUserUpdated={this.handleUserUpdated}
+                />
+              )}
+            />
+            <Route
+              path="/p/:postId"
+              render={(props) => (
+                <SinglePostPage
+                  {...props}
+                  userId={this.state.userId}
+                  token={this.state.token}
+                  currentUser={this.state.currentUser}
+                />
+              )}
+            />
+            <Route
+              path="/u/:userId"
+              render={(props) => (
+                <ProfilePage
+                  {...props}
+                  userId={this.state.userId}
+                  token={this.state.token}
+                  currentUser={this.state.currentUser}
+                />
+              )}
+            />
+            <Redirect to="/" />
+          </Switch>
+
+          {/* Modal overlay — only mounts when a background location
+              is preserved in router state (i.e. user clicked a post
+              link from a different route, not via direct URL). */}
+          {background && (
+            <Fragment>
+              <Backdrop onClick={this.closePostModal} />
+              <Route
+                path="/p/:postId"
+                render={(props) => (
+                  <SinglePostPage
+                    {...props}
+                    asModal
+                    onClose={this.closePostModal}
+                    userId={this.state.userId}
+                    token={this.state.token}
+                    currentUser={this.state.currentUser}
+                  />
+                )}
               />
-            )}
-          />
-          <Route
-            path="/p/:postId"
-            render={(props) => (
-              <SinglePostPage
-                {...props}
-                userId={this.state.userId}
-                token={this.state.token}
-                currentUser={this.state.currentUser}
-              />
-            )}
-          />
-          <Route
-            path="/u/:userId"
-            render={(props) => (
-              <ProfilePage
-                {...props}
-                userId={this.state.userId}
-                token={this.state.token}
-                currentUser={this.state.currentUser}
-              />
-            )}
-          />
-          <Redirect to="/" />
-        </Switch>
+            </Fragment>
+          )}
+        </Fragment>
       );
     }
     return (

@@ -29,6 +29,13 @@ class SinglePost extends Component {
   };
 
   componentDidMount() {
+    if (this.props.asModal) {
+      document.addEventListener('keydown', this.handleEscape);
+      // Prevent the page underneath from scrolling while the modal is open
+      this.prevBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+
     const postId = this.props.match.params.postId;
     const graphqlQuery = {
       query: `
@@ -218,6 +225,19 @@ class SinglePost extends Component {
       if (data.errors) throw new Error(data.errors[0].message);
     } catch (err) {
       this.setState({ comments: previous, error: err });
+    }
+  };
+
+  componentWillUnmount() {
+    if (this.props.asModal) {
+      document.removeEventListener('keydown', this.handleEscape);
+      document.body.style.overflow = this.prevBodyOverflow || '';
+    }
+  }
+
+  handleEscape = (e) => {
+    if (e.key === 'Escape' && this.props.onClose) {
+      this.props.onClose();
     }
   };
 

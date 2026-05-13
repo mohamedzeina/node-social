@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
 import Image from '../../Image/Image';
 import { Heart, HeartFilled, Reply, Share, Pencil, Trash } from '../../Icons/Icons';
@@ -68,6 +68,14 @@ const Post = props => {
 
   const initial = (props.author || '').trim().charAt(0).toUpperCase() || '?';
 
+  // Link to /p/:id but stash the current location so App.js renders
+  // it as a modal overlay over the feed/profile rather than as a
+  // full page navigation.
+  const postLinkTo = {
+    pathname: '/p/' + props.id,
+    state: { background: props.location },
+  };
+
   return (
     <article className="post">
       <span className="post__rail" aria-hidden="true" />
@@ -129,13 +137,13 @@ const Post = props => {
         )}
       </header>
 
-      <Link to={'/p/' + props.id} className="post__body">
+      <Link to={postLinkTo} className="post__body">
         <h2 className="post__title">{props.title}</h2>
         <p className="post__content">{props.content}</p>
       </Link>
 
       {props.image && (
-        <Link to={'/p/' + props.id} className="post__image">
+        <Link to={postLinkTo} className="post__image">
           <Image imageUrl={props.image} />
         </Link>
       )}
@@ -166,7 +174,7 @@ const Post = props => {
           ))}
         </button>
 
-        <Link to={'/p/' + props.id} className="post__action">
+        <Link to={postLinkTo} className="post__action">
           <span className="post__action-icon" aria-hidden="true">
             <Reply size={18} />
           </span>
@@ -197,4 +205,4 @@ const Post = props => {
   );
 };
 
-export default Post;
+export default withRouter(Post);
