@@ -3,11 +3,11 @@ import React from 'react';
 import './Logo.css';
 
 const logo = () => (
-  <div className="logo" aria-label="NodeSocial — Dispatches">
-    <span className="logo__mark">N°</span>
+  <div className="logo" aria-label="Dispatches">
+    <span className="logo__mark">D°</span>
     <span className="logo__wordmark">
-      <span className="logo__primary">NodeSocial</span>
-      <span className="logo__strap">Dispatches &middot; Est. MMXXVI</span>
+      <span className="logo__primary">Dispatches</span>
+      <span className="logo__strap">A writing journal &middot; Est. MMXXVI</span>
     </span>
   </div>
 );
