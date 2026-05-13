@@ -395,13 +395,6 @@ class Feed extends Component {
   };
 
   render() {
-    const today = new Date().toLocaleDateString('en-GB', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
-
     return (
       <div className="feed-page">
         <ErrorHandler error={this.state.error} onHandle={this.errorHandler} />
@@ -413,42 +406,27 @@ class Feed extends Component {
           onFinishEdit={this.finishEditHandler}
         />
 
-        <header className="feed__head">
-          <span className="feed__eyebrow">{today} &middot; Folio I</span>
-          <h1 className="feed__title">
-            The <em>Feed</em>
-          </h1>
-          <p className="feed__deck">
-            Today&rsquo;s dispatches from your fellow correspondents &mdash;
-            arranged newest first, two to a page.
-          </p>
-        </header>
-
         <section className="feed__status">
-          <span className="feed__status-icon">&para;</span>
+          <span className="feed__status-avatar">{(this.state.status || 'Y').trim().charAt(0).toUpperCase()}</span>
           <form onSubmit={this.statusUpdateHandler}>
             <Input
               id="status"
               type="text"
-              label="What are you working on?"
-              placeholder="Write a short note&hellip;"
+              placeholder="What's on your mind?"
               control="input"
               onChange={this.statusInputChangeHandler}
               value={this.state.status}
             />
             <Button mode="flat" type="submit">
-              Update note
+              Save
             </Button>
           </form>
         </section>
 
         <section className="feed__control">
-          <div className="feed__section-label">
-            <small>Section I</small>
-            Recent dispatches
-          </div>
+          <div className="feed__heading">Home</div>
           <Button mode="raised" design="accent" onClick={this.newPostHandler}>
-            File a dispatch
+            New post
           </Button>
         </section>
 
@@ -460,9 +438,8 @@ class Feed extends Component {
           )}
           {this.state.posts.length <= 0 && !this.state.postsLoading ? (
             <div className="feed__empty">
-              <span className="feed__empty-mark">&para;</span>
-              The galleys are empty.<br />
-              Be the first to file a dispatch.
+              <h3 className="feed__empty-title">No posts yet</h3>
+              <p>Be the first to share something.</p>
             </div>
           ) : null}
           {!this.state.postsLoading && this.state.posts.length > 0 && (
@@ -472,15 +449,14 @@ class Feed extends Component {
               lastPage={Math.ceil(this.state.totalPosts / 2)}
               currentPage={this.state.postPage}
             >
-              {this.state.posts.map((post, idx) => (
+              {this.state.posts.map((post) => (
                 <Post
                   key={post._id}
                   id={post._id}
-                  index={idx + 1}
                   author={post.creator.name}
-                  date={new Date(post.createdAt).toLocaleDateString('en-GB', {
+                  date={new Date(post.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
                     day: 'numeric',
-                    month: 'long',
                     year: 'numeric',
                   })}
                   title={post.title}

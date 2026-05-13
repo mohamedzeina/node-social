@@ -1,202 +1,125 @@
 /* ============================================================
-   Feed page — front page of the journal
+   Feed page — social home
    ============================================================ */
 
 .feed-page {
   width: 100%;
-  max-width: 56rem;
+  max-width: 38rem;
   margin: 0 auto;
-  position: relative;
-  z-index: 2;
-  animation: dispatch-fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: fade-up 0.4s var(--ease-out);
 }
 
-/* ---- Front-page masthead ------------------------------- */
-.feed__head {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.5rem;
-  text-align: center;
-  padding: 1rem 0 1.5rem;
-  border-bottom: 3px double var(--ink);
-  margin-bottom: 2.5rem;
-}
-
-.feed__eyebrow {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--vermilion);
-}
-
-.feed__title {
-  font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
-  font-weight: 600;
-  font-size: clamp(2.6rem, 6vw, 4.2rem);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-.feed__title em {
-  font-style: italic;
-  color: var(--vermilion);
-}
-
-.feed__deck {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.05rem;
-  color: var(--ink-soft);
-  margin: 0;
-  max-width: 32rem;
-  margin: 0 auto;
-  line-height: 1.45;
-}
-
-/* ---- Status row — your byline + status update --------- */
+/* ---- Status composer ------------------------------- */
 .feed__status {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 1rem;
-  align-items: end;
-  padding: 1.1rem 1.2rem;
-  background: var(--paper-deep);
-  border: 1px solid var(--ink);
-  margin-bottom: 2.5rem;
-  position: relative;
-  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.feed__status::before {
-  content: "The subscriber's note";
-  position: absolute;
-  top: -0.55rem;
-  left: 1rem;
-  padding: 0 0.4rem;
-  background: var(--paper);
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--vermilion);
-}
-
-.feed__status-icon {
-  width: 2rem;
-  height: 2rem;
-  background: var(--ink);
-  color: var(--paper);
+.feed__status-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--clay);
+  color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: 0.4rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 .feed__status form {
-  display: contents;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0.5rem;
 }
 
 .feed__status .input {
+  flex: 1;
   margin: 0;
 }
 
-.feed__status .button {
-  margin-bottom: 0.2rem;
+.feed__status .input input {
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.95rem;
 }
 
-/* ---- Control row — file a new dispatch --------------- */
+.feed__status .input input:focus {
+  background: var(--surface);
+  box-shadow: 0 0 0 4px var(--clay-soft);
+  border: 1px solid var(--clay);
+}
+
+/* ---- Compose CTA row ------------------------------- */
 .feed__control {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--paper-edge);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-.feed__section-label {
+.feed__heading {
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 60, "WONK" 1;
-  font-style: italic;
-  font-size: 1.7rem;
-  font-weight: 500;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
   color: var(--ink);
 }
 
-.feed__section-label small {
-  display: block;
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-size: 0.66rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: 0.35rem;
-}
-
-/* ---- Feed itself -------------------------------------- */
-.feed {
-  width: 100%;
-}
-
-.feed__empty {
-  text-align: center;
-  padding: 4rem 1rem;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.25rem;
-  color: var(--ink-faint);
-  border: 1px dashed var(--paper-edge);
-}
-
-.feed__empty-mark {
-  display: block;
-  font-size: 2.4rem;
-  color: var(--vermilion);
-  margin-bottom: 0.8rem;
-  font-variation-settings: "opsz" 144, "WONK" 1;
-}
+/* ---- Feed ------------------------------------------ */
+.feed { width: 100%; }
 
 .feed__loader-wrap {
   display: flex;
   justify-content: center;
-  padding: 4rem 0;
+  padding: 3rem 0;
 }
 
-/* Preview image inside the FeedEdit modal */
+.feed__empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--surface);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--r-lg);
+  color: var(--ink-3);
+}
+.feed__empty-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.4rem;
+}
+.feed__empty p { margin: 0; }
+
+/* ---- Preview image inside FeedEdit modal ----------- */
 .new-post__preview-image {
   width: 100%;
   height: 12rem;
-  background: var(--paper-deep);
-  border: 1px solid var(--paper-edge);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
   margin: 0.75rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink-faint);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.95rem;
+  color: var(--ink-3);
   position: relative;
+  overflow: hidden;
 }
-.new-post__preview-image p { margin: 0; }
-.new-post__preview-image .image { position: absolute; inset: 0; }
-
-@media (max-width: 600px) {
-  .feed__status {
-    grid-template-columns: 1fr;
-    gap: 0.6rem;
-  }
-  .feed__status .button { align-self: flex-start; }
-  .feed__control { flex-direction: column; align-items: flex-start; gap: 1rem; }
-}
+.new-post__preview-image p { margin: 0; font-size: 0.92rem; }
+.new-post__preview-image .image { position: absolute; inset: 0; background-size: cover; }

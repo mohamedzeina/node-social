@@ -1,52 +1,84 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import Image from '../../Image/Image';
-import Button from '../../Button/Button';
 import './Post.css';
 
-const post = props => {
+const Post = props => {
+  const [liked, setLiked] = useState(false);
   const initial = (props.author || '').trim().charAt(0).toUpperCase() || '?';
-  const folio = props.index ? String(props.index).padStart(2, '0') : '01';
 
   return (
     <article className="post">
-      <div className="post__folio" aria-hidden="true">{folio}</div>
-
       <header className="post__header">
+        <div className="post__avatar" aria-hidden="true">{initial}</div>
         <div className="post__byline">
-          <span className="post__initial" aria-hidden="true">{initial}</span>
-          <div className="post__byline-text">
-            <span className="post__author">{props.author}</span>
-            <span className="post__date">{props.date}</span>
-          </div>
+          <span className="post__author">{props.author}</span>
+          <span className="post__date">{props.date}</span>
         </div>
-        <h2 className="post__title">{props.title}</h2>
+        <div className="post__menu">
+          <button
+            className="post__menu-btn"
+            onClick={props.onStartEdit}
+            aria-label="Edit"
+            title="Edit"
+          >
+            ✎
+          </button>
+          <button
+            className="post__menu-btn post__menu-btn--danger"
+            onClick={props.onDelete}
+            aria-label="Delete"
+            title="Delete"
+          >
+            🗑
+          </button>
+        </div>
       </header>
 
-      <div className="post__image">
-        <Image imageUrl={props.image} contain />
-      </div>
+      <Link to={'/' + props.id} className="post__body">
+        <h2 className="post__title">{props.title}</h2>
+        <p className="post__content">{props.content}</p>
+      </Link>
 
-      <div className="post__content">{props.content}</div>
+      {props.image && (
+        <Link to={'/' + props.id} className="post__image">
+          <Image imageUrl={props.image} />
+        </Link>
+      )}
 
-      <div className="post__footer">
-        <div className="post__divider" aria-hidden="true">
-          <span>&sect;</span>
-        </div>
-        <div className="post__actions">
-          <Button mode="flat" link={props.id}>
-            Read in full
-          </Button>
-          <Button mode="flat" onClick={props.onStartEdit}>
-            Revise
-          </Button>
-          <Button mode="flat" design="danger" onClick={props.onDelete}>
-            Retract
-          </Button>
-        </div>
-      </div>
+      <footer className="post__footer">
+        <button
+          className={['post__action', 'post__action--like', liked ? 'is-liked' : ''].join(' ')}
+          onClick={() => setLiked(v => !v)}
+          aria-label={liked ? 'Unlike' : 'Like'}
+        >
+          <span className="post__action-icon" aria-hidden="true">
+            {liked ? '♥' : '♡'}
+          </span>
+          <span>{liked ? 'Liked' : 'Like'}</span>
+        </button>
+
+        <Link to={'/' + props.id} className="post__action">
+          <span className="post__action-icon" aria-hidden="true">💬</span>
+          <span>Reply</span>
+        </Link>
+
+        <button
+          className="post__action"
+          onClick={() => {
+            if (navigator.share) {
+              navigator.share({ title: props.title, url: window.location.origin + '/' + props.id }).catch(() => {});
+            }
+          }}
+          aria-label="Share"
+        >
+          <span className="post__action-icon" aria-hidden="true">↗</span>
+          <span>Share</span>
+        </button>
+      </footer>
     </article>
   );
 };
 
-export default post;
+export default Post;
