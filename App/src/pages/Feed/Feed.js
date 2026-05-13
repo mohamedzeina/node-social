@@ -7,6 +7,7 @@ import Input from '../../components/Form/Input/Input';
 import Paginator from '../../components/Paginator/Paginator';
 import Loader from '../../components/Loader/Loader';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
+import Sidebar from '../../components/Sidebar/Sidebar';
 import './Feed.css';
 
 class Feed extends Component {
@@ -411,6 +412,14 @@ class Feed extends Component {
           onFinishEdit={this.finishEditHandler}
         />
 
+        <div className="feed-page__sidebar">
+          <Sidebar
+            currentUser={this.props.currentUser}
+            postCount={this.state.totalPosts}
+          />
+        </div>
+
+        <div className="feed-page__main">
         <section className="feed__status">
           <span className="feed__status-avatar" aria-hidden="true">
             {this.props.currentUser && this.props.currentUser.avatarUrl ? (
@@ -488,6 +497,7 @@ class Feed extends Component {
             </Paginator>
           )}
         </section>
+        </div>
       </div>
     );
   }

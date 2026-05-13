@@ -17,11 +17,7 @@
   max-width: 100%;
 }
 
-.content > * {
-  max-width: 42rem;
-  margin-left: auto;
-  margin-right: auto;
-}
+/* Pages set their own widths (feed-page, auth, single-post). */
 
 @media (min-width: 768px) {
   .content {
