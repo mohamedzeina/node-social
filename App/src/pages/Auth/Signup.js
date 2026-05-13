@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 import Input from '../../components/Form/Input/Input';
 import Button from '../../components/Button/Button';
@@ -71,24 +72,23 @@ class Signup extends Component {
 
   render() {
     return (
-      <Auth>
+      <Auth
+        eyebrow="Become a contributor"
+        title="Subscribe."
+        lede="Make a byline, file your first dispatch, and join a quieter corner of the internet."
+        footer={
+          <span>
+            Already on the masthead? <Link to="/">Sign in</Link>
+          </span>
+        }
+      >
         <form onSubmit={e => this.props.onSignup(e, this.state)}>
           <Input
-            id="email"
-            label="Your E-Mail"
-            type="email"
-            control="input"
-            onChange={this.inputChangeHandler}
-            onBlur={this.inputBlurHandler.bind(this, 'email')}
-            value={this.state.signupForm['email'].value}
-            valid={this.state.signupForm['email'].valid}
-            touched={this.state.signupForm['email'].touched}
-          />
-          <Input
             id="name"
-            label="Your Name"
+            label="Byline"
             type="text"
             control="input"
+            placeholder="The name to print under your work"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'name')}
             value={this.state.signupForm['name'].value}
@@ -96,18 +96,31 @@ class Signup extends Component {
             touched={this.state.signupForm['name'].touched}
           />
           <Input
+            id="email"
+            label="Address of correspondence"
+            type="email"
+            control="input"
+            placeholder="you@dispatches.example"
+            onChange={this.inputChangeHandler}
+            onBlur={this.inputBlurHandler.bind(this, 'email')}
+            value={this.state.signupForm['email'].value}
+            valid={this.state.signupForm['email'].valid}
+            touched={this.state.signupForm['email'].touched}
+          />
+          <Input
             id="password"
-            label="Password"
+            label="Passphrase"
             type="password"
             control="input"
+            placeholder="At least five characters"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'password')}
             value={this.state.signupForm['password'].value}
             valid={this.state.signupForm['password'].valid}
             touched={this.state.signupForm['password'].touched}
           />
-          <Button design="raised" type="submit" loading={this.props.loading}>
-            Signup
+          <Button design="accent" mode="raised" type="submit" loading={this.props.loading}>
+            Join the masthead
           </Button>
         </form>
       </Auth>

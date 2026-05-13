@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 import Input from '../../components/Form/Input/Input';
 import Button from '../../components/Button/Button';
@@ -65,7 +66,16 @@ class Login extends Component {
 
   render() {
     return (
-      <Auth>
+      <Auth
+        eyebrow="Returning reader"
+        title="Welcome back."
+        lede="Sign in to continue filing dispatches and to read what others have written today."
+        footer={
+          <span>
+            New here? <Link to="/signup">Subscribe</Link>
+          </span>
+        }
+      >
         <form
           onSubmit={e =>
             this.props.onLogin(e, {
@@ -76,9 +86,10 @@ class Login extends Component {
         >
           <Input
             id="email"
-            label="Your E-Mail"
+            label="Address of correspondence"
             type="email"
             control="input"
+            placeholder="you@dispatches.example"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'email')}
             value={this.state.loginForm['email'].value}
@@ -87,17 +98,18 @@ class Login extends Component {
           />
           <Input
             id="password"
-            label="Password"
+            label="Passphrase"
             type="password"
             control="input"
+            placeholder="Your secret line"
             onChange={this.inputChangeHandler}
             onBlur={this.inputBlurHandler.bind(this, 'password')}
             value={this.state.loginForm['password'].value}
             valid={this.state.loginForm['password'].valid}
             touched={this.state.loginForm['password'].touched}
           />
-          <Button design="raised" type="submit" loading={this.props.loading}>
-            Login
+          <Button design="accent" mode="raised" type="submit" loading={this.props.loading}>
+            Enter the press room
           </Button>
         </form>
       </Auth>
