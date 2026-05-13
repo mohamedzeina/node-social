@@ -71,10 +71,14 @@
   pointer-events: none;
 }
 
-/* Deep threads — tighten spine + hook past the visual cap */
+/* Deep threads — tighten the hook past the visual cap so the indent
+   shrinks (--indent = --spine-x + --hook-w), but KEEP --spine-x at
+   its default so the spine column always sits at the parent avatar
+   centerline. Changing --spine-x here used to misalign deep spines
+   with the parent's drop-line, leaving a visible horizontal jump at
+   the cap boundary as the tree grew. */
 .comment-node--capped {
-  --hook-w:   0.55rem;
-  --spine-x:  0.85rem;
+  --hook-w: 0.55rem;
 }
 
 /* ============================================================
