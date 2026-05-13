@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import Post from '../../components/Feed/Post/Post';
 import Button from '../../components/Button/Button';
@@ -395,8 +395,15 @@ class Feed extends Component {
   };
 
   render() {
+    const today = new Date().toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
     return (
-      <Fragment>
+      <div className="feed-page">
         <ErrorHandler error={this.state.error} onHandle={this.errorHandler} />
         <FeedEdit
           editing={this.state.isEditing}
@@ -405,47 +412,77 @@ class Feed extends Component {
           onCancelEdit={this.cancelEditHandler}
           onFinishEdit={this.finishEditHandler}
         />
+
+        <header className="feed__head">
+          <span className="feed__eyebrow">{today} &middot; Folio I</span>
+          <h1 className="feed__title">
+            The <em>Feed</em>
+          </h1>
+          <p className="feed__deck">
+            Today&rsquo;s dispatches from your fellow correspondents &mdash;
+            arranged newest first, two to a page.
+          </p>
+        </header>
+
         <section className="feed__status">
+          <span className="feed__status-icon">&para;</span>
           <form onSubmit={this.statusUpdateHandler}>
             <Input
+              id="status"
               type="text"
-              placeholder="Your status"
+              label="What are you working on?"
+              placeholder="Write a short note&hellip;"
               control="input"
               onChange={this.statusInputChangeHandler}
               value={this.state.status}
             />
             <Button mode="flat" type="submit">
-              Update
+              Update note
             </Button>
           </form>
         </section>
+
         <section className="feed__control">
+          <div className="feed__section-label">
+            <small>Section I</small>
+            Recent dispatches
+          </div>
           <Button mode="raised" design="accent" onClick={this.newPostHandler}>
-            New Post
+            File a dispatch
           </Button>
         </section>
+
         <section className="feed">
           {this.state.postsLoading && (
-            <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <div className="feed__loader-wrap">
               <Loader />
             </div>
           )}
           {this.state.posts.length <= 0 && !this.state.postsLoading ? (
-            <p style={{ textAlign: 'center' }}>No posts found.</p>
+            <div className="feed__empty">
+              <span className="feed__empty-mark">&para;</span>
+              The galleys are empty.<br />
+              Be the first to file a dispatch.
+            </div>
           ) : null}
-          {!this.state.postsLoading && (
+          {!this.state.postsLoading && this.state.posts.length > 0 && (
             <Paginator
               onPrevious={this.loadPosts.bind(this, 'previous')}
               onNext={this.loadPosts.bind(this, 'next')}
               lastPage={Math.ceil(this.state.totalPosts / 2)}
               currentPage={this.state.postPage}
             >
-              {this.state.posts.map((post) => (
+              {this.state.posts.map((post, idx) => (
                 <Post
                   key={post._id}
                   id={post._id}
+                  index={idx + 1}
                   author={post.creator.name}
-                  date={new Date(post.createdAt).toLocaleDateString('en-US')}
+                  date={new Date(post.createdAt).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
@@ -456,7 +493,7 @@ class Feed extends Component {
             </Paginator>
           )}
         </section>
-      </Fragment>
+      </div>
     );
   }
 }

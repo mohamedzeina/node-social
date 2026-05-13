@@ -1,36 +1,178 @@
+/* ============================================================
+   Post card — a single published dispatch
+   Two-column on wide screens: image | text
+   ============================================================ */
+
 .post {
-  margin: 1rem 0;
-  border: 1px solid #3b0062;
-  border-radius: 5px;
-  padding: 0.5rem;
+  position: relative;
+  margin: 0 0 3rem;
+  padding: 0;
+  background: transparent;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  animation: dispatch-fade-up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-.post__meta {
-  font-size: 1rem;
-  color: #707070;
-  margin: 0;
+/* Big italic folio numeral, top-right */
+.post__folio {
+  position: absolute;
+  top: -1.2rem;
+  right: 0;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--paper-shadow);
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: -0.04em;
+}
+
+/* ---- Header ---------------------------------------- */
+.post__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-bottom: 0.5rem;
+}
+
+.post__byline {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.post__initial {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--paper);
+  background: var(--ink);
+  flex-shrink: 0;
+}
+
+.post__byline-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.post__author {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.98rem;
+  color: var(--ink);
+}
+
+.post__date {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 3px;
 }
 
 .post__title {
-  font-size: 1.5rem;
-  margin: 1rem 0;
-  color: #3b0062;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--ink);
+  max-width: 32rem;
+}
+.post__title:hover { color: var(--vermilion); transition: color 0.18s ease; }
+
+/* ---- Image ----------------------------------------- */
+.post__image {
+  width: 100%;
+  height: 14rem;
+  background: var(--paper-deep);
+  border: 1px solid var(--ink);
+  overflow: hidden;
+  position: relative;
+}
+.post__image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--paper);
+  pointer-events: none;
+}
+.post__image .image { background-size: cover; }
+
+/* ---- Body ------------------------------------------ */
+.post__content {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  /* clamp to 3 lines to preview */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.post__image {
-  height: 15rem;
-  width: 100%;
+/* ---- Footer ---------------------------------------- */
+.post__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post__divider {
+  height: 1px;
+  background: var(--ink);
+  position: relative;
+  margin-top: 0.5rem;
+}
+.post__divider span {
+  position: absolute;
+  left: 0;
+  top: -0.7rem;
+  background: var(--paper);
+  padding-right: 0.5rem;
+  font-family: var(--font-display);
+  color: var(--vermilion);
+  font-size: 0.95rem;
 }
 
 .post__actions {
-  text-align: right;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 
-@media (min-width: 768px) {
+/* ---- Wide-screen two-column layout ------------------ */
+@media (min-width: 720px) {
   .post {
-    padding: 1rem;
-    width: 40rem;
-    margin-left: auto;
-    margin-right: auto;
+    grid-template-columns: 1fr 1.15fr;
+    grid-template-areas:
+      "image header"
+      "image content"
+      "footer footer";
+    gap: 1.5rem 2rem;
+    margin-bottom: 4rem;
   }
+  .post__header  { grid-area: header; }
+  .post__image   { grid-area: image; height: 100%; min-height: 18rem; }
+  .post__content { grid-area: content; }
+  .post__footer  { grid-area: footer; }
+  .post__folio { font-size: 5rem; top: -2rem; right: -0.4rem; }
 }

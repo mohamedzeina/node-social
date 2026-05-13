@@ -1,28 +1,202 @@
+/* ============================================================
+   Feed page — front page of the journal
+   ============================================================ */
+
+.feed-page {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  animation: dispatch-fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ---- Front-page masthead ------------------------------- */
+.feed__head {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1rem 0 1.5rem;
+  border-bottom: 3px double var(--ink);
+  margin-bottom: 2.5rem;
+}
+
+.feed__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--vermilion);
+}
+
+.feed__title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-weight: 600;
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.feed__title em {
+  font-style: italic;
+  color: var(--vermilion);
+}
+
+.feed__deck {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 32rem;
+  margin: 0 auto;
+  line-height: 1.45;
+}
+
+/* ---- Status row — your byline + status update --------- */
 .feed__status {
-  width: 90%;
-  margin: 1rem auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1.1rem 1.2rem;
+  background: var(--paper-deep);
+  border: 1px solid var(--ink);
+  margin-bottom: 2.5rem;
+  position: relative;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.feed__status::before {
+  content: "The subscriber's note";
+  position: absolute;
+  top: -0.55rem;
+  left: 1rem;
+  padding: 0 0.4rem;
+  background: var(--paper);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vermilion);
+}
+
+.feed__status-icon {
+  width: 2rem;
+  height: 2rem;
+  background: var(--ink);
+  color: var(--paper);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
 }
 
 .feed__status form {
+  display: contents;
+}
+
+.feed__status .input {
+  margin: 0;
+}
+
+.feed__status .button {
+  margin-bottom: 0.2rem;
+}
+
+/* ---- Control row — file a new dispatch --------------- */
+.feed__control {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--paper-edge);
 }
 
-.feed__status form * {
-  margin: 0 0.5rem;
+.feed__section-label {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 60, "WONK" 1;
+  font-style: italic;
+  font-size: 1.7rem;
+  font-weight: 500;
+  color: var(--ink);
 }
 
-.feed__control {
+.feed__section-label small {
+  display: block;
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.35rem;
+}
+
+/* ---- Feed itself -------------------------------------- */
+.feed {
+  width: 100%;
+}
+
+.feed__empty {
   text-align: center;
+  padding: 4rem 1rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--ink-faint);
+  border: 1px dashed var(--paper-edge);
 }
 
+.feed__empty-mark {
+  display: block;
+  font-size: 2.4rem;
+  color: var(--vermilion);
+  margin-bottom: 0.8rem;
+  font-variation-settings: "opsz" 144, "WONK" 1;
+}
+
+.feed__loader-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+/* Preview image inside the FeedEdit modal */
 .new-post__preview-image {
-  width: 15rem;
-  height: 7rem;
+  width: 100%;
+  height: 12rem;
+  background: var(--paper-deep);
+  border: 1px solid var(--paper-edge);
+  margin: 0.75rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  position: relative;
 }
+.new-post__preview-image p { margin: 0; }
+.new-post__preview-image .image { position: absolute; inset: 0; }
 
-@media (min-width: 768px) {
+@media (max-width: 600px) {
   .feed__status {
-    width: 30rem;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
   }
+  .feed__status .button { align-self: flex-start; }
+  .feed__control { flex-direction: column; align-items: flex-start; gap: 1rem; }
 }

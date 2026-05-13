@@ -134,11 +134,12 @@ class FeedEdit extends Component {
   };
 
   render() {
+    const isRevising = Boolean(this.props.selectedPost);
     return this.props.editing ? (
       <Fragment>
         <Backdrop onClick={this.cancelPostChangeHandler} />
         <Modal
-          title="New Post"
+          title={isRevising ? 'Revise your dispatch' : 'File a new dispatch'}
           acceptEnabled={this.state.formIsValid}
           onCancelModal={this.cancelPostChangeHandler}
           onAcceptModal={this.acceptPostChangeHandler}
@@ -147,8 +148,9 @@ class FeedEdit extends Component {
           <form>
             <Input
               id="title"
-              label="Title"
+              label="Headline"
               control="input"
+              placeholder="What is this dispatch about?"
               onChange={this.postInputChangeHandler}
               onBlur={this.inputBlurHandler.bind(this, 'title')}
               valid={this.state.postForm['title'].valid}
@@ -157,7 +159,7 @@ class FeedEdit extends Component {
             />
             <FilePicker
               id="image"
-              label="Image"
+              label="Plate (PNG / JPG)"
               control="input"
               onChange={this.postInputChangeHandler}
               onBlur={this.inputBlurHandler.bind(this, 'image')}
@@ -165,16 +167,17 @@ class FeedEdit extends Component {
               touched={this.state.postForm['image'].touched}
             />
             <div className="new-post__preview-image">
-              {!this.state.imagePreview && <p>Please choose an image.</p>}
+              {!this.state.imagePreview && <p>No plate selected.</p>}
               {this.state.imagePreview && (
                 <Image imageUrl={this.state.imagePreview} contain left />
               )}
             </div>
             <Input
               id="content"
-              label="Content"
+              label="Body copy"
               control="textarea"
-              rows="5"
+              rows="6"
+              placeholder="Write your dispatch&hellip;"
               onChange={this.postInputChangeHandler}
               onBlur={this.inputBlurHandler.bind(this, 'content')}
               valid={this.state.postForm['content'].valid}
