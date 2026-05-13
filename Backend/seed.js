@@ -23,6 +23,7 @@ const bcrypt = require('bcryptjs');
 
 const User = require('./models/user');
 const Post = require('./models/post');
+const Comment = require('./models/comment');
 
 // --------------------------------------------------------------------
 // Env loading — read nodemon.json if it exists (project convention)
@@ -167,6 +168,58 @@ const POSTS = [
   },
 ];
 
+// Comments: post is the index into POSTS, author is index into USERS.
+// Ordered roughly oldest-first within each post so the seeded
+// timestamps don't all collide at the same millisecond.
+const COMMENTS = [
+  // Post 0 — Morning ritual (Maya)
+  { post: 0, author: 1, content: 'This is exactly why I bought a kettle that doesn’t beep.' },
+  { post: 0, author: 4, content: 'Same. The phone-less ten minutes is everything.' },
+  { post: 0, author: 5, content: 'Trying this tomorrow. Wish me luck.' },
+
+  // Post 1 — Seventeen miles (James)
+  { post: 1, author: 0, content: 'Where on the coast?? I want to do this trip.' },
+  { post: 1, author: 2, content: 'Crab rolls from a fold-out table is the dream.' },
+  { post: 1, author: 5, content: 'Seventeen miles is a serious day.' },
+
+  // Post 2 — Piranesi (Aisha)
+  { post: 2, author: 0, content: 'If you liked Piranesi, try The Buried Giant.' },
+  { post: 2, author: 3, content: 'I rationed it. Ten pages a night.' },
+  { post: 2, author: 4, content: 'Susanna Clarke is a magician.' },
+
+  // Post 3 — Small things compound (Oliver)
+  { post: 3, author: 0, content: 'Eight lines, ten times faster — favourite ratio.' },
+  { post: 3, author: 1, content: 'This is also true for photographs.' },
+
+  // Post 4 — The basil survived (Sofia)
+  { post: 4, author: 2, content: 'Talking to plants is not as silly as people say.' },
+  { post: 4, author: 5, content: 'Mine is on its third life. We’re not friends.' },
+  { post: 4, author: 0, content: 'What variety? Genovese?' },
+
+  // Post 5 — First loaf (Noah)
+  { post: 5, author: 4, content: 'Dense crumb is just well-loved bread.' },
+  { post: 5, author: 3, content: 'Going darker on the bake is a good problem.' },
+  { post: 5, author: 1, content: 'Send me the recipe.' },
+
+  // Post 6 — Espresso bar (Maya)
+  { post: 6, author: 1, content: 'Send me the canal, I’m coming.' },
+  { post: 6, author: 4, content: 'Three-seat bars are the only good bars.' },
+
+  // Post 7 — Light at 5pm (James)
+  { post: 7, author: 0, content: 'Stop, I’m crying at my desk.' },
+  { post: 7, author: 2, content: 'Long way home is the right way home.' },
+  { post: 7, author: 4, content: 'The “autumn film still” season.' },
+
+  // Post 8 — On rereading (Aisha)
+  { post: 8, author: 0, content: 'I reread Mrs. Dalloway every June.' },
+  { post: 8, author: 3, content: 'Yes. Skim once, read once.' },
+
+  // Post 9 — Brutalist library (Sofia)
+  { post: 9, author: 2, content: 'Concrete + wood is always the move.' },
+  { post: 9, author: 1, content: 'I’d love to shoot this on film.' },
+  { post: 9, author: 0, content: 'Buildings AND people, well said.' },
+];
+
 // --------------------------------------------------------------------
 // Run
 // --------------------------------------------------------------------
@@ -176,8 +229,12 @@ async function run() {
   console.log(`\n→ Connecting to MongoDB at ${hostHint} …`);
   await mongoose.connect(process.env.MONGODB_URI);
 
-  console.log('→ Wiping users + posts collections …');
-  await Promise.all([User.deleteMany({}), Post.deleteMany({})]);
+  console.log('→ Wiping users + posts + comments collections …');
+  await Promise.all([
+    User.deleteMany({}),
+    Post.deleteMany({}),
+    Comment.deleteMany({}),
+  ]);
 
   console.log('→ Creating users …');
   const hashedPassword = await bcrypt.hash(PASSWORD, 12);
@@ -194,6 +251,7 @@ async function run() {
   console.log(`  ✓ ${userDocs.length} users created`);
 
   console.log('→ Creating posts + likes …');
+  const postDocs = []; // index-aligned with POSTS for comment refs
   for (const p of POSTS) {
     const creator = userDocs[p.author];
     const likers = (p.likers || [])
@@ -208,6 +266,7 @@ async function run() {
       likes: likers,
     });
 
+    postDocs.push(post);
     creator.posts.push(post._id);
     await creator.save();
   }
@@ -217,7 +276,26 @@ async function run() {
     (sum, p) => sum + (p.likers || []).filter((i) => i !== p.author).length,
     0
   );
-  console.log(`  ✓ ${totalLikes} likes distributed\n`);
+  console.log(`  ✓ ${totalLikes} likes distributed`);
+
+  console.log('→ Creating comments …');
+  const commentCountByPost = {};
+  for (const c of COMMENTS) {
+    const post = postDocs[c.post];
+    const author = userDocs[c.author];
+    if (!post || !author) continue;
+    await Comment.create({
+      content: c.content,
+      author: author._id,
+      post: post._id,
+    });
+    commentCountByPost[post._id] = (commentCountByPost[post._id] || 0) + 1;
+  }
+  // Update denormalised counters in bulk
+  for (const [postId, count] of Object.entries(commentCountByPost)) {
+    await Post.updateOne({ _id: postId }, { $set: { commentCount: count } });
+  }
+  console.log(`  ✓ ${COMMENTS.length} comments distributed\n`);
 
   console.log('Done. Test accounts:');
   USERS.forEach((u) =>
