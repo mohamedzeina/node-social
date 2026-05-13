@@ -23,47 +23,46 @@
   animation: fade-up 0.3s var(--ease-out);
 }
 
-.single-post-modal__close {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1;
-  width: 2.5rem;
-  height: 2.5rem;
+/* Close button — anchored to the top-right of the card itself (modal only) */
+.single-post__close {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  z-index: 2;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
-  border: 1px solid var(--hairline);
-  background: var(--surface);
-  color: var(--ink);
+  border: 0;
+  background: var(--surface-2);
+  color: var(--ink-2);
   cursor: pointer;
-  box-shadow: var(--shadow-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   transition:
     background 0.16s var(--ease-out),
     color 0.16s var(--ease-out),
-    border-color 0.16s var(--ease-out),
     transform 0.12s var(--ease-out);
 }
-.single-post-modal__close:hover {
+.single-post__close:hover {
   background: var(--ink);
   color: #fff;
-  border-color: var(--ink);
 }
-.single-post-modal__close:active { transform: scale(0.94); }
+.single-post__close:active { transform: scale(0.92); }
 
 .single-post--modal { animation: fade-up 0.35s var(--ease-out); }
 .single-post--modal .single-post__card {
   box-shadow: var(--shadow-lg);
+  position: relative;          /* anchor for .single-post__close */
 }
 
 @media (min-width: 768px) {
   .single-post-modal {
     padding: 3.5rem 2rem 5rem;
   }
-  .single-post-modal__close {
-    top: 1.25rem;
-    right: 1.5rem;
+  .single-post__close {
+    top: 1rem;
+    right: 1rem;
   }
 }
 

@@ -282,13 +282,37 @@ class SinglePost extends Component {
     }
   };
 
+  /**
+   * Close when the click lands on the scroll-container itself
+   * (the "backdrop" area around the card) — not on the card or its
+   * descendants. The Backdrop component in App.js sits visually
+   * behind us at z-index 200 but our scroll-container covers it
+   * (inset: 0, z-index 280), so we own the dismiss behaviour here.
+   */
+  handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && this.props.onClose) {
+      this.props.onClose();
+    }
+  };
+
   dismissError = () => this.setState({ error: null });
 
   // ---------- Helpers for the inner content (shared by page + modal) ----------
 
   renderSkeletonCard() {
+    const isModal = !!this.props.asModal;
     return (
       <div className="single-post__card">
+        {isModal && (
+          <button
+            type="button"
+            className="single-post__close"
+            onClick={this.props.onClose}
+            aria-label="Close"
+          >
+            <Close size={16} />
+          </button>
+        )}
         <header className="single-post__header">
           <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
           <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
@@ -354,6 +378,7 @@ class SinglePost extends Component {
   renderCard() {
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
     const { liked, likeCount, likePending } = this.state;
+    const isModal = !!this.props.asModal;
 
     // Build the comment tree from the flat list.
     const byId = new Map();
@@ -372,6 +397,16 @@ class SinglePost extends Component {
 
     return (
       <div className="single-post__card">
+        {isModal && (
+          <button
+            type="button"
+            className="single-post__close"
+            onClick={this.props.onClose}
+            aria-label="Close"
+          >
+            <Close size={16} />
+          </button>
+        )}
         <header className="single-post__header">
           {this.state.authorId ? (
             <Link
@@ -483,22 +518,14 @@ class SinglePost extends Component {
     // ---- Modal mode (opened from feed / profile) ----
     if (this.props.asModal) {
       return (
-        <div className="single-post-modal" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            className="single-post-modal__close"
-            onClick={this.props.onClose}
-            aria-label="Close"
-          >
-            <Close size={18} />
-          </button>
+        <div
+          className="single-post-modal"
+          role="dialog"
+          aria-modal="true"
+          onClick={this.handleBackdropClick}
+        >
           <article className="single-post single-post--modal">
             <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
-            {loading && (
-              <div className="single-post__back-skeleton">
-                <Skeleton width="5rem" height="1.6rem" radius="999px" />
-              </div>
-            )}
             {inner}
           </article>
         </div>
