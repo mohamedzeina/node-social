@@ -1,32 +1,142 @@
+/* ============================================================
+   Form inputs — editorial form fields
+   Inspired by carbon-copy paper forms, with a strong baseline
+   ============================================================ */
+
 .input {
-  margin: 1rem 0;
+  margin: 1.25rem 0;
   width: 100%;
+  position: relative;
 }
 
 .input label {
   display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  margin-bottom: 0.25rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Numbered marker before each label */
+.input label::before {
+  content: "§";
+  color: var(--vermilion);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
 }
 
 .input input,
 .input textarea {
   display: block;
-  font: inherit;
-  padding: 0.25rem 0.5rem;
   width: 100%;
-  border-radius: 3px;
-  border: 1px solid #ccc;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--ink);
+  padding: 0.65rem 0.1rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  transition: border-color 0.18s ease,
+              background 0.18s ease,
+              padding 0.18s ease;
+  font-feature-settings: 'liga' 1, 'kern' 1;
 }
 
-.input .touched.invalid {
-    border-color: red;
-    background: #ffc2c2;
+.input textarea {
+  resize: vertical;
+  min-height: 8rem;
+  line-height: 1.6;
+}
+
+.input input::placeholder,
+.input textarea::placeholder {
+  color: var(--ink-ghost);
+  font-style: italic;
+}
+
+.input input:hover,
+.input textarea:hover {
+  background: rgba(22,19,16,0.025);
 }
 
 .input input:focus,
 .input textarea:focus {
   outline: none;
-  border-color: #3b0062;
-  color: #3b0062;
+  border-bottom-width: 2px;
+  border-bottom-color: var(--vermilion);
+  background: rgba(183,50,37,0.05);
+  padding-left: 0.4rem;
+}
+
+/* Validation — red underline + soft tint */
+.input .touched.invalid {
+  border-bottom-color: var(--vermilion-deep);
+  background: rgba(142,36,24,0.06);
+}
+
+.input .touched.invalid + .input__error {
+  opacity: 1;
+}
+
+/* ============================================================
+   File picker — looks like an editorial slip
+   ============================================================ */
+
+.input input[type="file"] {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0;
+  cursor: pointer;
+  border-bottom: 1px dashed var(--ink);
+  padding-bottom: 0.6rem;
+}
+
+.input input[type="file"]::-webkit-file-upload-button {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 0.5rem 1rem;
+  margin-right: 0.8rem;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.18s ease;
+}
+
+.input input[type="file"]::-webkit-file-upload-button:hover {
+  background: var(--vermilion);
+}
+
+.input input[type="file"]::file-selector-button {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  padding: 0.5rem 1rem;
+  margin-right: 0.8rem;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background 0.18s ease;
+}
+
+.input input[type="file"]::file-selector-button:hover {
+  background: var(--vermilion);
 }
