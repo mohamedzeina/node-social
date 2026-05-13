@@ -12,6 +12,82 @@ import './SinglePost.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
 
+/**
+ * Single point for GraphQL requests from this component. Centralizes
+ * auth header, JSON parsing, and error extraction so the four methods
+ * that hit the API don't each reinvent it.
+ */
+async function gqlRequest({ query, variables, token, fallbackMessage }) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query, variables }),
+  });
+  const data = await res.json();
+  if (data.errors && data.errors.length) {
+    const e = data.errors[0];
+    throw new Error(e.message || fallbackMessage || 'Request failed.');
+  }
+  return data.data;
+}
+
+/**
+ * Build a nested comment tree from the flat list returned by the API.
+ * Each root and reply gets a `replies: []` slot; orphans (parent id
+ * not present in the list) are treated as roots.
+ */
+function buildCommentTree(comments) {
+  const byId = new Map();
+  for (const c of comments) {
+    byId.set(c._id, { ...c, replies: [] });
+  }
+  const roots = [];
+  for (const node of byId.values()) {
+    if (node.parent && byId.has(node.parent)) {
+      byId.get(node.parent).replies.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
+
+const FETCH_POST_QUERY = `
+  query FetchSinglePost($postId: ID!) {
+    getPost(id: $postId) {
+      title
+      content
+      creator { _id name avatarUrl }
+      imageUrl
+      createdAt
+      likeCount
+      likedByMe
+      commentCount
+      comments {
+        _id
+        content
+        createdAt
+        parent
+        author { _id name avatarUrl }
+      }
+    }
+  }
+`;
+
+const ADD_COMMENT_QUERY = `
+  mutation AddComment($postId: ID!, $content: String!, $parentId: ID) {
+    addComment(postId: $postId, content: $content, parentId: $parentId) {
+      _id
+      content
+      createdAt
+      parent
+      author { _id name avatarUrl }
+    }
+  }
+`;
+
 const formatRelativeDate = (iso) => {
   if (!iso) return '';
   const d = new Date(iso);
@@ -56,62 +132,32 @@ class SinglePost extends Component {
     }
 
     const postId = this.props.match.params.postId;
-    const graphqlQuery = {
-      query: `
-      query FetchSinglePost($postId: ID!){
-        getPost(id: $postId) {
-          title
-          content
-          creator { _id name avatarUrl }
-          imageUrl
-          createdAt
-          likeCount
-          likedByMe
-          commentCount
-          comments {
-            _id
-            content
-            createdAt
-            parent
-            author { _id name avatarUrl }
-          }
-        }
-      }
-      `,
+    gqlRequest({
+      query: FETCH_POST_QUERY,
       variables: { postId },
-    };
-    fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + this.props.token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(graphqlQuery),
+      token: this.props.token,
+      fallbackMessage: 'Fetching post failed.',
     })
-      .then(res => res.json())
-      .then(resData => {
-        if (resData.errors && (resData.errors.status === 401 || resData.errors.status === 404)) {
-          throw new Error(resData.errors.message);
-        }
-        if (resData.errors) throw new Error('Fetching post failed.');
+      .then((data) => {
+        const post = data.getPost;
         this.setState({
-          title: resData.data.getPost.title,
-          author: resData.data.getPost.creator.name,
-          authorAvatar: resData.data.getPost.creator.avatarUrl,
-          authorId: resData.data.getPost.creator._id,
-          image: resData.data.getPost.imageUrl,
-          createdAt: resData.data.getPost.createdAt,
-          date: new Date(resData.data.getPost.createdAt).toLocaleDateString('en-US', {
+          title: post.title,
+          author: post.creator.name,
+          authorAvatar: post.creator.avatarUrl,
+          authorId: post.creator._id,
+          image: post.imageUrl,
+          createdAt: post.createdAt,
+          date: new Date(post.createdAt).toLocaleDateString('en-US', {
             month: 'long', day: 'numeric', year: 'numeric',
           }),
-          content: resData.data.getPost.content,
-          liked: resData.data.getPost.likedByMe,
-          likeCount: resData.data.getPost.likeCount,
-          comments: resData.data.getPost.comments || [],
+          content: post.content,
+          liked: post.likedByMe,
+          likeCount: post.likeCount,
+          comments: post.comments || [],
           loading: false,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
         this.setState({ loading: false });
       });
@@ -127,23 +173,13 @@ class SinglePost extends Component {
     this.setState({ liked: nextLiked, likeCount: nextCount, likePending: true });
 
     const mutation = nextLiked ? 'likePost' : 'unlikePost';
-    const query = {
-      query: `mutation L($id: ID!) { ${mutation}(id: $id) { _id likeCount likedByMe } }`,
-      variables: { id: postId },
-    };
-
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + this.props.token,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(query),
+      const data = await gqlRequest({
+        query: `mutation L($id: ID!) { ${mutation}(id: $id) { _id likeCount likedByMe } }`,
+        variables: { id: postId },
+        token: this.props.token,
       });
-      const data = await res.json();
-      if (data.errors) throw new Error(data.errors[0].message);
-      const fresh = data.data[mutation];
+      const fresh = data[mutation];
       this.setState({ liked: fresh.likedByMe, likeCount: fresh.likeCount });
       if (this.props.onPostUpdate) {
         this.props.onPostUpdate(postId, {
@@ -202,7 +238,11 @@ class SinglePost extends Component {
         const body = this.modalBodyRef.current;
         if (!body) return;
         if (parentId) {
-          const el = body.querySelector(`[data-client-id="${clientId}"]`);
+          // CSS.escape is defensive — clientId is internally generated
+          // (alphanumeric + hyphens) so today it's selector-safe, but
+          // escaping survives any future change to the clientId format.
+          const sel = `[data-client-id="${CSS.escape(clientId)}"]`;
+          const el = body.querySelector(sel);
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
           body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
@@ -210,34 +250,14 @@ class SinglePost extends Component {
       });
     }
 
-    const query = {
-      query: `
-        mutation AddComment($postId: ID!, $content: String!, $parentId: ID) {
-          addComment(postId: $postId, content: $content, parentId: $parentId) {
-            _id
-            content
-            createdAt
-            parent
-            author { _id name avatarUrl }
-          }
-        }
-      `,
-      variables: { postId, content, parentId: parentId || null },
-    };
-
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + this.props.token,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(query),
+      const data = await gqlRequest({
+        query: ADD_COMMENT_QUERY,
+        variables: { postId, content, parentId: parentId || null },
+        token: this.props.token,
       });
-      const data = await res.json();
-      if (data.errors) throw new Error(data.errors[0].message);
 
-      const real = data.data.addComment;
+      const real = data.addComment;
       let nextLength = 0;
       this.setState(
         (prev) => {
@@ -292,22 +312,12 @@ class SinglePost extends Component {
     const remaining = previous.filter((c) => !toRemove.has(c._id));
     this.setState({ comments: remaining });
 
-    const query = {
-      query: `mutation DeleteComment($id: ID!) { deleteComment(id: $id) }`,
-      variables: { id },
-    };
-
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + this.props.token,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(query),
+      await gqlRequest({
+        query: `mutation DeleteComment($id: ID!) { deleteComment(id: $id) }`,
+        variables: { id },
+        token: this.props.token,
       });
-      const data = await res.json();
-      if (data.errors) throw new Error(data.errors[0].message);
       if (this.props.onPostUpdate) {
         this.props.onPostUpdate(this.props.match.params.postId, {
           commentCount: remaining.length,
@@ -345,6 +355,36 @@ class SinglePost extends Component {
   };
 
   dismissError = () => this.setState({ error: null });
+
+  /**
+   * The like button — identical JSX in both the page card footer and
+   * the modal's like-row. Extracted so the heart icon, copy, and
+   * pressed/pending state stay in one place.
+   */
+  renderLikeButton() {
+    const { liked, likeCount, likePending } = this.state;
+    return (
+      <button
+        type="button"
+        className={[
+          'single-post__like',
+          liked ? 'is-liked' : '',
+          likePending ? 'is-pending' : '',
+        ].filter(Boolean).join(' ')}
+        onClick={this.toggleLike}
+        aria-pressed={liked}
+      >
+        <span className="single-post__like-icon" aria-hidden="true">
+          {liked ? <HeartFilled size={18} /> : <Heart size={18} />}
+        </span>
+        <span>
+          {likeCount > 0
+            ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
+            : 'Be the first to like this'}
+        </span>
+      </button>
+    );
+  }
 
   // ---------- Helpers for the inner content (shared by page + modal) ----------
 
@@ -415,21 +455,7 @@ class SinglePost extends Component {
 
   renderCard() {
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
-    const { liked, likeCount, likePending } = this.state;
-
-    // Build the comment tree from the flat list.
-    const byId = new Map();
-    for (const c of this.state.comments) {
-      byId.set(c._id, { ...c, replies: [] });
-    }
-    const roots = [];
-    for (const node of byId.values()) {
-      if (node.parent && byId.has(node.parent)) {
-        byId.get(node.parent).replies.push(node);
-      } else {
-        roots.push(node);
-      }
-    }
+    const roots = buildCommentTree(this.state.comments);
     const total = this.state.comments.length;
 
     return (
@@ -479,25 +505,7 @@ class SinglePost extends Component {
         <div className="single-post__content">{this.state.content}</div>
 
         <footer className="single-post__footer">
-          <button
-            type="button"
-            className={[
-              'single-post__like',
-              liked ? 'is-liked' : '',
-              likePending ? 'is-pending' : '',
-            ].join(' ')}
-            onClick={this.toggleLike}
-            aria-pressed={liked}
-          >
-            <span className="single-post__like-icon" aria-hidden="true">
-              {liked ? <HeartFilled size={18} /> : <Heart size={18} />}
-            </span>
-            <span>
-              {likeCount > 0
-                ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
-                : 'Be the first to like this'}
-            </span>
-          </button>
+          {this.renderLikeButton()}
         </footer>
 
         <section className="single-post__comments" aria-label="Comments">
@@ -551,22 +559,9 @@ class SinglePost extends Component {
    * surrounding empty space close the modal.
    */
   renderModal() {
-    const { loading, liked, likeCount, likePending } = this.state;
+    const { loading } = this.state;
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
-
-    // Build the comment tree (same algorithm as renderCard)
-    const byId = new Map();
-    for (const c of this.state.comments) {
-      byId.set(c._id, { ...c, replies: [] });
-    }
-    const roots = [];
-    for (const node of byId.values()) {
-      if (node.parent && byId.has(node.parent)) {
-        byId.get(node.parent).replies.push(node);
-      } else {
-        roots.push(node);
-      }
-    }
+    const roots = buildCommentTree(this.state.comments);
     const total = this.state.comments.length;
 
     return (
@@ -712,25 +707,7 @@ class SinglePost extends Component {
                 <div className="single-post-modal__content">{this.state.content}</div>
 
                 <div className="single-post-modal__like-row">
-                  <button
-                    type="button"
-                    className={[
-                      'single-post__like',
-                      liked ? 'is-liked' : '',
-                      likePending ? 'is-pending' : '',
-                    ].join(' ')}
-                    onClick={this.toggleLike}
-                    aria-pressed={liked}
-                  >
-                    <span className="single-post__like-icon" aria-hidden="true">
-                      {liked ? <HeartFilled size={18} /> : <Heart size={18} />}
-                    </span>
-                    <span>
-                      {likeCount > 0
-                        ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
-                        : 'Be the first to like this'}
-                    </span>
-                  </button>
+                  {this.renderLikeButton()}
                 </div>
 
                 <section className="single-post-modal__comments" aria-label="Comments">
