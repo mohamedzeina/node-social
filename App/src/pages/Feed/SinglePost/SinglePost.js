@@ -259,6 +259,45 @@ class SinglePost extends Component {
                 <footer className="single-post__footer">
                   <Skeleton width="9rem" height="2.5rem" radius="999px" />
                 </footer>
+
+                {/* Comments section skeleton */}
+                <section className="single-post__comments" aria-busy="true">
+                  <div className="single-post__comments-head">
+                    <Skeleton variant="text" width="5rem" height="1.1rem" />
+                    <Skeleton width="4.5rem" height="1.4rem" radius="999px" />
+                  </div>
+
+                  {/* Composer slot */}
+                  <div className="single-post__composer-skeleton">
+                    <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
+                    <div className="single-post__composer-skeleton-body">
+                      <Skeleton variant="rect" height="2.4rem" radius="14px" />
+                      <div className="single-post__composer-skeleton-footer">
+                        <Skeleton width="6rem" height="2rem" radius="999px" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Three comment-row skeletons */}
+                  <ul className="single-post__comments-list">
+                    {[0, 1, 2].map((i) => (
+                      <li key={i}>
+                        <div className="comment" aria-busy="true">
+                          <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
+                          <div className="comment__bubble">
+                            <div className="comment__head" style={{ width: '100%' }}>
+                              <Skeleton variant="text" width={`${30 + i * 8}%`} height="0.85rem" />
+                              <Skeleton variant="text" width="2.5rem" height="0.75rem" />
+                            </div>
+                            <Skeleton variant="text" width="100%" />
+                            <div style={{ height: '0.3rem' }} />
+                            <Skeleton variant="text" width={`${68 + i * 6}%`} />
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               </div>
             </article>
           </div>
