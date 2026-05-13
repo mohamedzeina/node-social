@@ -1,0 +1,43 @@
+/* ============================================================
+   PostSkeleton — mirrors the Post card layout while data loads
+   ============================================================ */
+
+.post-skeleton {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  margin: 0 0 1rem;
+  overflow: hidden;
+}
+
+.post-skeleton__header {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1rem 1.1rem 0.85rem;
+}
+
+.post-skeleton__byline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.post-skeleton__body {
+  padding: 0 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.post-skeleton__footer {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.7rem 0.85rem;
+  border-top: 1px solid var(--hairline);
+}
+
+@media (max-width: 480px) {
+  .post-skeleton > .skeleton--rect[style*="18rem"] { height: 14rem !important; }
+}
