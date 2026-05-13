@@ -38,6 +38,9 @@ const projectComment = (comment) => ({
   ...comment._doc,
   _id: comment._id.toString(),
   post: comment.post.toString ? comment.post.toString() : comment.post,
+  parent: comment.parent
+    ? (comment.parent.toString ? comment.parent.toString() : comment.parent)
+    : null,
   createdAt: comment.createdAt.toISOString(),
   updatedAt: comment.updatedAt.toISOString(),
 });
@@ -386,11 +389,17 @@ module.exports = {
   },
 
   /**
-   * Add a comment to a post.
-   * Validates content, creates a Comment doc, atomically bumps the
-   * denormalised commentCount on the parent Post.
+   * Add a comment to a post (optionally as a reply to another comment).
+   *
+   * If parentId is supplied, enforces depth-1 nesting:
+   *   - the parent comment must exist
+   *   - the parent must belong to the same post
+   *   - the parent itself must be top-level (parent.parent === null)
+   *
+   * Bumps Post.commentCount regardless (counter reflects total
+   * engagement on the post, including replies).
    */
-  addComment: async function ({ postId, content }, req) {
+  addComment: async function ({ postId, content, parentId }, req) {
     if (!req.isAuth) throw new Error('Not authenticated!');
 
     const trimmed = (content || '').trim();
@@ -405,7 +414,6 @@ module.exports = {
       throw err;
     }
 
-    // Make sure the post exists before we create an orphaned comment
     const post = await Post.findById(postId);
     if (!post) {
       const err = new Error('No post found.');
@@ -413,13 +421,35 @@ module.exports = {
       throw err;
     }
 
+    let parentRef = null;
+    if (parentId) {
+      const parent = await Comment.findById(parentId);
+      if (!parent) {
+        const err = new Error('Reply target not found.');
+        err.code = 404;
+        throw err;
+      }
+      if (parent.post.toString() !== postId.toString()) {
+        const err = new Error('Reply target belongs to a different post.');
+        err.code = 422;
+        throw err;
+      }
+      if (parent.parent) {
+        // Depth limit: replies cannot themselves be replied to.
+        const err = new Error('Replies cannot be nested further.');
+        err.code = 422;
+        throw err;
+      }
+      parentRef = parent._id;
+    }
+
     const comment = await Comment.create({
       content: trimmed,
       author: req.userId,
       post: postId,
+      parent: parentRef,
     });
 
-    // Atomically increment the denormalised counter on the parent
     await Post.updateOne({ _id: postId }, { $inc: { commentCount: 1 } });
 
     await comment.populate('author');
@@ -428,6 +458,9 @@ module.exports = {
 
   /**
    * Delete a comment. Only the author can delete their own comment.
+   *
+   * If the comment is a top-level thread, cascade-deletes all its
+   * replies (and adjusts commentCount accordingly).
    */
   deleteComment: async function ({ id }, req) {
     if (!req.isAuth) throw new Error('Not authenticated!');
@@ -444,9 +477,24 @@ module.exports = {
       throw err;
     }
 
+    // Count this comment + any child replies (only relevant for
+    // top-level deletions — replies don't have children of their own
+    // under the depth-1 rule).
+    const childCount = comment.parent
+      ? 0
+      : await Comment.countDocuments({ parent: comment._id });
+    const totalRemoved = 1 + childCount;
+
     await Comment.deleteOne({ _id: id });
-    // Decrement counter; clamp to 0 via the model's `min` constraint
-    await Post.updateOne({ _id: comment.post }, { $inc: { commentCount: -1 } });
+    if (childCount > 0) {
+      await Comment.deleteMany({ parent: id });
+    }
+
+    // Adjust the denormalised counter; clamped to 0 by model's min
+    await Post.updateOne(
+      { _id: comment.post },
+      { $inc: { commentCount: -totalRemoved } }
+    );
 
     return true;
   },

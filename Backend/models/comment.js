@@ -40,11 +40,22 @@ const commentSchema = new Schema(
       required: true,
       index: true,
     },
+    // Adjacency-list nesting. null = top-level comment, otherwise
+    // references the parent comment. Depth is limited to 1 at the
+    // resolver layer (a comment with parent != null cannot itself
+    // be referenced as a parent).
+    parent: {
+      type: Schema.Types.ObjectId,
+      ref: 'Comment',
+      default: null,
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
 commentSchema.index({ post: 1, createdAt: 1 });
 commentSchema.index({ author: 1, createdAt: -1 });
+commentSchema.index({ parent: 1, createdAt: 1 });
 
 module.exports = mongoose.model('Comment', commentSchema);

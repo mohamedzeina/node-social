@@ -22,12 +22,14 @@ module.exports = buildSchema(`
         comments: [Comment!]    # Only populated by getPost (null on feed queries)
     }
 
-    # A Comment on a Post
+    # A Comment on a Post. Nesting is limited to depth 1 — a reply
+    # (parent != null) cannot itself be a parent.
     type Comment {
         _id: ID!
         content: String!
         author: User!
         post: ID!
+        parent: ID          # null for top-level comments
         createdAt: String!
         updatedAt: String!
     }
@@ -88,8 +90,8 @@ module.exports = buildSchema(`
         updateAvatar(avatarUrl: String!): User!                 # Update user's avatar URL
         likePost(id: ID!): Post!                                # Like a post (idempotent)
         unlikePost(id: ID!): Post!                              # Remove like from a post
-        addComment(postId: ID!, content: String!): Comment!     # Add a comment to a post
-        deleteComment(id: ID!): Boolean                         # Delete own comment
+        addComment(postId: ID!, content: String!, parentId: ID): Comment!  # parentId optional → reply
+        deleteComment(id: ID!): Boolean                                    # Delete own comment (cascades children)
     }
 
     # ------------------------------
