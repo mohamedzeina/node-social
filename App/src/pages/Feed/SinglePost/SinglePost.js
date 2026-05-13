@@ -159,13 +159,27 @@ class SinglePost extends Component {
 
         <div className="single-post__card">
           <header className="single-post__header">
-            <div className="single-post__avatar" aria-hidden="true">
-              {this.state.authorAvatar ? (
-                <img src={this.state.authorAvatar} alt="" />
-              ) : (
-                <span>{initial}</span>
-              )}
-            </div>
+            {this.state.authorId ? (
+              <Link
+                to={`/u/${this.state.authorId}`}
+                className="single-post__avatar single-post__avatar--link"
+                aria-label={`View ${this.state.author}'s profile`}
+              >
+                {this.state.authorAvatar ? (
+                  <img src={this.state.authorAvatar} alt="" />
+                ) : (
+                  <span>{initial}</span>
+                )}
+              </Link>
+            ) : (
+              <div className="single-post__avatar" aria-hidden="true">
+                {this.state.authorAvatar ? (
+                  <img src={this.state.authorAvatar} alt="" />
+                ) : (
+                  <span>{initial}</span>
+                )}
+              </div>
+            )}
             <div className="single-post__byline">
               {this.state.authorId ? (
                 <Link to={`/u/${this.state.authorId}`} className="single-post__author">

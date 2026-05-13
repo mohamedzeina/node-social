@@ -62,13 +62,27 @@ const Post = props => {
   return (
     <article className="post">
       <header className="post__header">
-        <div className="post__avatar" aria-hidden="true">
-          {props.authorAvatar ? (
-            <img src={props.authorAvatar} alt="" loading="lazy" />
-          ) : (
-            <span>{initial}</span>
-          )}
-        </div>
+        {props.authorId ? (
+          <Link
+            to={`/u/${props.authorId}`}
+            className="post__avatar post__avatar--link"
+            aria-label={`View ${props.author}'s profile`}
+          >
+            {props.authorAvatar ? (
+              <img src={props.authorAvatar} alt="" loading="lazy" />
+            ) : (
+              <span>{initial}</span>
+            )}
+          </Link>
+        ) : (
+          <div className="post__avatar" aria-hidden="true">
+            {props.authorAvatar ? (
+              <img src={props.authorAvatar} alt="" loading="lazy" />
+            ) : (
+              <span>{initial}</span>
+            )}
+          </div>
+        )}
         <div className="post__byline">
           {props.authorId ? (
             <Link to={`/u/${props.authorId}`} className="post__author">

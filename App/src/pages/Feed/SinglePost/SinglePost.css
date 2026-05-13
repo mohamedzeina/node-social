@@ -80,6 +80,15 @@ a.single-post__author:hover {
   display: block;
 }
 
+a.single-post__avatar--link {
+  cursor: pointer;
+  transition: transform 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
+}
+a.single-post__avatar--link:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px var(--clay-soft);
+}
+
 .single-post__byline {
   display: flex;
   flex-direction: column;
