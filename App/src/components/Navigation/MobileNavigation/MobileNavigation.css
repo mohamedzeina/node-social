@@ -1,29 +1,91 @@
+/* ============================================================
+   Mobile navigation — table-of-contents drawer
+   ============================================================ */
+
 .mobile-nav {
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  width: 30rem;
-  max-width: 90%;
-  background: white;
-  box-shadow: 1px 0 8px rbga(0, 0, 0, 0.26);
-  transition: transform 0.3s ease-out;
+  width: 22rem;
+  max-width: 84%;
+  background: var(--paper);
+  color: var(--ink);
+
+  border-right: 1px solid var(--ink);
+  box-shadow: 14px 0 28px -8px rgba(22,19,16,0.35);
+
+  transition: transform 0.36s cubic-bezier(0.2, 0.7, 0.2, 1),
+              opacity 0.28s ease;
   transform: translateX(-100%);
-  z-index: 200;
-  padding: 3rem 2rem;
+  opacity: 0;
+  z-index: 300;
+
+  padding: 2rem 2rem 1.25rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .mobile-nav.open {
   transform: translateX(0);
+  opacity: 1;
+}
+
+/* Newspaper-fold paper texture */
+.mobile-nav::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 13% 24%, rgba(22,19,16,.015) 0 1px, transparent 1px),
+    radial-gradient(circle at 78% 71%, rgba(22,19,16,.020) 0 1px, transparent 1px);
+  background-size: 9px 9px, 13px 13px;
+}
+
+/* Header inside drawer */
+.mobile-nav__head {
+  padding-bottom: 1.25rem;
+  border-bottom: 3px double var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.mobile-nav__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vermilion);
+}
+
+.mobile-nav__folio {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-faint);
 }
 
 .mobile-nav__items {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 1.5rem 0 0;
+  margin: 0;
+  flex: 1;
 }
 
-.mobile-nav__items.mobile {
-    flex-direction: column;
+.mobile-nav__foot {
+  padding-top: 1rem;
+  border-top: 1px solid var(--paper-edge);
+  text-align: center;
+}
+
+.mobile-nav__colophon {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
 }
