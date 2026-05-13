@@ -1,11 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import Image from '../../Image/Image';
 import './Post.css';
 
+const API_URL = 'https://node-social-zmra.onrender.com/graphql';
+
 const Post = props => {
-  const [liked, setLiked] = useState(false);
+  const { id, token, likedByMe = false, likeCount = 0 } = props;
+  const [liked, setLiked] = useState(likedByMe);
+  const [count, setCount] = useState(likeCount);
+  const [pending, setPending] = useState(false);
+
+  // Keep local state in sync if parent re-fetches the feed
+  useEffect(() => { setLiked(likedByMe); }, [likedByMe]);
+  useEffect(() => { setCount(likeCount); }, [likeCount]);
+
+  const toggleLike = async () => {
+    if (pending || !token) return;
+    const nextLiked = !liked;
+    const nextCount = count + (nextLiked ? 1 : -1);
+
+    // Optimistic update
+    setLiked(nextLiked);
+    setCount(nextCount);
+    setPending(true);
+
+    const mutation = nextLiked ? 'likePost' : 'unlikePost';
+    const query = {
+      query: `mutation L($id: ID!) { ${mutation}(id: $id) { _id likeCount likedByMe } }`,
+      variables: { id },
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(query),
+      });
+      const data = await res.json();
+      if (data.errors) throw new Error(data.errors[0].message);
+      // Reconcile with server truth
+      const fresh = data.data[mutation];
+      setLiked(fresh.likedByMe);
+      setCount(fresh.likeCount);
+    } catch (err) {
+      // Revert on failure
+      setLiked(!nextLiked);
+      setCount(count);
+      console.error('Like toggle failed', err);
+    } finally {
+      setPending(false);
+    }
+  };
+
   const initial = (props.author || '').trim().charAt(0).toUpperCase() || '?';
 
   return (
@@ -49,14 +100,20 @@ const Post = props => {
 
       <footer className="post__footer">
         <button
-          className={['post__action', 'post__action--like', liked ? 'is-liked' : ''].join(' ')}
-          onClick={() => setLiked(v => !v)}
+          className={[
+            'post__action',
+            'post__action--like',
+            liked ? 'is-liked' : '',
+            pending ? 'is-pending' : '',
+          ].join(' ')}
+          onClick={toggleLike}
           aria-label={liked ? 'Unlike' : 'Like'}
+          aria-pressed={liked}
         >
           <span className="post__action-icon" aria-hidden="true">
             {liked ? '♥' : '♡'}
           </span>
-          <span>{liked ? 'Liked' : 'Like'}</span>
+          <span>{count > 0 ? count : 'Like'}</span>
         </button>
 
         <Link to={'/' + props.id} className="post__action">
@@ -68,7 +125,10 @@ const Post = props => {
           className="post__action"
           onClick={() => {
             if (navigator.share) {
-              navigator.share({ title: props.title, url: window.location.origin + '/' + props.id }).catch(() => {});
+              navigator.share({
+                title: props.title,
+                url: window.location.origin + '/' + props.id,
+              }).catch(() => {});
             }
           }}
           aria-label="Share"

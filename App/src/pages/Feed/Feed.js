@@ -86,6 +86,8 @@ class Feed extends Component {
               }
               imageUrl
               createdAt
+              likeCount
+              likedByMe
           }
             totalPosts
         }
@@ -222,6 +224,8 @@ class Feed extends Component {
                 name
               }
               createdAt
+              likeCount
+              likedByMe
             }
           }
           `,
@@ -236,8 +240,8 @@ class Feed extends Component {
           graphqlQuery = {
             query: `
             mutation UpdateExistingPost($postId: ID!, $title: String!, $content: String!, $imageUrl: String!) {
-              updatePost(id: $postId, postInput: {title: $title, 
-              content: $content 
+              updatePost(id: $postId, postInput: {title: $title,
+              content: $content
               imageUrl: $imageUrl}) {
               _id
               title
@@ -247,6 +251,8 @@ class Feed extends Component {
                 name
               }
               createdAt
+              likeCount
+              likedByMe
             }
           }
           `,
@@ -306,7 +312,10 @@ class Feed extends Component {
           content: resData.data[resDataField].content,
           creator: resData.data[resDataField].creator,
           createdAt: resData.data[resDataField].createdAt,
+          imageUrl: resData.data[resDataField].imageUrl,
           imagePath: resData.data[resDataField].imageUrl,
+          likeCount: resData.data[resDataField].likeCount,
+          likedByMe: resData.data[resDataField].likedByMe,
         };
         this.setState((prevState) => {
           let updatedPosts = [...prevState.posts];
@@ -462,6 +471,9 @@ class Feed extends Component {
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
+                  likeCount={post.likeCount}
+                  likedByMe={post.likedByMe}
+                  token={this.props.token}
                   onStartEdit={this.startEditPostHandler.bind(this, post._id)}
                   onDelete={this.deletePostHandler.bind(this, post._id)}
                 />
