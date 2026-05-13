@@ -20,8 +20,6 @@ const Sidebar = ({ currentUser, postCount }) => {
     <aside className="sidebar" aria-label="Account and quick navigation">
       {/* Profile card */}
       <div className="sidebar__card sidebar__profile">
-        <div className="sidebar__profile-cover" aria-hidden="true" />
-
         <span className="sidebar__profile-avatar" aria-hidden="true">
           {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
         </span>
