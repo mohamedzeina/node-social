@@ -6,6 +6,24 @@ const User = require('../models/user');
 const Post = require('../models/post');
 const cloudinary = require('../cloudinary');
 
+/**
+ * Project a Post document into the shape the GraphQL schema expects,
+ * including computed `likeCount` and `likedByMe` fields.
+ */
+const projectPost = (post, viewerId) => {
+  const likes = post.likes || [];
+  return {
+    ...post._doc,
+    _id: post._id.toString(),
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt.toISOString(),
+    likeCount: likes.length,
+    likedByMe: viewerId
+      ? likes.some((id) => id.toString() === viewerId.toString())
+      : false,
+  };
+};
+
 module.exports = {
   /**
    * Register a new user
@@ -117,12 +135,7 @@ module.exports = {
     user.posts.push(createdPost);
     await user.save();
 
-    return {
-      ...createdPost._doc,
-      _id: createdPost._id.toString(),
-      createdAt: createdPost.createdAt.toISOString(),
-      updatedAt: createdPost.updatedAt.toISOString(),
-    };
+    return projectPost(createdPost, req.userId);
   },
 
   /**
@@ -142,12 +155,7 @@ module.exports = {
       .populate('creator');
 
     return {
-      posts: posts.map((p) => ({
-        ...p._doc,
-        _id: p._id.toString(),
-        createdAt: p.createdAt.toISOString(),
-        updatedAt: p.updatedAt.toISOString(),
-      })),
+      posts: posts.map((p) => projectPost(p, req.userId)),
       totalPosts,
     };
   },
@@ -162,12 +170,7 @@ module.exports = {
     const post = await Post.findById(id).populate('creator');
     if (!post) throw new Error('No post found!');
 
-    return {
-      ...post._doc,
-      _id: post._id.toString(),
-      createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
-    };
+    return projectPost(post, req.userId);
   },
 
   /**
@@ -204,12 +207,7 @@ module.exports = {
     if (postInput.imageUrl !== 'undefined') post.imageUrl = postInput.imageUrl;
 
     const updatedPost = await post.save();
-    return {
-      ...updatedPost._doc,
-      _id: updatedPost._id.toString(),
-      createdAt: updatedPost.createdAt.toISOString(),
-      updatedAt: updatedPost.updatedAt.toISOString(),
-    };
+    return projectPost(updatedPost, req.userId);
   },
 
   /**
@@ -260,5 +258,39 @@ module.exports = {
     await user.save();
 
     return { ...user._doc, _id: user._id.toString() };
+  },
+
+  /**
+   * Like a post — idempotent ($addToSet won't duplicate)
+   * Requires authentication
+   */
+  likePost: async function ({ id }, req) {
+    if (!req.isAuth) throw new Error('Not authenticated!');
+
+    const post = await Post.findByIdAndUpdate(
+      id,
+      { $addToSet: { likes: req.userId } },
+      { new: true }
+    ).populate('creator');
+
+    if (!post) throw new Error('No post found!');
+    return projectPost(post, req.userId);
+  },
+
+  /**
+   * Unlike a post — idempotent ($pull is a no-op if not present)
+   * Requires authentication
+   */
+  unlikePost: async function ({ id }, req) {
+    if (!req.isAuth) throw new Error('Not authenticated!');
+
+    const post = await Post.findByIdAndUpdate(
+      id,
+      { $pull: { likes: req.userId } },
+      { new: true }
+    ).populate('creator');
+
+    if (!post) throw new Error('No post found!');
+    return projectPost(post, req.userId);
   },
 };

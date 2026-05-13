@@ -16,6 +16,8 @@ module.exports = buildSchema(`
         creator: User!          # Relation: every post has a creator
         createdAt: String!
         updatedAt: String!
+        likeCount: Int!         # Total number of likes on this post
+        likedByMe: Boolean!     # Whether the requesting user has liked this post
     }
     
     # A User of the system
@@ -68,6 +70,8 @@ module.exports = buildSchema(`
         updatePost(id: ID!, postInput: PostInputData): Post!    # Update an existing post
         deletePost(id: ID!): Boolean                            # Delete a post
         updateStatus(status: String!): User!                    # Update user status
+        likePost(id: ID!): Post!                                # Like a post (idempotent)
+        unlikePost(id: ID!): Post!                              # Remove like from a post
     }
 
     # ------------------------------
