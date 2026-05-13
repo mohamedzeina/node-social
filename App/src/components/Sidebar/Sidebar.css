@@ -135,26 +135,10 @@
 .sidebar__profile-cta svg { transition: transform 0.18s var(--ease-out); }
 .sidebar__profile-cta:hover svg { transform: rotate(-90deg) translateX(2px) !important; }
 
-/* Skeleton stand-in for the profile card body */
-.sidebar__profile-skeleton {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.65rem;
-  width: 100%;
-}
-.sidebar__profile-skeleton .skeleton--circle {
-  margin-bottom: 0.1rem;
-}
+/* Skeleton variant of the CTA — keeps the real .sidebar__profile-cta
+   layout (label-left + chevron-right, full-width docked bar) and only
+   disables interaction so it can't be hovered/clicked while loading. */
 .sidebar__profile-cta--skeleton {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  background: var(--surface-2);
-  border-top: 1px solid var(--hairline);
-  padding: 0.85rem 1.1rem;
-  margin: 0.75rem -1.1rem 0;
   cursor: default;
   pointer-events: none;
 }

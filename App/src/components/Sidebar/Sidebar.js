@@ -15,15 +15,30 @@ const Sidebar = ({ currentUser, postCount, postsLoading }) => {
   if (loading) {
     return (
       <aside className="sidebar" aria-label="Loading" aria-busy="true">
-        {/* Profile card skeleton */}
+        {/* Profile card skeleton — mirrors the real card's DOM/spacing
+            so the layout doesn't shift when currentUser arrives. */}
         <div className="sidebar__card sidebar__profile">
-          <div className="sidebar__profile-skeleton">
-            <Skeleton variant="circle" width="4.5rem" height="4.5rem" />
-            <Skeleton variant="text" width="60%" height="1.25rem" />
-            <Skeleton variant="text" width="85%" />
-            <div className="sidebar__profile-cta sidebar__profile-cta--skeleton">
-              <Skeleton variant="text" width="40%" />
-            </div>
+          {/* Avatar slot — matches .sidebar__profile-avatar (4.5rem, margin-bottom 0.75rem) */}
+          <Skeleton
+            variant="circle"
+            width="4.5rem"
+            height="4.5rem"
+            style={{ marginBottom: '0.75rem' }}
+          />
+          {/* Body — reuses .sidebar__profile-body so name/status spacing matches */}
+          <div className="sidebar__profile-body">
+            <Skeleton variant="text" width="62%" height="1.25rem" />
+            {/* Status renders two lines because the real status clamps to 2 */}
+            <Skeleton variant="text" width="92%" height="0.9rem" />
+            <Skeleton variant="text" width="68%" height="0.9rem" />
+          </div>
+          {/* CTA — reuses .sidebar__profile-cta layout (label left, chevron right) */}
+          <div
+            className="sidebar__profile-cta sidebar__profile-cta--skeleton"
+            aria-hidden="true"
+          >
+            <Skeleton variant="text" width="48%" height="0.85rem" />
+            <Skeleton variant="circle" width="0.85rem" height="0.85rem" />
           </div>
         </div>
 
