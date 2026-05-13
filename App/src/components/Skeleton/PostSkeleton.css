@@ -1,43 +1,72 @@
 /* ============================================================
-   PostSkeleton — mirrors the Post card layout while data loads
+   PostSkeleton — mirrors Post.css so the loading-to-loaded
+   transition doesn't shift padding, borders, or row heights.
+   Every value here matches a corresponding value in Post.css.
    ============================================================ */
 
 .post-skeleton {
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--r-lg);
-  margin: 0 0 1rem;
+  margin: 0 0 1.1rem;
   overflow: hidden;
 }
 
+/* ---- Header ---- matches .post__header --------------- */
 .post-skeleton__header {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 1rem 1.1rem 0.85rem;
+  padding: 1rem 1.1rem 0.7rem;
 }
 
 .post-skeleton__byline {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  /* Tight byline gap matching .post__byline (1px in the real card) */
+  gap: 4px;
+  min-width: 0;
 }
 
+/* ---- Body ---- matches .post__body -------------------- */
 .post-skeleton__body {
-  padding: 0 1.1rem 1rem;
+  padding: 0.3rem 1.1rem 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
+/* ---- Image ---- matches .post__image ------------------ */
+.post-skeleton__image {
+  width: 100%;
+  height: 18rem;
+  background: var(--surface-2);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ---- Footer ---- matches .post__footer ---------------- */
 .post-skeleton__footer {
   display: flex;
-  gap: 0.35rem;
-  padding: 0.7rem 0.85rem;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.7rem;
   border-top: 1px solid var(--hairline);
 }
 
+/* Each action mirrors .post__action — same pill paddings + gap so
+   the row height is identical to the real Post action row. */
+.post-skeleton__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--r-pill);
+}
+
 @media (max-width: 480px) {
-  .post-skeleton > .skeleton--rect[style*="18rem"] { height: 14rem !important; }
+  .post-skeleton__image { height: 14rem; }
 }
