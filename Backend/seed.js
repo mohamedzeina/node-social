@@ -13,7 +13,7 @@
  *
  * Test accounts:
  *   email:    test@test.com, test2@test.com, … test6@test.com
- *   password: password123
+ *   password: 123456
  */
 
 const fs = require('fs');
@@ -47,7 +47,7 @@ if (!process.env.MONGODB_URI) {
 // Seed data
 // --------------------------------------------------------------------
 
-const PASSWORD = 'password123';
+const PASSWORD = '123456';
 
 // Stable avatar head-shots from i.pravatar.cc (free, no auth).
 // Using `?img=N` returns the same image every time; the path is also
