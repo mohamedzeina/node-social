@@ -4,6 +4,7 @@ import Post from '../../components/Feed/Post/Post';
 import FeedEdit from '../../components/Feed/FeedEdit/FeedEdit';
 import Paginator from '../../components/Paginator/Paginator';
 import PostSkeleton from '../../components/Skeleton/PostSkeleton';
+import Skeleton from '../../components/Skeleton/Skeleton';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { Plus } from '../../components/Icons/Icons';
@@ -353,38 +354,47 @@ class Feed extends Component {
           <Sidebar
             currentUser={this.props.currentUser}
             postCount={this.state.totalPosts}
+            postsLoading={this.state.postsLoading}
           />
         </div>
 
         <div className="feed-page__main">
-        <button
-          type="button"
-          className="feed__composer"
-          onClick={this.newPostHandler}
-          aria-label="Create a new post"
-        >
-          <span className="feed__composer-avatar" aria-hidden="true">
-            {this.props.currentUser && this.props.currentUser.avatarUrl ? (
-              <img src={this.props.currentUser.avatarUrl} alt="" />
-            ) : (
-              ((this.props.currentUser && this.props.currentUser.name) || 'Y')
-                .trim()
-                .charAt(0)
-                .toUpperCase()
-            )}
-          </span>
-          <span className="feed__composer-prompt">
-            What&rsquo;s on your mind
-            {this.props.currentUser && this.props.currentUser.name
-              ? `, ${this.props.currentUser.name.trim().split(/\s+/)[0]}`
-              : ''}
-            ?
-          </span>
-          <span className="feed__composer-cta" aria-hidden="true">
-            <span className="feed__composer-cta-icon"><Plus size={14} /></span>
-            <span className="feed__composer-cta-label">Post</span>
-          </span>
-        </button>
+        {!this.props.currentUser ? (
+          <div className="feed__composer feed__composer--skeleton" aria-busy="true">
+            <Skeleton variant="circle" width="2.4rem" height="2.4rem" />
+            <Skeleton variant="text" height="2rem" radius="999px" />
+            <Skeleton width="4.5rem" height="2rem" radius="999px" />
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="feed__composer"
+            onClick={this.newPostHandler}
+            aria-label="Create a new post"
+          >
+            <span className="feed__composer-avatar" aria-hidden="true">
+              {this.props.currentUser.avatarUrl ? (
+                <img src={this.props.currentUser.avatarUrl} alt="" />
+              ) : (
+                (this.props.currentUser.name || 'Y')
+                  .trim()
+                  .charAt(0)
+                  .toUpperCase()
+              )}
+            </span>
+            <span className="feed__composer-prompt">
+              What&rsquo;s on your mind
+              {this.props.currentUser.name
+                ? `, ${this.props.currentUser.name.trim().split(/\s+/)[0]}`
+                : ''}
+              ?
+            </span>
+            <span className="feed__composer-cta" aria-hidden="true">
+              <span className="feed__composer-cta-icon"><Plus size={14} /></span>
+              <span className="feed__composer-cta-label">Post</span>
+            </span>
+          </button>
+        )}
 
         <section className="feed">
           {this.state.postsLoading && (

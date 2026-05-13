@@ -81,6 +81,19 @@
   box-shadow: 0 0 0 4px var(--clay-soft);
 }
 
+/* Skeleton variant: same shell, shimmer placeholders inside */
+.feed__composer--skeleton {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  cursor: default;
+  pointer-events: none;
+}
+.feed__composer--skeleton:hover {
+  background: var(--surface);
+  border-color: var(--hairline);
+  box-shadow: var(--shadow-sm);
+}
+
 .feed__composer-avatar {
   width: 2.4rem;
   height: 2.4rem;

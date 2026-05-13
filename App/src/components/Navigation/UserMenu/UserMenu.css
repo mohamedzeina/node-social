@@ -10,8 +10,8 @@
 .user-menu__trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem 0.25rem 0.3rem;
   background: var(--surface);
   border: 1px solid var(--hairline);
   border-radius: var(--r-pill);
@@ -36,6 +36,18 @@
   background: var(--surface-2);
   border-color: var(--clay);
   box-shadow: 0 0 0 3px var(--clay-soft), var(--shadow-md);
+}
+
+/* Skeleton state — same pill shape, shimmer placeholders inside */
+.user-menu__trigger--skeleton {
+  cursor: default;
+  pointer-events: none;
+}
+.user-menu__trigger--skeleton:hover {
+  background: var(--surface);
+  border-color: var(--hairline);
+  box-shadow: var(--shadow-sm);
+  transform: none;
 }
 
 .user-menu__avatar {
@@ -64,16 +76,6 @@
   width: 2.75rem;
   height: 2.75rem;
   font-size: 1.1rem;
-}
-
-.user-menu__name {
-  font-size: 0.92rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  max-width: 8rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .user-menu__caret {

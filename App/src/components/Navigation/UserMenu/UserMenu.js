@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
+import Skeleton from '../../Skeleton/Skeleton';
 import './UserMenu.css';
 
 const UserMenu = ({ currentUser, onLogout }) => {
@@ -30,7 +31,18 @@ const UserMenu = ({ currentUser, onLogout }) => {
   const name = (currentUser && currentUser.name) || '';
   const avatar = currentUser && currentUser.avatarUrl;
   const initial = name.trim().charAt(0).toUpperCase() || '?';
-  const firstName = name.trim().split(/\s+/)[0] || '';
+
+  // While the lifted currentUser hasn't loaded yet, show a skeleton
+  // trigger so the toolbar doesn't read as 'unknown user'.
+  if (!currentUser) {
+    return (
+      <div className="user-menu user-menu--skeleton" aria-busy="true">
+        <div className="user-menu__trigger user-menu__trigger--skeleton">
+          <Skeleton variant="circle" width="1.9rem" height="1.9rem" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-menu" ref={rootRef}>
@@ -45,7 +57,6 @@ const UserMenu = ({ currentUser, onLogout }) => {
         <span className="user-menu__avatar" aria-hidden="true">
           {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
         </span>
-        <span className="user-menu__name">{firstName || 'You'}</span>
         <svg
           className="user-menu__caret"
           width="10"

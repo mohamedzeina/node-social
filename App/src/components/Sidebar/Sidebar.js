@@ -2,16 +2,18 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 
 import { Chevron } from '../Icons/Icons';
+import Skeleton from '../Skeleton/Skeleton';
 import './Sidebar.css';
 
-const Sidebar = ({ currentUser, postCount }) => {
+const Sidebar = ({ currentUser, postCount, postsLoading }) => {
   const profileLink = currentUser && currentUser._id ? `/u/${currentUser._id}` : null;
 
+  // Profile is already accessible from the profile card CTA and the
+  // navbar avatar menu, so it's intentionally not in this nav rail.
   const navItems = [
-    { id: 'home',    label: 'Home',          icon: '⌂', link: '/',         active: true },
-    { id: 'profile', label: 'Your profile',  icon: '☻', link: profileLink },
-    { id: 'saved',   label: 'Saved',         icon: '✦', soon: true },
-    { id: 'notifs',  label: 'Notifications', icon: '◔', soon: true },
+    { id: 'home',   label: 'Home',          icon: '⌂', link: '/', active: true },
+    { id: 'saved',  label: 'Saved',         icon: '✦', soon: true },
+    { id: 'notifs', label: 'Notifications', icon: '◔', soon: true },
   ];
 
   const name = (currentUser && currentUser.name) || '';
@@ -23,24 +25,38 @@ const Sidebar = ({ currentUser, postCount }) => {
     <aside className="sidebar" aria-label="Account and quick navigation">
       {/* Profile card */}
       <div className="sidebar__card sidebar__profile">
-        <span className="sidebar__profile-avatar" aria-hidden="true">
-          {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
-        </span>
+        {currentUser ? (
+          <>
+            <span className="sidebar__profile-avatar" aria-hidden="true">
+              {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
+            </span>
 
-        <div className="sidebar__profile-body">
-          <span className="sidebar__profile-name">{name || 'Welcome'}</span>
-          <span className="sidebar__profile-status">
-            <span className="sidebar__profile-status-mark" aria-hidden="true">“</span>
-            {status}
-            <span className="sidebar__profile-status-mark" aria-hidden="true">”</span>
-          </span>
-        </div>
+            <div className="sidebar__profile-body">
+              <span className="sidebar__profile-name">{name || 'Welcome'}</span>
+              <span className="sidebar__profile-status">
+                <span className="sidebar__profile-status-mark" aria-hidden="true">“</span>
+                {status}
+                <span className="sidebar__profile-status-mark" aria-hidden="true">”</span>
+              </span>
+            </div>
 
-        {profileLink && (
-          <Link to={profileLink} className="sidebar__profile-cta">
-            <span>View your profile</span>
-            <Chevron size={14} style={{ transform: 'rotate(-90deg)' }} />
-          </Link>
+            {profileLink && (
+              <Link to={profileLink} className="sidebar__profile-cta">
+                <span>View your profile</span>
+                <Chevron size={14} style={{ transform: 'rotate(-90deg)' }} />
+              </Link>
+            )}
+          </>
+        ) : (
+          /* Skeleton state while currentUser loads */
+          <div className="sidebar__profile-skeleton" aria-busy="true">
+            <Skeleton variant="circle" width="4.5rem" height="4.5rem" />
+            <Skeleton variant="text" width="60%" height="1.25rem" />
+            <Skeleton variant="text" width="85%" />
+            <div className="sidebar__profile-cta sidebar__profile-cta--skeleton">
+              <Skeleton variant="text" width="40%" />
+            </div>
+          </div>
         )}
       </div>
 
@@ -82,10 +98,18 @@ const Sidebar = ({ currentUser, postCount }) => {
         <div className="sidebar__tip-body">
           <strong className="sidebar__tip-title">Slow social</strong>
           <p className="sidebar__tip-text">
-            Two dispatches per page, sorted newest first.
-            {typeof postCount === 'number' && (
-              <> Currently <strong>{postCount}</strong> in the feed.</>
-            )}
+            Two dispatches per page, sorted newest first. Currently{' '}
+            {postsLoading ? (
+              <Skeleton
+                variant="text"
+                width="1.5rem"
+                height="0.85em"
+                className="sidebar__tip-count-skeleton"
+              />
+            ) : (
+              <strong>{typeof postCount === 'number' ? postCount : 0}</strong>
+            )}{' '}
+            in the feed.
           </p>
         </div>
       </div>
