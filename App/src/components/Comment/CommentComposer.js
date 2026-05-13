@@ -29,6 +29,14 @@ const CommentComposer = ({
   const [submitting, setSubmitting] = useState(false);
   const taRef = useRef(null);
 
+  // Reply composers unmount the moment their parent calls
+  // setIsReplying(false) — which happens right when submit is fired.
+  // mountedRef lets the finally block skip its state updates if the
+  // composer was unmounted during the in-flight submit (avoids the
+  // "setState on unmounted component" warning).
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
+
   // Auto-resize the textarea as the user types
   useEffect(() => {
     const ta = taRef.current;
@@ -59,9 +67,9 @@ const CommentComposer = ({
       await onSubmit(text);
     } catch (err) {
       console.error('comment submit failed', err);
-      setValue(text);
+      if (mountedRef.current) setValue(text);
     } finally {
-      setSubmitting(false);
+      if (mountedRef.current) setSubmitting(false);
     }
   };
 

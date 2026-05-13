@@ -63,9 +63,17 @@ const Comment = ({
   const authorId = author && author._id;
   const isOwn = authorId && viewerId && authorId === viewerId;
 
-  const handleReplySubmit = async (text) => {
-    await onAddReply(_id, text);
+  const handleReplySubmit = (text) => {
+    // Close the composer at the same moment the optimistic reply is
+    // queued. Keeping it open during the network roundtrip makes the
+    // new reply look like a "preview" sitting under an empty composer
+    // until the request resolves and the composer finally collapses.
+    // addComment owns the optimistic + error state, so we fire it and
+    // let it run in the background.
     setIsReplying(false);
+    onAddReply(_id, text).catch(() => {
+      /* surfaced via SinglePost's state.error / ErrorHandler */
+    });
   };
 
   const visualDepth = Math.min(depth, MAX_VISUAL_DEPTH);
