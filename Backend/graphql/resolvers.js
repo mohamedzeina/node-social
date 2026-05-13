@@ -391,13 +391,12 @@ module.exports = {
   /**
    * Add a comment to a post (optionally as a reply to another comment).
    *
-   * If parentId is supplied, enforces depth-1 nesting:
-   *   - the parent comment must exist
-   *   - the parent must belong to the same post
-   *   - the parent itself must be top-level (parent.parent === null)
+   * Nesting is unlimited — replies can themselves be replied to,
+   * to any depth. The only constraint on the parent is that it
+   * exists and belongs to the same post.
    *
    * Bumps Post.commentCount regardless (counter reflects total
-   * engagement on the post, including replies).
+   * engagement on the post, including replies at every depth).
    */
   addComment: async function ({ postId, content, parentId }, req) {
     if (!req.isAuth) throw new Error('Not authenticated!');
@@ -434,12 +433,6 @@ module.exports = {
         err.code = 422;
         throw err;
       }
-      if (parent.parent) {
-        // Depth limit: replies cannot themselves be replied to.
-        const err = new Error('Replies cannot be nested further.');
-        err.code = 422;
-        throw err;
-      }
       parentRef = parent._id;
     }
 
@@ -459,8 +452,9 @@ module.exports = {
   /**
    * Delete a comment. Only the author can delete their own comment.
    *
-   * If the comment is a top-level thread, cascade-deletes all its
-   * replies (and adjusts commentCount accordingly).
+   * Cascades the entire subtree: collects all descendants iteratively
+   * via BFS, then deletes them in a single deleteMany. The post's
+   * commentCount drops by 1 + number_of_descendants in one $inc.
    */
   deleteComment: async function ({ id }, req) {
     if (!req.isAuth) throw new Error('Not authenticated!');
@@ -477,20 +471,29 @@ module.exports = {
       throw err;
     }
 
-    // Count this comment + any child replies (only relevant for
-    // top-level deletions — replies don't have children of their own
-    // under the depth-1 rule).
-    const childCount = comment.parent
-      ? 0
-      : await Comment.countDocuments({ parent: comment._id });
-    const totalRemoved = 1 + childCount;
-
-    await Comment.deleteOne({ _id: id });
-    if (childCount > 0) {
-      await Comment.deleteMany({ parent: id });
+    // Walk the subtree breadth-first to collect every descendant ID.
+    // One round trip per depth level — fine for typical threads;
+    // could be replaced with $graphLookup if threads grow very deep.
+    const descendantIds = [];
+    let frontier = [comment._id];
+    while (frontier.length > 0) {
+      const next = await Comment.find(
+        { parent: { $in: frontier } },
+        { _id: 1 }
+      ).lean();
+      const nextIds = next.map((c) => c._id);
+      if (nextIds.length === 0) break;
+      descendantIds.push(...nextIds);
+      frontier = nextIds;
     }
 
-    // Adjust the denormalised counter; clamped to 0 by model's min
+    const totalRemoved = 1 + descendantIds.length;
+
+    await Comment.deleteOne({ _id: id });
+    if (descendantIds.length > 0) {
+      await Comment.deleteMany({ _id: { $in: descendantIds } });
+    }
+
     await Post.updateOne(
       { _id: comment.post },
       { $inc: { commentCount: -totalRemoved } }
