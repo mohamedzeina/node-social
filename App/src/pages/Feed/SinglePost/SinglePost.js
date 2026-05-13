@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import Image from '../../../components/Image/Image';
 import Skeleton from '../../../components/Skeleton/Skeleton';
 import Sidebar from '../../../components/Sidebar/Sidebar';
+import Comment from '../../../components/Comment/Comment';
+import CommentComposer from '../../../components/Comment/CommentComposer';
+import ErrorHandler from '../../../components/ErrorHandler/ErrorHandler';
 import './SinglePost.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
@@ -21,6 +24,8 @@ class SinglePost extends Component {
     liked: false,
     likeCount: 0,
     likePending: false,
+    comments: [],
+    error: null,
   };
 
   componentDidMount() {
@@ -36,6 +41,13 @@ class SinglePost extends Component {
           createdAt
           likeCount
           likedByMe
+          commentCount
+          comments {
+            _id
+            content
+            createdAt
+            author { _id name avatarUrl }
+          }
         }
       }
       `,
@@ -67,6 +79,7 @@ class SinglePost extends Component {
           content: resData.data.getPost.content,
           liked: resData.data.getPost.likedByMe,
           likeCount: resData.data.getPost.likeCount,
+          comments: resData.data.getPost.comments || [],
           loading: false,
         });
       })
@@ -111,6 +124,100 @@ class SinglePost extends Component {
       this.setState({ likePending: false });
     }
   };
+
+  // ---- Comments ----------------------------------------
+
+  addComment = async (content) => {
+    const postId = this.props.match.params.postId;
+
+    // Build an optimistic comment. Negative tempId so it never
+    // collides with real Mongo ObjectIds and is easy to swap.
+    const tempId = `temp-${Date.now()}`;
+    const optimistic = {
+      _id: tempId,
+      content,
+      createdAt: new Date().toISOString(),
+      author: this.props.currentUser
+        ? {
+            _id: this.props.currentUser._id,
+            name: this.props.currentUser.name,
+            avatarUrl: this.props.currentUser.avatarUrl,
+          }
+        : { _id: this.props.userId, name: 'You', avatarUrl: null },
+      __pending: true,
+    };
+    this.setState((prev) => ({ comments: [...prev.comments, optimistic] }));
+
+    const query = {
+      query: `
+        mutation AddComment($postId: ID!, $content: String!) {
+          addComment(postId: $postId, content: $content) {
+            _id
+            content
+            createdAt
+            author { _id name avatarUrl }
+          }
+        }
+      `,
+      variables: { postId, content },
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + this.props.token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(query),
+      });
+      const data = await res.json();
+      if (data.errors) throw new Error(data.errors[0].message);
+
+      // Replace the optimistic placeholder with the server's record
+      const real = data.data.addComment;
+      this.setState((prev) => ({
+        comments: prev.comments.map((c) => (c._id === tempId ? real : c)),
+      }));
+    } catch (err) {
+      // Roll back the optimistic insert and surface the error
+      this.setState((prev) => ({
+        comments: prev.comments.filter((c) => c._id !== tempId),
+        error: err,
+      }));
+      throw err;
+    }
+  };
+
+  deleteComment = async (id) => {
+    // Hold on to the comment in case we need to restore it
+    const previous = this.state.comments;
+    this.setState((prev) => ({
+      comments: prev.comments.filter((c) => c._id !== id),
+    }));
+
+    const query = {
+      query: `mutation DeleteComment($id: ID!) { deleteComment(id: $id) }`,
+      variables: { id },
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + this.props.token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(query),
+      });
+      const data = await res.json();
+      if (data.errors) throw new Error(data.errors[0].message);
+    } catch (err) {
+      this.setState({ comments: previous, error: err });
+    }
+  };
+
+  dismissError = () => this.setState({ error: null });
 
   render() {
     const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
@@ -166,6 +273,7 @@ class SinglePost extends Component {
         </div>
 
         <div className="app-page__main">
+        <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
         <article className="single-post">
         <Link to="/" className="single-post__back">
           ← Back to Home
@@ -239,6 +347,40 @@ class SinglePost extends Component {
               </span>
             </button>
           </footer>
+
+          {/* ---- Comments section ----------------------- */}
+          <section className="single-post__comments" aria-label="Comments">
+            <div className="single-post__comments-head">
+              <h2 className="single-post__comments-title">Comments</h2>
+              <span className="single-post__comments-count">
+                {this.state.comments.length} {this.state.comments.length === 1 ? 'reply' : 'replies'}
+              </span>
+            </div>
+
+            <CommentComposer
+              currentUser={this.props.currentUser}
+              onSubmit={this.addComment}
+            />
+
+            {this.state.comments.length === 0 ? (
+              <div className="single-post__comments-empty">
+                <p>No replies yet. Be the first to say something.</p>
+              </div>
+            ) : (
+              <ul className="single-post__comments-list">
+                {this.state.comments.map((c) => (
+                  <li key={c._id}>
+                    <Comment
+                      comment={c}
+                      pending={!!c.__pending}
+                      isOwn={c.author && c.author._id === this.props.userId}
+                      onDelete={this.deleteComment}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </article>
         </div>

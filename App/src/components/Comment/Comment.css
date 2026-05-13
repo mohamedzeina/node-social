@@ -1,0 +1,112 @@
+/* ============================================================
+   Comment — chat-bubble row
+   ============================================================ */
+
+.comment {
+  display: grid;
+  grid-template-columns: 2.1rem 1fr auto;
+  gap: 0.7rem;
+  padding: 0.65rem 0;
+  position: relative;
+  animation: fade-up 0.28s var(--ease-out);
+}
+
+.comment.is-pending { opacity: 0.6; }
+
+.comment__avatar {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--clay), var(--gold));
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+.comment__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+a.comment__avatar--link {
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out), box-shadow 0.14s var(--ease-out);
+}
+a.comment__avatar--link:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px var(--clay-soft);
+}
+
+.comment__bubble {
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: 0.55rem 0.85rem;
+  min-width: 0;
+}
+
+.comment__head {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.15rem;
+}
+
+.comment__author {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color 0.14s var(--ease-out);
+}
+a.comment__author:hover {
+  color: var(--clay);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--clay);
+}
+
+.comment__date {
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.comment__content {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.comment__delete {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.15rem;
+  opacity: 0;
+  transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out), opacity 0.16s var(--ease-out);
+}
+.comment:hover .comment__delete,
+.comment:focus-within .comment__delete { opacity: 1; }
+.comment__delete:hover { background: var(--heart-soft); color: var(--heart); }

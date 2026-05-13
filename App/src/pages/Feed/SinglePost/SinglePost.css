@@ -193,6 +193,67 @@ a.single-post__avatar--link:hover {
   line-height: 1;
 }
 
+/* ============================================================
+   Comments section
+   ============================================================ */
+
+.single-post__comments {
+  margin-top: 0.75rem;
+}
+
+.single-post__comments-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.single-post__comments-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+}
+
+.single-post__comments-count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--r-pill);
+  font-variant-numeric: tabular-nums;
+}
+
+.single-post__comments-empty {
+  margin: 0.75rem 0 0;
+  padding: 1.25rem;
+  text-align: center;
+  background: var(--surface-2);
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--r-md);
+}
+.single-post__comments-empty p {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 0.92rem;
+}
+
+.single-post__comments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.single-post__comments-list > li + li {
+  border-top: 1px solid var(--hairline);
+}
+
 @media (min-width: 768px) {
   .single-post__card {
     padding: 1.75rem 2rem 2rem;
