@@ -9,6 +9,7 @@ import MobileNavigation from './components/Navigation/MobileNavigation/MobileNav
 import ErrorHandler from './components/ErrorHandler/ErrorHandler';
 import FeedPage from './pages/Feed/Feed';
 import SinglePostPage from './pages/Feed/SinglePost/SinglePost';
+import ProfilePage from './pages/Profile/Profile';
 import LoginPage from './pages/Auth/Login';
 import SignupPage from './pages/Auth/Signup';
 import './App.css';
@@ -264,6 +265,16 @@ class App extends Component {
             path="/p/:postId"
             render={(props) => (
               <SinglePostPage
+                {...props}
+                userId={this.state.userId}
+                token={this.state.token}
+              />
+            )}
+          />
+          <Route
+            path="/u/:userId"
+            render={(props) => (
+              <ProfilePage
                 {...props}
                 userId={this.state.userId}
                 token={this.state.token}
