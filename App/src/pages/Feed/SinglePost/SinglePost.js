@@ -159,35 +159,23 @@ class SinglePost extends Component {
 
         <div className="single-post__card">
           <header className="single-post__header">
-            {this.state.authorId ? (
-              <Link to={`/u/${this.state.authorId}`} className="single-post__byline-link">
-                <div className="single-post__avatar" aria-hidden="true">
-                  {this.state.authorAvatar ? (
-                    <img src={this.state.authorAvatar} alt="" />
-                  ) : (
-                    <span>{initial}</span>
-                  )}
-                </div>
-                <div className="single-post__byline">
-                  <span className="single-post__author">{this.state.author || '—'}</span>
-                  <span className="single-post__date">{this.state.date}</span>
-                </div>
-              </Link>
-            ) : (
-              <div className="single-post__byline-link">
-                <div className="single-post__avatar" aria-hidden="true">
-                  {this.state.authorAvatar ? (
-                    <img src={this.state.authorAvatar} alt="" />
-                  ) : (
-                    <span>{initial}</span>
-                  )}
-                </div>
-                <div className="single-post__byline">
-                  <span className="single-post__author">{this.state.author || '—'}</span>
-                  <span className="single-post__date">{this.state.date}</span>
-                </div>
-              </div>
-            )}
+            <div className="single-post__avatar" aria-hidden="true">
+              {this.state.authorAvatar ? (
+                <img src={this.state.authorAvatar} alt="" />
+              ) : (
+                <span>{initial}</span>
+              )}
+            </div>
+            <div className="single-post__byline">
+              {this.state.authorId ? (
+                <Link to={`/u/${this.state.authorId}`} className="single-post__author">
+                  {this.state.author || '—'}
+                </Link>
+              ) : (
+                <span className="single-post__author">{this.state.author || '—'}</span>
+              )}
+              <span className="single-post__date">{this.state.date}</span>
+            </div>
           </header>
 
           <h1 className="single-post__title">{this.state.title || ''}</h1>

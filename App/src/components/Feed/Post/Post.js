@@ -62,35 +62,23 @@ const Post = props => {
   return (
     <article className="post">
       <header className="post__header">
-        {props.authorId ? (
-          <Link to={`/u/${props.authorId}`} className="post__byline-link">
-            <div className="post__avatar" aria-hidden="true">
-              {props.authorAvatar ? (
-                <img src={props.authorAvatar} alt="" loading="lazy" />
-              ) : (
-                <span>{initial}</span>
-              )}
-            </div>
-            <div className="post__byline">
-              <span className="post__author">{props.author}</span>
-              <span className="post__date">{props.date}</span>
-            </div>
-          </Link>
-        ) : (
-          <div className="post__byline-link">
-            <div className="post__avatar" aria-hidden="true">
-              {props.authorAvatar ? (
-                <img src={props.authorAvatar} alt="" loading="lazy" />
-              ) : (
-                <span>{initial}</span>
-              )}
-            </div>
-            <div className="post__byline">
-              <span className="post__author">{props.author}</span>
-              <span className="post__date">{props.date}</span>
-            </div>
-          </div>
-        )}
+        <div className="post__avatar" aria-hidden="true">
+          {props.authorAvatar ? (
+            <img src={props.authorAvatar} alt="" loading="lazy" />
+          ) : (
+            <span>{initial}</span>
+          )}
+        </div>
+        <div className="post__byline">
+          {props.authorId ? (
+            <Link to={`/u/${props.authorId}`} className="post__author">
+              {props.author}
+            </Link>
+          ) : (
+            <span className="post__author">{props.author}</span>
+          )}
+          <span className="post__date">{props.date}</span>
+        </div>
         {props.isOwn && (
           <div className="post__menu">
             <button

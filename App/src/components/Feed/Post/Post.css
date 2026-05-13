@@ -26,23 +26,19 @@
   padding: 1rem 1.1rem 0.7rem;
 }
 
-/* Clickable byline (avatar + name + date) — wraps in a link to
-   the author's profile when authorId is provided. */
-.post__byline-link {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  flex: 1;
-  min-width: 0;
+/* Only the author's name is clickable to their profile. Avatar and
+   date are passive — keeps the byline strip from being one huge
+   tap target. */
+a.post__author {
   text-decoration: none;
-  color: inherit;
-  border-radius: var(--r-pill);
-  padding: 0.2rem 0.4rem;
-  margin: -0.2rem -0.4rem;
-  transition: background 0.16s var(--ease-out);
+  color: var(--ink);
 }
-a.post__byline-link:hover { background: var(--surface-2); }
-a.post__byline-link:hover .post__author { color: var(--clay); }
+a.post__author:hover {
+  color: var(--clay);
+  text-decoration: underline;
+  text-decoration-color: var(--clay);
+  text-underline-offset: 3px;
+}
 
 .post__avatar {
   width: 2.4rem;
