@@ -9,6 +9,61 @@
   animation: fade-up 0.4s var(--ease-out);
 }
 
+/* ============================================================
+   Modal variant — Facebook-style overlay when opened from the feed
+   ============================================================ */
+
+.single-post-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 280;       /* above Backdrop (200) but below tooltips */
+  overflow-y: auto;
+  padding: 3rem 1rem 5rem;
+  -webkit-overflow-scrolling: touch;
+  animation: fade-up 0.3s var(--ease-out);
+}
+
+.single-post-modal__close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.16s var(--ease-out), transform 0.12s var(--ease-out);
+}
+.single-post-modal__close:hover {
+  background: var(--clay-soft);
+  color: var(--clay-hover);
+}
+.single-post-modal__close:active { transform: scale(0.94); }
+
+.single-post--modal { animation: fade-up 0.35s var(--ease-out); }
+.single-post--modal .single-post__card {
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 768px) {
+  .single-post-modal {
+    padding: 3.5rem 2rem 5rem;
+  }
+  .single-post-modal__close {
+    top: 1.25rem;
+    right: 1.5rem;
+  }
+}
+
 .single-post__back {
   display: inline-flex;
   align-items: center;

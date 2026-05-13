@@ -223,92 +223,228 @@ class SinglePost extends Component {
 
   dismissError = () => this.setState({ error: null });
 
-  render() {
-    const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
-    const { liked, likeCount, likePending, loading } = this.state;
+  // ---------- Helpers for the inner content (shared by page + modal) ----------
 
-    if (loading) {
-      return (
-        <div className="app-page">
-          <div className="app-page__sidebar">
-            <Sidebar currentUser={this.props.currentUser} />
+  renderSkeletonCard() {
+    return (
+      <div className="single-post__card">
+        <header className="single-post__header">
+          <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
+          <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
+            <Skeleton variant="text" width="45%" />
+            <div style={{ height: '0.35rem' }} />
+            <Skeleton variant="text" width="30%" />
           </div>
-          <div className="app-page__main">
-            <article className="single-post">
+        </header>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
+          <Skeleton variant="text" width="80%" height="2rem" />
+          <Skeleton variant="text" width="55%" height="2rem" />
+        </div>
+        <div className="single-post__image">
+          <Skeleton width="100%" height="100%" radius={0} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          <Skeleton variant="text" width="98%" />
+          <Skeleton variant="text" width="94%" />
+          <Skeleton variant="text" width="100%" />
+          <Skeleton variant="text" width="72%" />
+        </div>
+        <footer className="single-post__footer">
+          <Skeleton width="9rem" height="2.5rem" radius="999px" />
+        </footer>
+
+        <section className="single-post__comments" aria-busy="true">
+          <div className="single-post__comments-head">
+            <Skeleton variant="text" width="5rem" height="1.1rem" />
+            <Skeleton width="4.5rem" height="1.4rem" radius="999px" />
+          </div>
+          <div className="single-post__composer-skeleton">
+            <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
+            <div className="single-post__composer-skeleton-body">
+              <Skeleton variant="rect" height="2.4rem" radius="14px" />
+              <div className="single-post__composer-skeleton-footer">
+                <Skeleton width="6rem" height="2rem" radius="999px" />
+              </div>
+            </div>
+          </div>
+          <ul className="single-post__comments-list">
+            {[0, 1, 2].map((i) => (
+              <li key={i}>
+                <div className="comment" aria-busy="true">
+                  <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
+                  <div className="comment__bubble">
+                    <div className="comment__head" style={{ width: '100%' }}>
+                      <Skeleton variant="text" width={`${30 + i * 8}%`} height="0.85rem" />
+                      <Skeleton variant="text" width="2.5rem" height="0.75rem" />
+                    </div>
+                    <Skeleton variant="text" width="100%" />
+                    <div style={{ height: '0.3rem' }} />
+                    <Skeleton variant="text" width={`${68 + i * 6}%`} />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    );
+  }
+
+  renderCard() {
+    const initial = (this.state.author || '').trim().charAt(0).toUpperCase() || '?';
+    const { liked, likeCount, likePending } = this.state;
+
+    // Build the comment tree from the flat list.
+    const byId = new Map();
+    for (const c of this.state.comments) {
+      byId.set(c._id, { ...c, replies: [] });
+    }
+    const roots = [];
+    for (const node of byId.values()) {
+      if (node.parent && byId.has(node.parent)) {
+        byId.get(node.parent).replies.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+    const total = this.state.comments.length;
+
+    return (
+      <div className="single-post__card">
+        <header className="single-post__header">
+          {this.state.authorId ? (
+            <Link
+              to={`/u/${this.state.authorId}`}
+              className="single-post__avatar single-post__avatar--link"
+              aria-label={`View ${this.state.author}'s profile`}
+            >
+              {this.state.authorAvatar ? (
+                <img src={this.state.authorAvatar} alt="" />
+              ) : (
+                <span>{initial}</span>
+              )}
+            </Link>
+          ) : (
+            <div className="single-post__avatar" aria-hidden="true">
+              {this.state.authorAvatar ? (
+                <img src={this.state.authorAvatar} alt="" />
+              ) : (
+                <span>{initial}</span>
+              )}
+            </div>
+          )}
+          <div className="single-post__byline">
+            {this.state.authorId ? (
+              <Link to={`/u/${this.state.authorId}`} className="single-post__author">
+                {this.state.author || '—'}
+              </Link>
+            ) : (
+              <span className="single-post__author">{this.state.author || '—'}</span>
+            )}
+            <span className="single-post__date">{this.state.date}</span>
+          </div>
+        </header>
+
+        <h1 className="single-post__title">{this.state.title || ''}</h1>
+
+        {this.state.image && (
+          <div className="single-post__image">
+            <Image contain imageUrl={this.state.image} />
+          </div>
+        )}
+
+        <div className="single-post__content">{this.state.content}</div>
+
+        <footer className="single-post__footer">
+          <button
+            type="button"
+            className={[
+              'single-post__like',
+              liked ? 'is-liked' : '',
+              likePending ? 'is-pending' : '',
+            ].join(' ')}
+            onClick={this.toggleLike}
+            aria-pressed={liked}
+          >
+            <span className="single-post__like-icon" aria-hidden="true">
+              {liked ? '♥' : '♡'}
+            </span>
+            <span>
+              {likeCount > 0
+                ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
+                : 'Be the first to like this'}
+            </span>
+          </button>
+        </footer>
+
+        <section className="single-post__comments" aria-label="Comments">
+          <div className="single-post__comments-head">
+            <h2 className="single-post__comments-title">Comments</h2>
+            <span className="single-post__comments-count">
+              {total} {total === 1 ? 'reply' : 'replies'}
+            </span>
+          </div>
+
+          <CommentComposer
+            currentUser={this.props.currentUser}
+            onSubmit={(text) => this.addComment(null, text)}
+          />
+
+          {roots.length === 0 ? (
+            <div className="single-post__comments-empty">
+              <p>No replies yet. Be the first to say something.</p>
+            </div>
+          ) : (
+            <ul className="single-post__comments-list">
+              {roots.map((c) => (
+                <li key={c._id}>
+                  <Comment
+                    comment={c}
+                    depth={0}
+                    viewerId={this.props.userId}
+                    currentUser={this.props.currentUser}
+                    onAddReply={this.addComment}
+                    onDelete={this.deleteComment}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    );
+  }
+
+  render() {
+    const { loading } = this.state;
+    const inner = loading ? this.renderSkeletonCard() : this.renderCard();
+
+    // ---- Modal mode (opened from feed / profile) ----
+    if (this.props.asModal) {
+      return (
+        <div className="single-post-modal" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="single-post-modal__close"
+            onClick={this.props.onClose}
+            aria-label="Close"
+          >
+            ×
+          </button>
+          <article className="single-post single-post--modal">
+            <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
+            {loading && (
               <div className="single-post__back-skeleton">
                 <Skeleton width="5rem" height="1.6rem" radius="999px" />
               </div>
-              <div className="single-post__card">
-                <header className="single-post__header">
-                  <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
-                  <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
-                    <Skeleton variant="text" width="45%" />
-                    <div style={{ height: '0.35rem' }} />
-                    <Skeleton variant="text" width="30%" />
-                  </div>
-                </header>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
-                  <Skeleton variant="text" width="80%" height="2rem" />
-                  <Skeleton variant="text" width="55%" height="2rem" />
-                </div>
-                <div className="single-post__image">
-                  <Skeleton width="100%" height="100%" radius={0} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-                  <Skeleton variant="text" width="98%" />
-                  <Skeleton variant="text" width="94%" />
-                  <Skeleton variant="text" width="100%" />
-                  <Skeleton variant="text" width="72%" />
-                </div>
-                <footer className="single-post__footer">
-                  <Skeleton width="9rem" height="2.5rem" radius="999px" />
-                </footer>
-
-                {/* Comments section skeleton */}
-                <section className="single-post__comments" aria-busy="true">
-                  <div className="single-post__comments-head">
-                    <Skeleton variant="text" width="5rem" height="1.1rem" />
-                    <Skeleton width="4.5rem" height="1.4rem" radius="999px" />
-                  </div>
-
-                  {/* Composer slot */}
-                  <div className="single-post__composer-skeleton">
-                    <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
-                    <div className="single-post__composer-skeleton-body">
-                      <Skeleton variant="rect" height="2.4rem" radius="14px" />
-                      <div className="single-post__composer-skeleton-footer">
-                        <Skeleton width="6rem" height="2rem" radius="999px" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Three comment-row skeletons */}
-                  <ul className="single-post__comments-list">
-                    {[0, 1, 2].map((i) => (
-                      <li key={i}>
-                        <div className="comment" aria-busy="true">
-                          <Skeleton variant="circle" width="2.1rem" height="2.1rem" />
-                          <div className="comment__bubble">
-                            <div className="comment__head" style={{ width: '100%' }}>
-                              <Skeleton variant="text" width={`${30 + i * 8}%`} height="0.85rem" />
-                              <Skeleton variant="text" width="2.5rem" height="0.75rem" />
-                            </div>
-                            <Skeleton variant="text" width="100%" />
-                            <div style={{ height: '0.3rem' }} />
-                            <Skeleton variant="text" width={`${68 + i * 6}%`} />
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              </div>
-            </article>
-          </div>
+            )}
+            {inner}
+          </article>
         </div>
       );
     }
 
+    // ---- Page mode (direct URL / refresh) ----
     return (
       <div className="app-page">
         <div className="app-page__sidebar">
@@ -316,137 +452,19 @@ class SinglePost extends Component {
         </div>
 
         <div className="app-page__main">
-        <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
-        <article className="single-post">
-        <Link to="/" className="single-post__back">
-          ← Back to Home
-        </Link>
-
-        <div className="single-post__card">
-          <header className="single-post__header">
-            {this.state.authorId ? (
-              <Link
-                to={`/u/${this.state.authorId}`}
-                className="single-post__avatar single-post__avatar--link"
-                aria-label={`View ${this.state.author}'s profile`}
-              >
-                {this.state.authorAvatar ? (
-                  <img src={this.state.authorAvatar} alt="" />
-                ) : (
-                  <span>{initial}</span>
-                )}
-              </Link>
-            ) : (
-              <div className="single-post__avatar" aria-hidden="true">
-                {this.state.authorAvatar ? (
-                  <img src={this.state.authorAvatar} alt="" />
-                ) : (
-                  <span>{initial}</span>
-                )}
+          <ErrorHandler error={this.state.error} onHandle={this.dismissError} />
+          <article className="single-post">
+            {loading ? (
+              <div className="single-post__back-skeleton">
+                <Skeleton width="5rem" height="1.6rem" radius="999px" />
               </div>
+            ) : (
+              <Link to="/" className="single-post__back">
+                ← Back to Home
+              </Link>
             )}
-            <div className="single-post__byline">
-              {this.state.authorId ? (
-                <Link to={`/u/${this.state.authorId}`} className="single-post__author">
-                  {this.state.author || '—'}
-                </Link>
-              ) : (
-                <span className="single-post__author">{this.state.author || '—'}</span>
-              )}
-              <span className="single-post__date">{this.state.date}</span>
-            </div>
-          </header>
-
-          <h1 className="single-post__title">{this.state.title || ''}</h1>
-
-          {this.state.image && (
-            <div className="single-post__image">
-              <Image contain imageUrl={this.state.image} />
-            </div>
-          )}
-
-          <div className="single-post__content">
-            {this.state.content}
-          </div>
-
-          <footer className="single-post__footer">
-            <button
-              type="button"
-              className={[
-                'single-post__like',
-                liked ? 'is-liked' : '',
-                likePending ? 'is-pending' : '',
-              ].join(' ')}
-              onClick={this.toggleLike}
-              aria-pressed={liked}
-            >
-              <span className="single-post__like-icon" aria-hidden="true">
-                {liked ? '♥' : '♡'}
-              </span>
-              <span>
-                {likeCount > 0
-                  ? `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`
-                  : 'Be the first to like this'}
-              </span>
-            </button>
-          </footer>
-
-          {/* ---- Comments section ----------------------- */}
-          {(() => {
-            // Build the tree from the flat comment list.
-            const byId = new Map();
-            for (const c of this.state.comments) {
-              byId.set(c._id, { ...c, replies: [] });
-            }
-            const roots = [];
-            for (const node of byId.values()) {
-              if (node.parent && byId.has(node.parent)) {
-                byId.get(node.parent).replies.push(node);
-              } else {
-                roots.push(node);
-              }
-            }
-            const total = this.state.comments.length;
-
-            return (
-              <section className="single-post__comments" aria-label="Comments">
-                <div className="single-post__comments-head">
-                  <h2 className="single-post__comments-title">Comments</h2>
-                  <span className="single-post__comments-count">
-                    {total} {total === 1 ? 'reply' : 'replies'}
-                  </span>
-                </div>
-
-                <CommentComposer
-                  currentUser={this.props.currentUser}
-                  onSubmit={(text) => this.addComment(null, text)}
-                />
-
-                {roots.length === 0 ? (
-                  <div className="single-post__comments-empty">
-                    <p>No replies yet. Be the first to say something.</p>
-                  </div>
-                ) : (
-                  <ul className="single-post__comments-list">
-                    {roots.map((c) => (
-                      <li key={c._id}>
-                        <Comment
-                          comment={c}
-                          depth={0}
-                          viewerId={this.props.userId}
-                          currentUser={this.props.currentUser}
-                          onAddReply={this.addComment}
-                          onDelete={this.deleteComment}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-            );
-          })()}
-        </div>
-      </article>
+            {inner}
+          </article>
         </div>
       </div>
     );
