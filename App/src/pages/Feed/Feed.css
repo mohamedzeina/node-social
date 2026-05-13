@@ -32,7 +32,7 @@
   .feed-page__sidebar {
     display: block;
     position: sticky;
-    top: 5.5rem;        /* under the sticky toolbar */
+    top: 6rem;          /* clear breathing room under the sticky toolbar */
   }
   .feed-page__main { margin: 0; }
 }
