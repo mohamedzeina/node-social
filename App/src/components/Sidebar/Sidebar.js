@@ -6,50 +6,18 @@ import Skeleton from '../Skeleton/Skeleton';
 import './Sidebar.css';
 
 const Sidebar = ({ currentUser, postCount, postsLoading }) => {
-  const profileLink = currentUser && currentUser._id ? `/u/${currentUser._id}` : null;
+  // Treat the whole sidebar as loading until BOTH the auth user and
+  // the post count have arrived — avoids the patchy half-real,
+  // half-shimmer look. Once everything is in, swap to real content
+  // in one coherent reveal.
+  const loading = !currentUser || postsLoading;
 
-  // Profile is already accessible from the profile card CTA and the
-  // navbar avatar menu, so it's intentionally not in this nav rail.
-  const navItems = [
-    { id: 'home',   label: 'Home',          icon: '⌂', link: '/', active: true },
-    { id: 'saved',  label: 'Saved',         icon: '✦', soon: true },
-    { id: 'notifs', label: 'Notifications', icon: '◔', soon: true },
-  ];
-
-  const name = (currentUser && currentUser.name) || '';
-  const initial = name.trim().charAt(0).toUpperCase() || '?';
-  const avatar = currentUser && currentUser.avatarUrl;
-  const status = (currentUser && currentUser.status) || 'No status yet';
-
-  return (
-    <aside className="sidebar" aria-label="Account and quick navigation">
-      {/* Profile card */}
-      <div className="sidebar__card sidebar__profile">
-        {currentUser ? (
-          <>
-            <span className="sidebar__profile-avatar" aria-hidden="true">
-              {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
-            </span>
-
-            <div className="sidebar__profile-body">
-              <span className="sidebar__profile-name">{name || 'Welcome'}</span>
-              <span className="sidebar__profile-status">
-                <span className="sidebar__profile-status-mark" aria-hidden="true">“</span>
-                {status}
-                <span className="sidebar__profile-status-mark" aria-hidden="true">”</span>
-              </span>
-            </div>
-
-            {profileLink && (
-              <Link to={profileLink} className="sidebar__profile-cta">
-                <span>View your profile</span>
-                <Chevron size={14} style={{ transform: 'rotate(-90deg)' }} />
-              </Link>
-            )}
-          </>
-        ) : (
-          /* Skeleton state while currentUser loads */
-          <div className="sidebar__profile-skeleton" aria-busy="true">
+  if (loading) {
+    return (
+      <aside className="sidebar" aria-label="Loading" aria-busy="true">
+        {/* Profile card skeleton */}
+        <div className="sidebar__card sidebar__profile">
+          <div className="sidebar__profile-skeleton">
             <Skeleton variant="circle" width="4.5rem" height="4.5rem" />
             <Skeleton variant="text" width="60%" height="1.25rem" />
             <Skeleton variant="text" width="85%" />
@@ -57,6 +25,68 @@ const Sidebar = ({ currentUser, postCount, postsLoading }) => {
               <Skeleton variant="text" width="40%" />
             </div>
           </div>
+        </div>
+
+        {/* Nav skeleton */}
+        <nav className="sidebar__card sidebar__nav">
+          <Skeleton variant="text" width="3rem" height="0.7rem" style={{ marginBottom: '0.4rem', marginLeft: '0.55rem' }} />
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="sidebar__link sidebar__link--skeleton">
+              <Skeleton variant="rect" width="1.6rem" height="1.6rem" radius="10px" />
+              <Skeleton variant="text" width={`${48 + i * 8}%`} />
+            </div>
+          ))}
+        </nav>
+
+        {/* Tip card skeleton */}
+        <div className="sidebar__card sidebar__tip">
+          <Skeleton variant="circle" width="1.4rem" height="1.4rem" />
+          <div className="sidebar__tip-body" style={{ flex: 1, gap: '0.4rem' }}>
+            <Skeleton variant="text" width="55%" height="0.95rem" />
+            <Skeleton variant="text" width="100%" />
+            <Skeleton variant="text" width="78%" />
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // Loaded state — real content
+  const profileLink = currentUser._id ? `/u/${currentUser._id}` : null;
+
+  const navItems = [
+    { id: 'home',   label: 'Home',          icon: '⌂', link: '/', active: true },
+    { id: 'saved',  label: 'Saved',         icon: '✦', soon: true },
+    { id: 'notifs', label: 'Notifications', icon: '◔', soon: true },
+  ];
+
+  const name = currentUser.name || '';
+  const initial = name.trim().charAt(0).toUpperCase() || '?';
+  const avatar = currentUser.avatarUrl;
+  const status = currentUser.status || 'No status yet';
+
+  return (
+    <aside className="sidebar" aria-label="Account and quick navigation">
+      {/* Profile card */}
+      <div className="sidebar__card sidebar__profile">
+        <span className="sidebar__profile-avatar" aria-hidden="true">
+          {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
+        </span>
+
+        <div className="sidebar__profile-body">
+          <span className="sidebar__profile-name">{name || 'Welcome'}</span>
+          <span className="sidebar__profile-status">
+            <span className="sidebar__profile-status-mark" aria-hidden="true">“</span>
+            {status}
+            <span className="sidebar__profile-status-mark" aria-hidden="true">”</span>
+          </span>
+        </div>
+
+        {profileLink && (
+          <Link to={profileLink} className="sidebar__profile-cta">
+            <span>View your profile</span>
+            <Chevron size={14} style={{ transform: 'rotate(-90deg)' }} />
+          </Link>
         )}
       </div>
 
@@ -99,16 +129,7 @@ const Sidebar = ({ currentUser, postCount, postsLoading }) => {
           <strong className="sidebar__tip-title">Slow social</strong>
           <p className="sidebar__tip-text">
             Two dispatches per page, sorted newest first. Currently{' '}
-            {postsLoading ? (
-              <Skeleton
-                variant="text"
-                width="1.5rem"
-                height="0.85em"
-                className="sidebar__tip-count-skeleton"
-              />
-            ) : (
-              <strong>{typeof postCount === 'number' ? postCount : 0}</strong>
-            )}{' '}
+            <strong>{typeof postCount === 'number' ? postCount : 0}</strong>{' '}
             in the feed.
           </p>
         </div>
