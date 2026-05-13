@@ -62,7 +62,13 @@ const Post = props => {
   return (
     <article className="post">
       <header className="post__header">
-        <div className="post__avatar" aria-hidden="true">{initial}</div>
+        <div className="post__avatar" aria-hidden="true">
+          {props.authorAvatar ? (
+            <img src={props.authorAvatar} alt="" loading="lazy" />
+          ) : (
+            <span>{initial}</span>
+          )}
+        </div>
         <div className="post__byline">
           <span className="post__author">{props.author}</span>
           <span className="post__date">{props.date}</span>

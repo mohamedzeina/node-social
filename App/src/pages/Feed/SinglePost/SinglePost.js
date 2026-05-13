@@ -10,6 +10,7 @@ class SinglePost extends Component {
   state = {
     title: '',
     author: '',
+    authorAvatar: null,
     date: '',
     image: '',
     content: '',
@@ -27,7 +28,7 @@ class SinglePost extends Component {
         getPost(id: $postId) {
           title
           content
-          creator { name }
+          creator { name avatarUrl }
           imageUrl
           createdAt
           likeCount
@@ -54,6 +55,7 @@ class SinglePost extends Component {
         this.setState({
           title: resData.data.getPost.title,
           author: resData.data.getPost.creator.name,
+          authorAvatar: resData.data.getPost.creator.avatarUrl,
           image: resData.data.getPost.imageUrl,
           date: new Date(resData.data.getPost.createdAt).toLocaleDateString('en-US', {
             month: 'long', day: 'numeric', year: 'numeric',
@@ -118,7 +120,13 @@ class SinglePost extends Component {
 
         <div className="single-post__card">
           <header className="single-post__header">
-            <div className="single-post__avatar" aria-hidden="true">{initial}</div>
+            <div className="single-post__avatar" aria-hidden="true">
+              {this.state.authorAvatar ? (
+                <img src={this.state.authorAvatar} alt="" />
+              ) : (
+                <span>{initial}</span>
+              )}
+            </div>
             <div className="single-post__byline">
               <span className="single-post__author">{this.state.author || '—'}</span>
               <span className="single-post__date">{this.state.date}</span>

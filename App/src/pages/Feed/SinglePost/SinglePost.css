@@ -55,6 +55,13 @@
   font-weight: 700;
   font-size: 1.05rem;
   flex-shrink: 0;
+  overflow: hidden;
+}
+.single-post__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .single-post__byline {

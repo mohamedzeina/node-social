@@ -83,6 +83,7 @@ class Feed extends Component {
               content
               creator {
                 name
+                avatarUrl
               }
               imageUrl
               createdAt
@@ -222,6 +223,7 @@ class Feed extends Component {
               imageUrl
               creator  {
                 name
+                avatarUrl
               }
               createdAt
               likeCount
@@ -249,6 +251,7 @@ class Feed extends Component {
               imageUrl
               creator  {
                 name
+                avatarUrl
               }
               createdAt
               likeCount
@@ -463,6 +466,7 @@ class Feed extends Component {
                   key={post._id}
                   id={post._id}
                   author={post.creator.name}
+                  authorAvatar={post.creator.avatarUrl}
                   date={new Date(post.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
