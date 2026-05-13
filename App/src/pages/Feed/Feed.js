@@ -90,6 +90,7 @@ class Feed extends Component {
               title
               content
               creator {
+                _id
                 name
                 avatarUrl
               }
@@ -233,6 +234,7 @@ class Feed extends Component {
               content
               imageUrl
               creator  {
+                _id
                 name
                 avatarUrl
               }
@@ -261,6 +263,7 @@ class Feed extends Component {
               content
               imageUrl
               creator  {
+                _id
                 name
                 avatarUrl
               }
@@ -486,6 +489,7 @@ class Feed extends Component {
                 <Post
                   key={post._id}
                   id={post._id}
+                  isOwn={post.creator._id === this.props.userId}
                   author={post.creator.name}
                   authorAvatar={post.creator.avatarUrl}
                   date={new Date(post.createdAt).toLocaleDateString('en-US', {

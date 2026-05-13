@@ -73,24 +73,26 @@ const Post = props => {
           <span className="post__author">{props.author}</span>
           <span className="post__date">{props.date}</span>
         </div>
-        <div className="post__menu">
-          <button
-            className="post__menu-btn"
-            onClick={props.onStartEdit}
-            aria-label="Edit"
-            title="Edit"
-          >
-            ✎
-          </button>
-          <button
-            className="post__menu-btn post__menu-btn--danger"
-            onClick={props.onDelete}
-            aria-label="Delete"
-            title="Delete"
-          >
-            🗑
-          </button>
-        </div>
+        {props.isOwn && (
+          <div className="post__menu">
+            <button
+              className="post__menu-btn"
+              onClick={props.onStartEdit}
+              aria-label="Edit"
+              title="Edit"
+            >
+              ✎
+            </button>
+            <button
+              className="post__menu-btn post__menu-btn--danger"
+              onClick={props.onDelete}
+              aria-label="Delete"
+              title="Delete"
+            >
+              🗑
+            </button>
+          </div>
+        )}
       </header>
 
       <Link to={'/' + props.id} className="post__body">
