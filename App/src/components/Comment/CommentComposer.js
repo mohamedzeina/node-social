@@ -4,7 +4,27 @@ import './CommentComposer.css';
 
 const MAX = 2000;
 
-const CommentComposer = ({ currentUser, onSubmit }) => {
+/**
+ * Inline composer for a top-level comment or a reply.
+ *
+ * Props:
+ * - currentUser:    for the leading avatar
+ * - onSubmit(text): resolves on success; the composer clears + closes
+ * - onCancel:       if provided, a 'Cancel' button is rendered next to Submit
+ * - compact:        smaller paddings / font (used for inline replies)
+ * - autoFocus:      focus the textarea on mount
+ * - placeholder:    override the default placeholder
+ * - submitLabel:    override the default 'Comment'
+ */
+const CommentComposer = ({
+  currentUser,
+  onSubmit,
+  onCancel,
+  compact = false,
+  autoFocus = false,
+  placeholder,
+  submitLabel,
+}) => {
   const [value, setValue] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const taRef = useRef(null);
@@ -17,29 +37,34 @@ const CommentComposer = ({ currentUser, onSubmit }) => {
     ta.style.height = `${Math.min(ta.scrollHeight, 220)}px`;
   }, [value]);
 
+  // Focus on mount when requested
+  useEffect(() => {
+    if (autoFocus && taRef.current) taRef.current.focus();
+  }, [autoFocus]);
+
   const trimmed = value.trim();
   const disabled = submitting || trimmed.length === 0 || trimmed.length > MAX;
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (disabled) return;
     setSubmitting(true);
     try {
       await onSubmit(trimmed);
       setValue('');
     } catch (err) {
-      // Parent surfaces the error via ErrorHandler; keep the text so
-      // the user doesn't lose it.
-      console.error('addComment failed', err);
+      console.error('comment submit failed', err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Cmd/Ctrl+Enter to submit
   const handleKey = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       handleSubmit(e);
+    }
+    if (e.key === 'Escape' && onCancel) {
+      onCancel();
     }
   };
 
@@ -52,7 +77,10 @@ const CommentComposer = ({ currentUser, onSubmit }) => {
   const closeToLimit = trimmed.length > MAX - 100;
 
   return (
-    <form className="comment-composer" onSubmit={handleSubmit}>
+    <form
+      className={['comment-composer', compact ? 'comment-composer--compact' : ''].join(' ')}
+      onSubmit={handleSubmit}
+    >
       <span className="comment-composer__avatar" aria-hidden="true">
         {avatar ? <img src={avatar} alt="" /> : <span>{initial}</span>}
       </span>
@@ -61,13 +89,13 @@ const CommentComposer = ({ currentUser, onSubmit }) => {
         <textarea
           ref={taRef}
           className="comment-composer__textarea"
-          placeholder="Write a comment…"
+          placeholder={placeholder || 'Write a comment…'}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKey}
-          maxLength={MAX + 200}    // generous buffer; we enforce MAX in submit
+          maxLength={MAX + 200}
           rows={1}
-          aria-label="Write a comment"
+          aria-label={placeholder || 'Write a comment'}
         />
 
         <div className="comment-composer__footer">
@@ -81,13 +109,25 @@ const CommentComposer = ({ currentUser, onSubmit }) => {
           >
             {trimmed.length > 0 ? `${trimmed.length} / ${MAX}` : ''}
           </span>
-          <button
-            type="submit"
-            className="comment-composer__submit"
-            disabled={disabled}
-          >
-            {submitting ? 'Posting…' : 'Comment'}
-          </button>
+          <div className="comment-composer__actions">
+            {onCancel && (
+              <button
+                type="button"
+                className="comment-composer__cancel"
+                onClick={onCancel}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              type="submit"
+              className="comment-composer__submit"
+              disabled={disabled}
+            >
+              {submitting ? 'Posting…' : submitLabel || 'Comment'}
+            </button>
+          </div>
         </div>
       </div>
     </form>

@@ -76,6 +76,50 @@
   gap: 0.6rem;
 }
 
+.comment-composer__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.comment-composer__cancel {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--r-pill);
+  transition: background 0.14s var(--ease-out), color 0.14s var(--ease-out);
+}
+.comment-composer__cancel:hover { background: var(--surface-2); color: var(--ink); }
+
+/* Compact variant — used for inline reply composers under nested comments */
+.comment-composer--compact {
+  padding: 0.6rem 0 0.25rem;
+  border-top: 0;
+}
+.comment-composer--compact .comment-composer__avatar {
+  width: 1.8rem;
+  height: 1.8rem;
+  font-size: 0.78rem;
+}
+.comment-composer--compact .comment-composer__textarea {
+  font-size: 0.92rem;
+  padding: 0.55rem 0.8rem;
+  min-height: 2.1rem;
+}
+.comment-composer--compact .comment-composer__submit {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.9rem;
+}
+.comment-composer--compact .comment-composer__cancel {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.75rem;
+}
+
 .comment-composer__counter {
   font-family: var(--font-mono);
   font-size: 0.7rem;

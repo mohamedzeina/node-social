@@ -1,12 +1,47 @@
 /* ============================================================
-   Comment — chat-bubble row
+   Comment — chat-bubble row + cascading replies
+   ============================================================ */
+
+.comment-node {
+  /* depth is set by Comment.js as --depth (0…MAX_VISUAL_DEPTH) */
+  --depth: 0;
+}
+
+/* Replies indent + get a thread line on the left of their wrapper */
+.comment-node--reply {
+  position: relative;
+  margin-left: 1.4rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--hairline);
+}
+.comment-node--reply:hover { border-left-color: var(--hairline-strong); }
+
+/* Deepest visual rung — past this we stop adding more nesting space
+   so threads stay readable on narrow columns. */
+.comment-node--capped {
+  margin-left: 1rem;
+  padding-left: 0.7rem;
+}
+
+.comment-node__composer {
+  padding: 0 0 0.25rem;
+}
+
+.comment-node__children {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.25rem;
+}
+
+/* ============================================================
+   The comment row itself
    ============================================================ */
 
 .comment {
   display: grid;
-  grid-template-columns: 2.1rem 1fr auto;
+  grid-template-columns: 2.1rem 1fr;
   gap: 0.7rem;
-  padding: 0.65rem 0;
+  padding: 0.6rem 0;
   position: relative;
   animation: fade-up 0.28s var(--ease-out);
 }
@@ -27,7 +62,7 @@
   font-weight: 700;
   font-size: 0.9rem;
   flex-shrink: 0;
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
 }
 .comment__avatar img {
   width: 100%;
@@ -92,21 +127,39 @@ a.comment__author:hover {
   white-space: pre-wrap;
 }
 
-.comment__delete {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
+/* ---- Actions row inside the bubble ------------------ */
+.comment__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  margin-left: -0.35rem;
+  opacity: 0.7;
+  transition: opacity 0.14s var(--ease-out);
+}
+.comment:hover .comment__actions,
+.comment:focus-within .comment__actions { opacity: 1; }
+
+.comment__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   background: transparent;
   border: 0;
   cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--r-pill);
   color: var(--ink-3);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.15rem;
-  opacity: 0;
-  transition: background 0.16s var(--ease-out), color 0.16s var(--ease-out), opacity 0.16s var(--ease-out);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: background 0.14s var(--ease-out), color 0.14s var(--ease-out);
 }
-.comment:hover .comment__delete,
-.comment:focus-within .comment__delete { opacity: 1; }
-.comment__delete:hover { background: var(--heart-soft); color: var(--heart); }
+.comment__action:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+.comment__action--danger:hover {
+  background: var(--heart-soft);
+  color: var(--heart);
+}

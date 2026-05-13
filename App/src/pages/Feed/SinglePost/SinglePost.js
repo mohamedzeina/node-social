@@ -46,6 +46,7 @@ class SinglePost extends Component {
             _id
             content
             createdAt
+            parent
             author { _id name avatarUrl }
           }
         }
@@ -127,16 +128,20 @@ class SinglePost extends Component {
 
   // ---- Comments ----------------------------------------
 
-  addComment = async (content) => {
+  /**
+   * Add a comment or reply. Pass parentId to nest under another
+   * comment, or null for a top-level comment. Optimistic update
+   * inserts a temporary record with __pending: true so the new
+   * node renders immediately.
+   */
+  addComment = async (parentId, content) => {
     const postId = this.props.match.params.postId;
-
-    // Build an optimistic comment. Negative tempId so it never
-    // collides with real Mongo ObjectIds and is easy to swap.
-    const tempId = `temp-${Date.now()}`;
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const optimistic = {
       _id: tempId,
       content,
       createdAt: new Date().toISOString(),
+      parent: parentId || null,
       author: this.props.currentUser
         ? {
             _id: this.props.currentUser._id,
@@ -150,16 +155,17 @@ class SinglePost extends Component {
 
     const query = {
       query: `
-        mutation AddComment($postId: ID!, $content: String!) {
-          addComment(postId: $postId, content: $content) {
+        mutation AddComment($postId: ID!, $content: String!, $parentId: ID) {
+          addComment(postId: $postId, content: $content, parentId: $parentId) {
             _id
             content
             createdAt
+            parent
             author { _id name avatarUrl }
           }
         }
       `,
-      variables: { postId, content },
+      variables: { postId, content, parentId: parentId || null },
     };
 
     try {
@@ -174,13 +180,11 @@ class SinglePost extends Component {
       const data = await res.json();
       if (data.errors) throw new Error(data.errors[0].message);
 
-      // Replace the optimistic placeholder with the server's record
       const real = data.data.addComment;
       this.setState((prev) => ({
         comments: prev.comments.map((c) => (c._id === tempId ? real : c)),
       }));
     } catch (err) {
-      // Roll back the optimistic insert and surface the error
       this.setState((prev) => ({
         comments: prev.comments.filter((c) => c._id !== tempId),
         error: err,
@@ -388,38 +392,59 @@ class SinglePost extends Component {
           </footer>
 
           {/* ---- Comments section ----------------------- */}
-          <section className="single-post__comments" aria-label="Comments">
-            <div className="single-post__comments-head">
-              <h2 className="single-post__comments-title">Comments</h2>
-              <span className="single-post__comments-count">
-                {this.state.comments.length} {this.state.comments.length === 1 ? 'reply' : 'replies'}
-              </span>
-            </div>
+          {(() => {
+            // Build the tree from the flat comment list.
+            const byId = new Map();
+            for (const c of this.state.comments) {
+              byId.set(c._id, { ...c, replies: [] });
+            }
+            const roots = [];
+            for (const node of byId.values()) {
+              if (node.parent && byId.has(node.parent)) {
+                byId.get(node.parent).replies.push(node);
+              } else {
+                roots.push(node);
+              }
+            }
+            const total = this.state.comments.length;
 
-            <CommentComposer
-              currentUser={this.props.currentUser}
-              onSubmit={this.addComment}
-            />
+            return (
+              <section className="single-post__comments" aria-label="Comments">
+                <div className="single-post__comments-head">
+                  <h2 className="single-post__comments-title">Comments</h2>
+                  <span className="single-post__comments-count">
+                    {total} {total === 1 ? 'reply' : 'replies'}
+                  </span>
+                </div>
 
-            {this.state.comments.length === 0 ? (
-              <div className="single-post__comments-empty">
-                <p>No replies yet. Be the first to say something.</p>
-              </div>
-            ) : (
-              <ul className="single-post__comments-list">
-                {this.state.comments.map((c) => (
-                  <li key={c._id}>
-                    <Comment
-                      comment={c}
-                      pending={!!c.__pending}
-                      isOwn={c.author && c.author._id === this.props.userId}
-                      onDelete={this.deleteComment}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+                <CommentComposer
+                  currentUser={this.props.currentUser}
+                  onSubmit={(text) => this.addComment(null, text)}
+                />
+
+                {roots.length === 0 ? (
+                  <div className="single-post__comments-empty">
+                    <p>No replies yet. Be the first to say something.</p>
+                  </div>
+                ) : (
+                  <ul className="single-post__comments-list">
+                    {roots.map((c) => (
+                      <li key={c._id}>
+                        <Comment
+                          comment={c}
+                          depth={0}
+                          viewerId={this.props.userId}
+                          currentUser={this.props.currentUser}
+                          onAddReply={this.addComment}
+                          onDelete={this.deleteComment}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            );
+          })()}
         </div>
       </article>
         </div>
