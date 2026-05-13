@@ -7,30 +7,32 @@ import './Modal.css';
 const modal = props =>
   ReactDOM.createPortal(
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div className="modal__corner modal__corner--tl" />
-      <div className="modal__corner modal__corner--tr" />
-      <div className="modal__corner modal__corner--bl" />
-      <div className="modal__corner modal__corner--br" />
-
       <header className="modal__header">
-        <span className="modal__eyebrow">Editor&apos;s desk</span>
         <h1 id="modal-title" className="modal__title">{props.title}</h1>
-        <div className="modal__rule" />
+        <button
+          type="button"
+          className="modal__close"
+          onClick={props.onCancelModal}
+          aria-label="Close"
+        >
+          ×
+        </button>
       </header>
 
       <div className="modal__content">{props.children}</div>
 
       <div className="modal__actions">
-        <Button design="danger" mode="flat" onClick={props.onCancelModal}>
+        <Button mode="flat" onClick={props.onCancelModal}>
           Cancel
         </Button>
         <Button
           mode="raised"
+          design="accent"
           onClick={props.onAcceptModal}
           disabled={!props.acceptEnabled}
           loading={props.isLoading}
         >
-          Set in print
+          {props.acceptLabel || 'Save'}
         </Button>
       </div>
     </div>,

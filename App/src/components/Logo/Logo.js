@@ -4,11 +4,12 @@ import './Logo.css';
 
 const logo = () => (
   <div className="logo" aria-label="Dispatches">
-    <span className="logo__mark">D°</span>
-    <span className="logo__wordmark">
-      <span className="logo__primary">Dispatches</span>
-      <span className="logo__strap">A writing journal &middot; Est. MMXXVI</span>
+    <span className="logo__mark" aria-hidden="true">
+      <span className="logo__dot logo__dot--a" />
+      <span className="logo__dot logo__dot--b" />
+      <span className="logo__dot logo__dot--c" />
     </span>
+    <span className="logo__wordmark">dispatches</span>
   </div>
 );
 

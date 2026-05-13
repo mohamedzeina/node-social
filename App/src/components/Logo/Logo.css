@@ -1,58 +1,52 @@
 /* ============================================================
-   Logo — masthead style
-   "N°" mark + wordmark + strapline (Est. line)
+   Logo — three coloured dots + wordmark
+   Speech-bubble / message-dot energy
    ============================================================ */
 
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
-  padding: 0.25rem 0;
+  gap: 0.55rem;
   user-select: none;
   cursor: pointer;
+  padding: 0.25rem 0;
 }
 
 .logo__mark {
-  font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
-  font-weight: 600;
-  font-style: italic;
-  font-size: 1.65rem;
-  line-height: 1;
-  color: var(--paper);
-  background: var(--vermilion);
-  padding: 0.18rem 0.45rem 0.22rem;
-  letter-spacing: -0.02em;
-  transition: background 0.22s ease, transform 0.22s ease;
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-sm);
 }
+
+.logo__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.logo__dot--a { background: var(--clay); }
+.logo__dot--b { background: var(--gold); }
+.logo__dot--c { background: var(--sage); }
 
 .logo__wordmark {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-}
-
-.logo__primary {
   font-family: var(--font-display);
-  font-variation-settings: "opsz" 144, "SOFT" 50;
   font-weight: 600;
-  font-size: 1.25rem;
-  color: var(--paper);
-  letter-spacing: -0.02em;
+  font-size: 1.15rem;
+  letter-spacing: -0.025em;
+  color: var(--ink);
 }
 
-.logo__strap {
-  margin-top: 3px;
-  font-family: var(--font-mono);
-  font-size: 0.56rem;
-  font-weight: 500;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(242, 236, 223, 0.6);
-}
+/* Hover — dots wiggle in sequence */
+.logo:hover .logo__dot--a { animation: dot-wiggle 0.6s var(--ease-out) 0s; }
+.logo:hover .logo__dot--b { animation: dot-wiggle 0.6s var(--ease-out) 0.08s; }
+.logo:hover .logo__dot--c { animation: dot-wiggle 0.6s var(--ease-out) 0.16s; }
 
-.logo:hover .logo__mark {
-  background: var(--paper);
-  color: var(--vermilion);
-  transform: rotate(-3deg);
+@keyframes dot-wiggle {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
 }
