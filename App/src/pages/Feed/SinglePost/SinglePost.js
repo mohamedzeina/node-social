@@ -158,8 +158,11 @@ class SinglePost extends Component {
         });
       })
       .catch((err) => {
-        console.log(err);
-        this.setState({ loading: false });
+        // Previously this only set loading:false, which left the user
+        // staring at an empty card with no signal. Surface the error
+        // through ErrorHandler so they know what happened.
+        console.error('Failed to load post', err);
+        this.setState({ loading: false, error: err });
       });
   }
 
