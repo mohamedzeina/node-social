@@ -55,6 +55,7 @@ class Profile extends Component {
               createdAt
               likeCount
               likedByMe
+              commentCount
               creator { _id name avatarUrl }
             }
           }
@@ -292,6 +293,7 @@ class Profile extends Component {
                 content={post.content}
                 likeCount={post.likeCount}
                 likedByMe={post.likedByMe}
+                commentCount={post.commentCount}
                 token={this.props.token}
               />
             ))

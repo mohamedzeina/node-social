@@ -56,6 +56,7 @@ class Feed extends Component {
               createdAt
               likeCount
               likedByMe
+              commentCount
           }
             totalPosts
         }
@@ -159,6 +160,7 @@ class Feed extends Component {
               createdAt
               likeCount
               likedByMe
+              commentCount
             }
           }
           `,
@@ -188,6 +190,7 @@ class Feed extends Component {
               createdAt
               likeCount
               likedByMe
+              commentCount
             }
           }
           `,
@@ -251,6 +254,7 @@ class Feed extends Component {
           imagePath: resData.data[resDataField].imageUrl,
           likeCount: resData.data[resDataField].likeCount,
           likedByMe: resData.data[resDataField].likedByMe,
+          commentCount: resData.data[resDataField].commentCount,
         };
         this.setState((prevState) => {
           let updatedPosts = [...prevState.posts];
@@ -434,6 +438,7 @@ class Feed extends Component {
                   content={post.content}
                   likeCount={post.likeCount}
                   likedByMe={post.likedByMe}
+                  commentCount={post.commentCount}
                   token={this.props.token}
                   onStartEdit={this.startEditPostHandler.bind(this, post._id)}
                   onDelete={this.deletePostHandler.bind(this, post._id)}

@@ -170,7 +170,9 @@ const Post = props => {
           <span className="post__action-icon" aria-hidden="true">
             <Reply size={18} />
           </span>
-          <span className="post__action-label">Reply</span>
+          <span className="post__action-label">
+            {props.commentCount > 0 ? props.commentCount : 'Reply'}
+          </span>
         </Link>
 
         <button
