@@ -3,14 +3,6 @@ import { Link } from 'react-router-dom';
 
 import './Button.css';
 
-const ButtonLoading = () => (
-  <span className="button__loading" aria-label="Loading">
-    <span />
-    <span />
-    <span />
-  </span>
-);
-
 const button = props => {
   const classes = [
     'button',
@@ -33,7 +25,11 @@ const button = props => {
       disabled={props.disabled || props.loading}
       type={props.type}
     >
-      {props.loading ? <ButtonLoading /> : props.children}
+      {props.loading ? (
+        <span className="button__loading" aria-label="Loading" />
+      ) : (
+        props.children
+      )}
     </button>
   );
 };

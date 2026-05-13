@@ -1,204 +1,153 @@
 /* ============================================================
-   Button — editorial press stamp
-   Looks like a numbered stamp / letterpress impression
+   Button — pill, tappable, modern social
    ============================================================ */
 
 .button {
-  --btn-ink: var(--ink);
-  --btn-paper: transparent;
-  --btn-edge: var(--ink);
+  --btn-bg:     var(--surface);
+  --btn-fg:     var(--ink);
+  --btn-edge:   var(--hairline-strong);
+  --btn-bg-h:   var(--surface-2);
+  --btn-fg-h:   var(--ink);
 
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
 
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: -0.005em;
   text-decoration: none;
+  white-space: nowrap;
 
-  padding: 0.7rem 1.4rem;
+  padding: 0.62rem 1.2rem;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
   border: 1px solid var(--btn-edge);
-  background: var(--btn-paper);
-  color: var(--btn-ink);
-  border-radius: 0;
+  border-radius: var(--r-pill);
   cursor: pointer;
 
-  transition: transform 0.16s ease,
-              background 0.18s ease,
-              color 0.18s ease,
-              box-shadow 0.18s ease,
-              letter-spacing 0.22s ease;
+  transition:
+    background 0.16s var(--ease-out),
+    color 0.16s var(--ease-out),
+    border-color 0.16s var(--ease-out),
+    transform 0.12s var(--ease-out),
+    box-shadow 0.16s var(--ease-out);
   user-select: none;
-  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
-
-/* Hairline corner ticks — letterpress detail */
-.button::before,
-.button::after {
-  content: "";
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border: 1px solid var(--btn-edge);
-  pointer-events: none;
-  transition: inset 0.22s ease, opacity 0.18s ease;
-  opacity: 0;
-}
-.button::before { top: -3px;    left: -3px;    border-right: 0; border-bottom: 0; }
-.button::after  { bottom: -3px; right: -3px;   border-left: 0;  border-top: 0; }
-
-.button:hover::before,
-.button:hover::after { opacity: 1; }
 
 .button:hover {
-  letter-spacing: 0.2em;
-  background: var(--btn-ink);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--btn-edge);
-  transform: translate(-1px, -1px);
+  background: var(--btn-bg-h);
+  color: var(--btn-fg-h);
+  border-color: var(--ink-4);
 }
 
 .button:active {
-  transform: translate(1px, 1px);
-  box-shadow: 0 0 0 var(--btn-edge);
+  transform: scale(0.96);
 }
 
 .button:focus { outline: none; }
 
 .button:disabled,
 .button:disabled:hover {
-  --btn-ink:  var(--ink-ghost);
-  --btn-edge: var(--ink-ghost);
-  --btn-paper: transparent;
+  background: var(--surface-2);
+  color: var(--ink-4);
+  border-color: var(--hairline);
   cursor: not-allowed;
-  letter-spacing: 0.16em;
   transform: none;
   box-shadow: none;
 }
-.button:disabled::before,
-.button:disabled::after { opacity: 0; }
 
 /* ============================================================
-   Modes: flat | raised
+   Modes
    ============================================================ */
 
 .button--flat {
-  border-color: transparent;
-  padding: 0.55rem 0.9rem;
-}
-.button--flat::before,
-.button--flat::after { display: none; }
-
-.button--flat:hover {
-  background: transparent;
-  color: var(--vermilion);
-  box-shadow: inset 0 -2px 0 var(--vermilion);
-  transform: none;
+  --btn-bg:     transparent;
+  --btn-edge:   transparent;
+  --btn-bg-h:   var(--surface-2);
+  padding: 0.5rem 0.85rem;
 }
 
 .button--raised {
-  background: var(--ink);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--ink);
+  --btn-bg:     var(--ink);
+  --btn-fg:     #fff;
+  --btn-edge:   var(--ink);
+  --btn-bg-h:   #000;
+  --btn-fg-h:   #fff;
+  box-shadow: var(--shadow-sm);
 }
-.button--raised:hover {
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 5px 5px 0 var(--ink);
-  transform: translate(-2px, -2px);
-}
+.button--raised:hover { box-shadow: var(--shadow-md); }
 
 /* ============================================================
-   Designs: default | accent | danger | success
+   Designs
    ============================================================ */
 
+/* Accent — clay (terracotta) */
 .button--accent {
-  --btn-ink: var(--vermilion);
-  --btn-edge: var(--vermilion);
-}
-.button--accent:hover {
-  background: var(--vermilion);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--vermilion-deep);
+  --btn-bg:     transparent;
+  --btn-fg:     var(--clay);
+  --btn-edge:   var(--clay);
+  --btn-bg-h:   var(--clay-soft);
+  --btn-fg-h:   var(--clay-hover);
 }
 .button--raised.button--accent {
-  background: var(--vermilion);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--vermilion-deep);
+  --btn-bg:     var(--clay);
+  --btn-fg:     #fff;
+  --btn-edge:   var(--clay);
+  --btn-bg-h:   var(--clay-hover);
+  --btn-fg-h:   #fff;
 }
-.button--raised.button--accent:hover {
-  background: var(--paper);
-  color: var(--vermilion);
-  box-shadow: 5px 5px 0 var(--vermilion-deep);
-}
-.button--flat.button--accent:hover {
-  background: transparent;
-  color: var(--vermilion);
-  box-shadow: inset 0 -2px 0 var(--vermilion);
+.button--flat.button--accent {
+  --btn-fg:     var(--clay);
+  --btn-bg-h:   var(--clay-soft);
 }
 
+/* Danger — heart */
 .button--danger {
-  --btn-ink: var(--vermilion-deep);
-  --btn-edge: var(--vermilion-deep);
-}
-.button--danger:hover {
-  background: var(--vermilion-deep);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--ink);
+  --btn-bg:     transparent;
+  --btn-fg:     var(--heart);
+  --btn-edge:   transparent;
+  --btn-bg-h:   var(--heart-soft);
+  --btn-fg-h:   var(--heart);
 }
 .button--raised.button--danger {
-  background: var(--vermilion-deep);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--ink);
+  --btn-bg:     var(--heart);
+  --btn-fg:     #fff;
+  --btn-edge:   var(--heart);
+  --btn-bg-h:   #C42747;
+  --btn-fg-h:   #fff;
 }
 .button--flat.button--danger {
-  color: var(--vermilion-deep);
-}
-.button--flat.button--danger:hover {
-  background: transparent;
-  color: var(--vermilion-deep);
-  box-shadow: inset 0 -2px 0 var(--vermilion-deep);
+  --btn-fg:     var(--heart);
+  --btn-bg-h:   var(--heart-soft);
 }
 
+/* Success — sage */
 .button--success {
-  --btn-ink: var(--moss);
-  --btn-edge: var(--moss);
-}
-.button--success:hover {
-  background: var(--moss);
-  color: var(--paper);
-  box-shadow: 3px 3px 0 var(--ink);
+  --btn-bg:     transparent;
+  --btn-fg:     var(--sage);
+  --btn-edge:   var(--sage);
+  --btn-bg-h:   var(--sage-soft);
 }
 .button--raised.button--success {
-  background: var(--moss);
-  color: var(--paper);
+  --btn-bg:     var(--sage);
+  --btn-fg:     #fff;
+  --btn-edge:   var(--sage);
 }
 
 /* ============================================================
-   Loading state — three pulsing dots, monospaced
+   Loading state — small spinner
    ============================================================ */
 
 .button__loading {
-  display: inline-flex;
-  gap: 0.3rem;
-  align-items: center;
-}
-.button__loading span {
-  width: 5px;
-  height: 5px;
-  background: currentColor;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
-  animation: btn-pulse 1.0s ease-in-out infinite;
-}
-.button__loading span:nth-child(2) { animation-delay: 0.15s; }
-.button__loading span:nth-child(3) { animation-delay: 0.30s; }
-
-@keyframes btn-pulse {
-  0%, 80%, 100% { opacity: 0.25; transform: scale(0.7); }
-  40%           { opacity: 1;    transform: scale(1); }
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
 }
