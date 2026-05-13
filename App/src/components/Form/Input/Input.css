@@ -1,37 +1,20 @@
 /* ============================================================
-   Form inputs — editorial form fields
-   Inspired by carbon-copy paper forms, with a strong baseline
+   Form inputs — rounded surface fields
    ============================================================ */
 
 .input {
-  margin: 1.25rem 0;
+  margin: 0.9rem 0;
   width: 100%;
-  position: relative;
 }
 
 .input label {
   display: block;
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-/* Numbered marker before each label */
-.input label::before {
-  content: "§";
-  color: var(--vermilion);
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1;
+  color: var(--ink-2);
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.005em;
 }
 
 .input input,
@@ -39,104 +22,79 @@
   display: block;
   width: 100%;
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--ink);
-  padding: 0.65rem 0.1rem;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--ink);
-  border-radius: 0;
-  transition: border-color 0.18s ease,
-              background 0.18s ease,
-              padding 0.18s ease;
-  font-feature-settings: 'liga' 1, 'kern' 1;
+  padding: 0.75rem 0.95rem;
+  background: var(--surface);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md);
+  transition: border-color 0.18s var(--ease-out),
+              box-shadow 0.18s var(--ease-out),
+              background 0.18s var(--ease-out);
+  -webkit-appearance: none;
 }
 
 .input textarea {
   resize: vertical;
-  min-height: 8rem;
-  line-height: 1.6;
+  min-height: 7rem;
+  line-height: 1.55;
+  font-family: var(--font-body);
 }
 
 .input input::placeholder,
 .input textarea::placeholder {
-  color: var(--ink-ghost);
-  font-style: italic;
+  color: var(--ink-4);
 }
 
 .input input:hover,
 .input textarea:hover {
-  background: rgba(22,19,16,0.025);
+  border-color: var(--ink-4);
 }
 
 .input input:focus,
 .input textarea:focus {
   outline: none;
-  border-bottom-width: 2px;
-  border-bottom-color: var(--vermilion);
-  background: rgba(183,50,37,0.05);
-  padding-left: 0.4rem;
+  border-color: var(--clay);
+  box-shadow: 0 0 0 4px var(--clay-soft);
+  background: var(--surface);
 }
 
-/* Validation — red underline + soft tint */
+/* Validation */
 .input .touched.invalid {
-  border-bottom-color: var(--vermilion-deep);
-  background: rgba(142,36,24,0.06);
-}
-
-.input .touched.invalid + .input__error {
-  opacity: 1;
+  border-color: var(--heart);
+  box-shadow: 0 0 0 4px var(--heart-soft);
 }
 
 /* ============================================================
-   File picker — looks like an editorial slip
+   File picker
    ============================================================ */
 
 .input input[type="file"] {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 0;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--ink-3);
+  padding: 0.55rem 0.7rem;
+  background: var(--surface-2);
+  border: 1px dashed var(--hairline-strong);
   cursor: pointer;
-  border-bottom: 1px dashed var(--ink);
-  padding-bottom: 0.6rem;
 }
+.input input[type="file"]:hover { border-color: var(--clay); background: var(--clay-soft); }
 
-.input input[type="file"]::-webkit-file-upload-button {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  background: var(--ink);
-  color: var(--paper);
-  border: 0;
-  padding: 0.5rem 1rem;
-  margin-right: 0.8rem;
-  cursor: pointer;
-  border-radius: 0;
-  transition: background 0.18s ease;
-}
-
-.input input[type="file"]::-webkit-file-upload-button:hover {
-  background: var(--vermilion);
-}
-
+.input input[type="file"]::-webkit-file-upload-button,
 .input input[type="file"]::file-selector-button {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   background: var(--ink);
-  color: var(--paper);
+  color: #fff;
   border: 0;
   padding: 0.5rem 1rem;
   margin-right: 0.8rem;
   cursor: pointer;
-  border-radius: 0;
-  transition: background 0.18s ease;
+  border-radius: var(--r-pill);
+  transition: background 0.16s var(--ease-out);
 }
-
+.input input[type="file"]::-webkit-file-upload-button:hover,
 .input input[type="file"]::file-selector-button:hover {
-  background: var(--vermilion);
+  background: var(--clay);
 }
