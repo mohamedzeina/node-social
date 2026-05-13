@@ -1,7 +1,58 @@
+/* ============================================================
+   Logo — masthead style
+   "N°" mark + wordmark + strapline (Est. line)
+   ============================================================ */
+
 .logo {
-    font-size: 1rem;
-    font-weight: bold;
-    border: 1px solid white;
-    padding: 0.5rem;
-    color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.25rem 0;
+  user-select: none;
+  cursor: pointer;
+}
+
+.logo__mark {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 1.65rem;
+  line-height: 1;
+  color: var(--paper);
+  background: var(--vermilion);
+  padding: 0.18rem 0.45rem 0.22rem;
+  letter-spacing: -0.02em;
+  transition: background 0.22s ease, transform 0.22s ease;
+}
+
+.logo__wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo__primary {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+}
+
+.logo__strap {
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(242, 236, 223, 0.6);
+}
+
+.logo:hover .logo__mark {
+  background: var(--paper);
+  color: var(--vermilion);
+  transform: rotate(-3deg);
 }
