@@ -49,13 +49,18 @@ if (!process.env.MONGODB_URI) {
 
 const PASSWORD = 'password123';
 
+// Stable avatar head-shots from i.pravatar.cc (free, no auth).
+// Using `?img=N` returns the same image every time; the path is also
+// safe to pass through `?img=` query string when accessed via fetch.
+const avatar = (n) => `https://i.pravatar.cc/300?img=${n}`;
+
 const USERS = [
-  { email: 'test@test.com',  name: 'Maya Rodriguez', status: 'Coffee, code, long walks ☕' },
-  { email: 'test2@test.com', name: 'James Chen',     status: 'Photographer & part-time wanderer' },
-  { email: 'test3@test.com', name: 'Aisha Patel',    status: 'Reading, writing, watching the weather' },
-  { email: 'test4@test.com', name: 'Oliver Bennett', status: 'Builds small things that compound' },
-  { email: 'test5@test.com', name: 'Sofia Hassan',   status: 'Books, basil, brutalist buildings' },
-  { email: 'test6@test.com', name: 'Noah Williams',  status: 'Currently learning to bake bread' },
+  { email: 'test@test.com',  name: 'Maya Rodriguez', status: 'Coffee, code, long walks ☕',          avatarUrl: avatar(47) },
+  { email: 'test2@test.com', name: 'James Chen',     status: 'Photographer & part-time wanderer',   avatarUrl: avatar(13) },
+  { email: 'test3@test.com', name: 'Aisha Patel',    status: 'Reading, writing, watching the weather', avatarUrl: avatar(32) },
+  { email: 'test4@test.com', name: 'Oliver Bennett', status: 'Builds small things that compound',   avatarUrl: avatar(8)  },
+  { email: 'test5@test.com', name: 'Sofia Hassan',   status: 'Books, basil, brutalist buildings',   avatarUrl: avatar(44) },
+  { email: 'test6@test.com', name: 'Noah Williams',  status: 'Currently learning to bake bread',    avatarUrl: avatar(60) },
 ];
 
 // Stable, varied images via picsum.photos seeded URLs
@@ -181,6 +186,7 @@ async function run() {
       email: u.email,
       name: u.name,
       status: u.status,
+      avatarUrl: u.avatarUrl,
       password: hashedPassword,
       posts: [],
     }))
