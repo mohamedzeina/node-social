@@ -340,7 +340,7 @@ class Feed extends Component {
 
   render() {
     return (
-      <div className="feed-page">
+      <div className="app-page">
         <ErrorHandler error={this.state.error} onHandle={this.errorHandler} />
         <FeedEdit
           editing={this.state.isEditing}
@@ -350,7 +350,7 @@ class Feed extends Component {
           onFinishEdit={this.finishEditHandler}
         />
 
-        <div className="feed-page__sidebar">
+        <div className="app-page__sidebar">
           <Sidebar
             currentUser={this.props.currentUser}
             postCount={this.state.totalPosts}
@@ -358,7 +358,7 @@ class Feed extends Component {
           />
         </div>
 
-        <div className="feed-page__main">
+        <div className="app-page__main">
         {!this.props.currentUser ? (
           <div className="feed__composer feed__composer--skeleton" aria-busy="true">
             <Skeleton variant="circle" width="2.4rem" height="2.4rem" />

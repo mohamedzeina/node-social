@@ -5,6 +5,7 @@ import Post from '../../components/Feed/Post/Post';
 import Skeleton from '../../components/Skeleton/Skeleton';
 import PostSkeleton from '../../components/Skeleton/PostSkeleton';
 import ErrorHandler from '../../components/ErrorHandler/ErrorHandler';
+import Sidebar from '../../components/Sidebar/Sidebar';
 import './Profile.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
@@ -103,52 +104,67 @@ class Profile extends Component {
 
     if (loading) {
       return (
-        <div className="profile">
-          {/* Back link slot kept stable so the page doesn't jump on load */}
-          <div className="profile__back-skeleton">
-            <Skeleton width="5rem" height="1.6rem" radius="999px" />
+        <div className="app-page">
+          <div className="app-page__sidebar">
+            <Sidebar currentUser={this.props.currentUser} />
           </div>
 
-          <header className="profile__hero profile__hero--skeleton">
-            <span className="profile__accent" aria-hidden="true" />
-            <div className="profile__hero-top">
-              <Skeleton variant="circle" width="5rem" height="5rem" />
-              <div className="profile__identity">
-                <Skeleton variant="text" width="55%" height="1.8rem" />
-                <div style={{ height: '0.5rem' }} />
-                <Skeleton variant="text" width="85%" />
+          <div className="app-page__main">
+            <div className="profile">
+              {/* Back link slot kept stable so the page doesn't jump on load */}
+              <div className="profile__back-skeleton">
+                <Skeleton width="5rem" height="1.6rem" radius="999px" />
               </div>
-              <Skeleton width="6.5rem" height="2.25rem" radius="999px" />
-            </div>
-            <div className="profile__stats">
-              <Skeleton width="3.5rem" height="2.25rem" />
-              <div className="profile__stat-sep" aria-hidden="true" />
-              <Skeleton width="4rem" height="2.25rem" />
-              <div className="profile__stat-sep" aria-hidden="true" />
-              <Skeleton width="5rem" height="2.25rem" />
-            </div>
-          </header>
 
-          <section className="profile__posts">
-            <div className="profile__posts-header">
-              <Skeleton variant="text" width="6rem" height="1.4rem" />
-              <Skeleton width="5rem" height="1.6rem" radius="999px" />
+              <header className="profile__hero profile__hero--skeleton">
+                <span className="profile__accent" aria-hidden="true" />
+                <div className="profile__hero-top">
+                  <Skeleton variant="circle" width="5rem" height="5rem" />
+                  <div className="profile__identity">
+                    <Skeleton variant="text" width="55%" height="1.8rem" />
+                    <div style={{ height: '0.5rem' }} />
+                    <Skeleton variant="text" width="85%" />
+                  </div>
+                  <Skeleton width="6.5rem" height="2.25rem" radius="999px" />
+                </div>
+                <div className="profile__stats">
+                  <Skeleton width="3.5rem" height="2.25rem" />
+                  <div className="profile__stat-sep" aria-hidden="true" />
+                  <Skeleton width="4rem" height="2.25rem" />
+                  <div className="profile__stat-sep" aria-hidden="true" />
+                  <Skeleton width="5rem" height="2.25rem" />
+                </div>
+              </header>
+
+              <section className="profile__posts">
+                <div className="profile__posts-header">
+                  <Skeleton variant="text" width="6rem" height="1.4rem" />
+                  <Skeleton width="5rem" height="1.6rem" radius="999px" />
+                </div>
+                <PostSkeleton />
+                <PostSkeleton />
+              </section>
             </div>
-            <PostSkeleton />
-            <PostSkeleton />
-          </section>
+          </div>
         </div>
       );
     }
 
     if (!user) {
       return (
-        <div className="profile profile--empty">
-          <ErrorHandler error={error} onHandle={this.dismissError} />
-          <div className="profile__not-found">
-            <h2>This person doesn&rsquo;t exist</h2>
-            <p>We couldn&rsquo;t find that account.</p>
-            <Link to="/" className="profile__link">&larr; Back to Home</Link>
+        <div className="app-page">
+          <div className="app-page__sidebar">
+            <Sidebar currentUser={this.props.currentUser} />
+          </div>
+          <div className="app-page__main">
+            <div className="profile profile--empty">
+              <ErrorHandler error={error} onHandle={this.dismissError} />
+              <div className="profile__not-found">
+                <h2>This person doesn&rsquo;t exist</h2>
+                <p>We couldn&rsquo;t find that account.</p>
+                <Link to="/" className="profile__link">&larr; Back to Home</Link>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -159,12 +175,18 @@ class Profile extends Component {
     const totalLikes = posts.reduce((sum, p) => sum + (p.likeCount || 0), 0);
 
     return (
-      <div className="profile">
-        <ErrorHandler error={error} onHandle={this.dismissError} />
+      <div className="app-page">
+        <div className="app-page__sidebar">
+          <Sidebar currentUser={this.props.currentUser} />
+        </div>
 
-        <Link to="/" className="profile__back">← Home</Link>
+        <div className="app-page__main">
+          <div className="profile">
+            <ErrorHandler error={error} onHandle={this.dismissError} />
 
-        <header className="profile__hero">
+            <Link to="/" className="profile__back">← Home</Link>
+
+            <header className="profile__hero">
           {/* Accent rule — a small decorative bar on the left */}
           <span className="profile__accent" aria-hidden="true" />
 
@@ -275,6 +297,8 @@ class Profile extends Component {
             ))
           )}
         </section>
+          </div>
+        </div>
       </div>
     );
   }

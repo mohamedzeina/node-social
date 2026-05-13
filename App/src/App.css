@@ -8,3 +8,50 @@
   flex-direction: column;
   background: var(--bg);
 }
+
+/* ============================================================
+   .app-page — shared 2-column layout used by Feed, Profile,
+   SinglePost. Mobile = single column (main only). Desktop =
+   sticky sidebar + main column, centred under the toolbar.
+   ============================================================ */
+
+.app-page {
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  animation: fade-up 0.4s var(--ease-out);
+}
+
+.app-page__sidebar { display: none; }
+
+.app-page__main {
+  width: 100%;
+  max-width: 38rem;
+  margin: 0 auto;
+  min-width: 0;          /* prevents long titles from blowing the grid out */
+}
+
+@media (min-width: 960px) {
+  .app-page {
+    grid-template-columns: 17rem minmax(0, 38rem);
+    justify-content: center;
+    gap: 2rem;
+  }
+  .app-page__sidebar {
+    display: block;
+    position: sticky;
+    top: 6rem;
+  }
+  .app-page__main { margin: 0; }
+}
+
+@media (min-width: 1200px) {
+  .app-page {
+    grid-template-columns: 19rem minmax(0, 38rem);
+    gap: 2.25rem;
+  }
+}

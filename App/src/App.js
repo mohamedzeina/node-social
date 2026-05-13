@@ -268,6 +268,7 @@ class App extends Component {
                 {...props}
                 userId={this.state.userId}
                 token={this.state.token}
+                currentUser={this.state.currentUser}
               />
             )}
           />
@@ -278,6 +279,7 @@ class App extends Component {
                 {...props}
                 userId={this.state.userId}
                 token={this.state.token}
+                currentUser={this.state.currentUser}
               />
             )}
           />

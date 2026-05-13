@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import Image from '../../../components/Image/Image';
 import Skeleton from '../../../components/Skeleton/Skeleton';
+import Sidebar from '../../../components/Sidebar/Sidebar';
 import './SinglePost.css';
 
 const API_URL = 'https://node-social-zmra.onrender.com/graphql';
@@ -117,42 +118,55 @@ class SinglePost extends Component {
 
     if (loading) {
       return (
-        <article className="single-post">
-          <div className="single-post__back-skeleton">
-            <Skeleton width="5rem" height="1.6rem" radius="999px" />
+        <div className="app-page">
+          <div className="app-page__sidebar">
+            <Sidebar currentUser={this.props.currentUser} />
           </div>
-          <div className="single-post__card">
-            <header className="single-post__header">
-              <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
-              <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
-                <Skeleton variant="text" width="45%" />
-                <div style={{ height: '0.35rem' }} />
-                <Skeleton variant="text" width="30%" />
+          <div className="app-page__main">
+            <article className="single-post">
+              <div className="single-post__back-skeleton">
+                <Skeleton width="5rem" height="1.6rem" radius="999px" />
               </div>
-            </header>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
-              <Skeleton variant="text" width="80%" height="2rem" />
-              <Skeleton variant="text" width="55%" height="2rem" />
-            </div>
-            <div className="single-post__image">
-              <Skeleton width="100%" height="100%" radius={0} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-              <Skeleton variant="text" width="98%" />
-              <Skeleton variant="text" width="94%" />
-              <Skeleton variant="text" width="100%" />
-              <Skeleton variant="text" width="72%" />
-            </div>
-            <footer className="single-post__footer">
-              <Skeleton width="9rem" height="2.5rem" radius="999px" />
-            </footer>
+              <div className="single-post__card">
+                <header className="single-post__header">
+                  <Skeleton variant="circle" width="2.6rem" height="2.6rem" />
+                  <div className="single-post__byline" style={{ flex: 1, maxWidth: '14rem' }}>
+                    <Skeleton variant="text" width="45%" />
+                    <div style={{ height: '0.35rem' }} />
+                    <Skeleton variant="text" width="30%" />
+                  </div>
+                </header>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.2rem' }}>
+                  <Skeleton variant="text" width="80%" height="2rem" />
+                  <Skeleton variant="text" width="55%" height="2rem" />
+                </div>
+                <div className="single-post__image">
+                  <Skeleton width="100%" height="100%" radius={0} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                  <Skeleton variant="text" width="98%" />
+                  <Skeleton variant="text" width="94%" />
+                  <Skeleton variant="text" width="100%" />
+                  <Skeleton variant="text" width="72%" />
+                </div>
+                <footer className="single-post__footer">
+                  <Skeleton width="9rem" height="2.5rem" radius="999px" />
+                </footer>
+              </div>
+            </article>
           </div>
-        </article>
+        </div>
       );
     }
 
     return (
-      <article className="single-post">
+      <div className="app-page">
+        <div className="app-page__sidebar">
+          <Sidebar currentUser={this.props.currentUser} />
+        </div>
+
+        <div className="app-page__main">
+        <article className="single-post">
         <Link to="/" className="single-post__back">
           ← Back to Home
         </Link>
@@ -227,6 +241,8 @@ class SinglePost extends Component {
           </footer>
         </div>
       </article>
+        </div>
+      </div>
     );
   }
 }

@@ -1,48 +1,8 @@
 /* ============================================================
    Feed page — social home
-   Mobile : single column (main only)
-   Desktop: 2-column grid (sidebar | feed)
+   Layout grid lives in App.css (.app-page); this file only owns
+   the feed-specific composer + section bits below.
    ============================================================ */
-
-.feed-page {
-  width: 100%;
-  max-width: 64rem;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  align-items: start;
-  animation: fade-up 0.4s var(--ease-out);
-}
-
-.feed-page__sidebar { display: none; }
-
-.feed-page__main {
-  width: 100%;
-  max-width: 38rem;
-  margin: 0 auto;
-}
-
-@media (min-width: 960px) {
-  .feed-page {
-    grid-template-columns: 17rem minmax(0, 38rem);
-    justify-content: center;
-    gap: 2rem;
-  }
-  .feed-page__sidebar {
-    display: block;
-    position: sticky;
-    top: 6rem;          /* clear breathing room under the sticky toolbar */
-  }
-  .feed-page__main { margin: 0; }
-}
-
-@media (min-width: 1200px) {
-  .feed-page {
-    grid-template-columns: 19rem minmax(0, 38rem);
-    gap: 2.25rem;
-  }
-}
 
 /* ---- Composer trigger ------------------------------ */
 /* Tappable bar that opens the new-post modal. Replaces the old

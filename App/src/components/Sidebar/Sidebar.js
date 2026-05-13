@@ -6,11 +6,11 @@ import Skeleton from '../Skeleton/Skeleton';
 import './Sidebar.css';
 
 const Sidebar = ({ currentUser, postCount, postsLoading }) => {
-  // Treat the whole sidebar as loading until BOTH the auth user and
-  // the post count have arrived — avoids the patchy half-real,
-  // half-shimmer look. Once everything is in, swap to real content
-  // in one coherent reveal.
-  const loading = !currentUser || postsLoading;
+  // When postCount is undefined (Profile / SinglePost mount the
+  // sidebar without feed data), don't pretend posts are loading —
+  // just gate the loading state on currentUser arriving.
+  const hasFeedCount = typeof postCount === 'number';
+  const loading = !currentUser || (hasFeedCount && postsLoading);
 
   if (loading) {
     return (
@@ -128,9 +128,10 @@ const Sidebar = ({ currentUser, postCount, postsLoading }) => {
         <div className="sidebar__tip-body">
           <strong className="sidebar__tip-title">Slow social</strong>
           <p className="sidebar__tip-text">
-            Two dispatches per page, sorted newest first. Currently{' '}
-            <strong>{typeof postCount === 'number' ? postCount : 0}</strong>{' '}
-            in the feed.
+            Two dispatches per page, sorted newest first.
+            {hasFeedCount && (
+              <> Currently <strong>{postCount}</strong> in the feed.</>
+            )}
           </p>
         </div>
       </div>
